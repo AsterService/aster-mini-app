@@ -9,40 +9,81 @@
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F8FAFC; color: #111827; min-height: 100vh; padding-bottom: 80px; }
 
-  /* HEADER */
   .header { background: #0F172A; padding: 16px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 50; }
   .header-logo { width: 36px; height: 36px; background: #1B3A5C; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .header-logo svg { width: 22px; height: 22px; }
-  .header-title { color: #fff; }
-  .header-title .brand { font-size: 16px; font-weight: 700; }
+  .header-title .brand { color: #fff; font-size: 16px; font-weight: 700; }
   .header-title .brand span { color: #4A9FBF; }
   .header-title .sub { font-size: 11px; color: #64748B; margin-top: 1px; }
-  .header-user { margin-left: auto; font-size: 12px; color: #64748B; text-align: right; }
-  .header-user .name { color: #94A3B8; font-weight: 500; }
+  .header-user { margin-left: auto; font-size: 13px; color: #94A3B8; font-weight: 500; }
 
-  /* BOTTOM NAV */
   .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0F172A; display: flex; border-top: 1px solid #1E293B; z-index: 50; }
   .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 4px 14px; cursor: pointer; border: none; background: none; color: #64748B; font-size: 10px; font-family: inherit; gap: 4px; transition: color 0.15s; }
   .nav-item.active { color: #4A9FBF; }
   .nav-item svg { width: 22px; height: 22px; }
 
-  /* PAGES */
   .page { display: none; padding: 20px; }
   .page.active { display: block; }
 
-  /* CARDS */
   .card { background: #fff; border-radius: 14px; border: 1px solid #E5E7EB; margin-bottom: 14px; overflow: hidden; }
-  .card-header { padding: 14px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #F3F4F6; }
-  .card-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-  .card-title { font-size: 14px; font-weight: 700; color: #111827; }
-  .card-sub { font-size: 12px; color: #6B7280; margin-top: 2px; }
   .card-body { padding: 14px 16px; }
 
-  /* INFO ROWS */
   .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #F9FAFB; }
   .info-row:last-child { border-bottom: none; }
   .info-label { font-size: 12px; color: #9CA3AF; }
-  .info-value { font-size: 13px; font-weight: 600; color: #111827; text-align: right; }
+  .info-value { font-size: 13px; font-weight: 600; color: #111827; text-align: right; max-width: 60%; word-break: break-all; }
+
+  .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; margin-bottom: 10px; transition: opacity 0.15s; }
+  .btn:active { opacity: 0.8; }
+  .btn:last-child { margin-bottom: 0; }
+  .btn-primary { background: #1B3A5C; color: #fff; }
+  .btn-secondary { background: #F1F5F9; color: #374151; }
+  .btn-accent { background: #4A9FBF; color: #fff; }
+  .btn-danger { background: #FEF2F2; color: #DC2626; }
+  .btn-sm { padding: 8px 14px; font-size: 13px; width: auto; margin-bottom: 0; }
+
+  .form-field { margin-bottom: 14px; }
+  .form-label { font-size: 12px; color: #6B7280; font-weight: 500; margin-bottom: 6px; display: block; }
+  .form-input { width: 100%; padding: 12px 14px; border: 1.5px solid #E5E7EB; border-radius: 10px; font-size: 14px; font-family: inherit; color: #111827; background: #fff; outline: none; }
+  .form-input:focus { border-color: #4A9FBF; }
+  .form-input.error { border-color: #DC2626; }
+  .form-input.vin-input { font-family: monospace; text-transform: uppercase; letter-spacing: 1px; }
+  .form-error { font-size: 11px; color: #DC2626; margin-top: 4px; display: none; }
+  .form-error.show { display: block; }
+  select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
+  .section-title { font-size: 13px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+  /* WELCOME */
+  .welcome-banner { background: linear-gradient(135deg, #0F172A 0%, #1B3A5C 100%); border-radius: 16px; padding: 20px; margin-bottom: 20px; color: #fff; }
+  .welcome-hi { font-size: 13px; color: #94A3B8; margin-bottom: 4px; }
+  .welcome-name { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+
+  /* CAR SELECTOR */
+  .car-selector { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; scrollbar-width: none; }
+  .car-selector::-webkit-scrollbar { display: none; }
+  .car-chip { flex-shrink: 0; background: #ffffff20; border: 1px solid #ffffff30; border-radius: 20px; padding: 6px 14px; font-size: 13px; color: #fff; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+  .car-chip.active { background: #4A9FBF; border-color: #4A9FBF; font-weight: 600; }
+  .car-chip-add { background: transparent; border: 1px dashed #ffffff50; color: #94A3B8; }
+
+  /* QUICK ACTIONS */
+  .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .quick-btn { background: #fff; border: 1px solid #E5E7EB; border-radius: 14px; padding: 16px 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: all 0.15s; }
+  .quick-btn:active { background: #F8FAFC; }
+  .quick-btn .icon { font-size: 26px; }
+  .quick-btn .label { font-size: 12px; font-weight: 600; color: #374151; text-align: center; }
+
+  /* CAR CARDS in profile */
+  .car-card { background: #fff; border: 1px solid #E5E7EB; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; }
+  .car-card.active-car { border-color: #4A9FBF; background: #F0F9FF; }
+  .car-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .car-card-name { font-size: 15px; font-weight: 700; color: #111827; }
+  .car-card-vin { font-size: 11px; color: #9CA3AF; font-family: monospace; margin-top: 2px; }
+  .car-card-actions { display: flex; gap: 8px; }
+  .car-card-btn { padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; }
+  .car-card-btn-select { background: #EFF6FF; color: #1D4ED8; }
+  .car-card-btn-delete { background: #FEF2F2; color: #DC2626; }
+  .active-badge { font-size: 10px; background: #4A9FBF; color: #fff; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
 
   /* HISTORY */
   .history-item { padding: 12px 16px; border-bottom: 1px solid #F3F4F6; cursor: pointer; }
@@ -55,76 +96,42 @@
   .history-detail.open { display: block; }
   .history-arrow { color: #9CA3AF; font-size: 12px; transition: transform 0.2s; }
   .history-arrow.open { transform: rotate(180deg); }
+  .history-vin-tag { font-size: 10px; color: #6B7280; font-family: monospace; background: #F3F4F6; padding: 2px 6px; border-radius: 4px; }
 
-  /* BUTTONS */
-  .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; margin-bottom: 10px; transition: opacity 0.15s; }
-  .btn:active { opacity: 0.8; }
-  .btn-primary { background: #1B3A5C; color: #fff; }
-  .btn-secondary { background: #F1F5F9; color: #374151; }
-  .btn-accent { background: #4A9FBF; color: #fff; }
+  /* SCHEDULE */
+  .appt-card { background: linear-gradient(135deg, #EFF6FF, #DBEAFE); border: 1px solid #BFDBFE; border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; }
+  .appt-date { font-size: 16px; font-weight: 700; color: #1D4ED8; margin-bottom: 4px; }
+  .appt-info { font-size: 13px; color: #374151; }
 
-  /* FORM */
-  .form-field { margin-bottom: 14px; }
-  .form-label { font-size: 12px; color: #6B7280; font-weight: 500; margin-bottom: 6px; display: block; }
-  .form-input { width: 100%; padding: 12px 14px; border: 1.5px solid #E5E7EB; border-radius: 10px; font-size: 14px; font-family: inherit; color: #111827; background: #fff; outline: none; }
-  .form-input:focus { border-color: #4A9FBF; }
-  select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
-
-  /* STATUS BADGE */
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-  .badge-green { background: #ECFDF5; color: #065F46; }
-  .badge-blue { background: #EFF6FF; color: #1D4ED8; }
-  .badge-yellow { background: #FFFBEB; color: #92400E; }
-
-  /* CONTACT CARD */
+  /* CONTACTS */
   .branch-card { background: #fff; border-radius: 14px; border: 1px solid #E5E7EB; padding: 14px 16px; margin-bottom: 12px; }
   .branch-name { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 4px; }
   .branch-addr { font-size: 12px; color: #6B7280; margin-bottom: 10px; }
   .branch-phone { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #4A9FBF; font-weight: 600; text-decoration: none; }
 
-  /* WELCOME */
-  .welcome-banner { background: linear-gradient(135deg, #0F172A 0%, #1B3A5C 100%); border-radius: 16px; padding: 20px; margin-bottom: 20px; color: #fff; }
-  .welcome-hi { font-size: 13px; color: #94A3B8; margin-bottom: 4px; }
-  .welcome-name { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
-  .welcome-car { display: flex; align-items: center; gap: 8px; background: #ffffff15; border-radius: 10px; padding: 10px 12px; }
-  .welcome-car-icon { font-size: 22px; }
-  .welcome-car-info .model { font-size: 14px; font-weight: 600; }
-  .welcome-car-info .vin { font-size: 11px; color: #94A3B8; margin-top: 2px; }
-
-  /* QUICK ACTIONS */
-  .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-  .quick-btn { background: #fff; border: 1px solid #E5E7EB; border-radius: 14px; padding: 16px 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: all 0.15s; }
-  .quick-btn:active { background: #F8FAFC; }
-  .quick-btn .icon { font-size: 26px; }
-  .quick-btn .label { font-size: 12px; font-weight: 600; color: #374151; text-align: center; }
-
-  /* LOADING */
   .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; gap: 14px; }
   .spinner { width: 36px; height: 36px; border: 3px solid #E5E7EB; border-top-color: #4A9FBF; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-text { font-size: 14px; color: #9CA3AF; }
 
-  /* REGISTER */
-  .register-page { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; padding: 30px 20px; text-align: center; }
+  .register-page { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; padding: 30px 20px; text-align: center; }
   .register-icon { font-size: 64px; margin-bottom: 20px; }
   .register-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
   .register-sub { font-size: 14px; color: #6B7280; margin-bottom: 30px; line-height: 1.5; }
 
-  /* TOAST */
   .toast { position: fixed; top: 80px; left: 20px; right: 20px; background: #0F172A; color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 14px; text-align: center; z-index: 100; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
   .toast.show { opacity: 1; }
 
-  .section-title { font-size: 13px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 4px; }
+  .vin-counter { font-size: 11px; color: #9CA3AF; text-align: right; margin-top: 4px; }
+  .vin-counter.full { color: #10B981; font-weight: 600; }
 
-  /* APPOINTMENT CARD */
-  .appt-card { background: linear-gradient(135deg, #EFF6FF, #DBEAFE); border: 1px solid #BFDBFE; border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; }
-  .appt-date { font-size: 16px; font-weight: 700; color: #1D4ED8; margin-bottom: 4px; }
-  .appt-info { font-size: 13px; color: #374151; }
+  .divider { height: 1px; background: #F3F4F6; margin: 16px 0; }
+  .empty-state { text-align: center; padding: 40px 20px; color: #9CA3AF; font-size: 14px; }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <div class="header-logo">
     <svg viewBox="0 0 24 24" fill="none" stroke="#4A9FBF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -139,28 +146,16 @@
   <div class="header-user" id="header-user"></div>
 </div>
 
-<!-- PAGES -->
-
 <!-- HOME -->
 <div class="page active" id="page-home">
-  <div id="home-loading" class="loading">
-    <div class="spinner"></div>
-    <div class="loading-text">Загрузка...</div>
-  </div>
+  <div id="home-loading" class="loading"><div class="spinner"></div><div class="loading-text">Загрузка...</div></div>
   <div id="home-content" style="display:none">
     <div class="welcome-banner">
       <div class="welcome-hi">Добро пожаловать 👋</div>
       <div class="welcome-name" id="home-name">—</div>
-      <div class="welcome-car">
-        <div class="welcome-car-icon">🚗</div>
-        <div class="welcome-car-info">
-          <div class="model" id="home-car">—</div>
-          <div class="vin" id="home-vin">VIN: —</div>
-        </div>
-      </div>
+      <div class="car-selector" id="home-car-selector"></div>
+      <div style="font-size:13px;color:#94A3B8">VIN: <span id="home-vin" style="font-family:monospace;color:#fff">—</span></div>
     </div>
-
-    <!-- Ближайшая запись -->
     <div id="home-appt" style="display:none">
       <div class="section-title">Ближайший визит</div>
       <div class="appt-card">
@@ -168,25 +163,12 @@
         <div class="appt-info" id="appt-info">—</div>
       </div>
     </div>
-
     <div class="section-title">Быстрые действия</div>
     <div class="quick-grid">
-      <div class="quick-btn" onclick="goTo('schedule')">
-        <div class="icon">📅</div>
-        <div class="label">Записаться на сервис</div>
-      </div>
-      <div class="quick-btn" onclick="goTo('history')">
-        <div class="icon">📋</div>
-        <div class="label">История ремонта</div>
-      </div>
-      <div class="quick-btn" onclick="requestCallback()">
-        <div class="icon">📞</div>
-        <div class="label">Обратный звонок</div>
-      </div>
-      <div class="quick-btn" onclick="goTo('contacts')">
-        <div class="icon">🏢</div>
-        <div class="label">Наши филиалы</div>
-      </div>
+      <div class="quick-btn" onclick="goTo('schedule')"><div class="icon">📅</div><div class="label">Записаться на сервис</div></div>
+      <div class="quick-btn" onclick="goTo('history')"><div class="icon">📋</div><div class="label">История ремонта</div></div>
+      <div class="quick-btn" onclick="requestCallback()"><div class="icon">📞</div><div class="label">Обратный звонок</div></div>
+      <div class="quick-btn" onclick="goTo('contacts')"><div class="icon">🏢</div><div class="label">Наши филиалы</div></div>
     </div>
   </div>
   <div id="home-register" style="display:none">
@@ -202,142 +184,173 @@
 <!-- SCHEDULE -->
 <div class="page" id="page-schedule">
   <div class="section-title">Запись на сервис</div>
-  <div class="card">
-    <div class="card-body">
-      <div class="form-field">
-        <label class="form-label">Филиал</label>
-        <select class="form-input" id="s-branch">
-          <option value="">Выберите филиал</option>
-          <option>Рохат</option>
-          <option>Ахмад Дониш</option>
-          <option>Самарканд</option>
-          <option>Бухара</option>
-          <option>Наманган</option>
-          <option>Карши</option>
-          <option>Навои</option>
-        </select>
-      </div>
-      <div class="form-field">
-        <label class="form-label">Дата визита</label>
-        <input type="date" class="form-input" id="s-date">
-      </div>
-      <div class="form-field">
-        <label class="form-label">Время</label>
-        <select class="form-input" id="s-time">
-          <option value="">Выберите время</option>
-        </select>
-      </div>
-      <div class="form-field">
-        <label class="form-label">Причина обращения</label>
-        <input type="text" class="form-input" id="s-reason" placeholder="Опишите проблему или услугу">
-      </div>
-      <button class="btn btn-primary" onclick="submitSchedule()">Записаться</button>
+  <div class="card"><div class="card-body">
+    <div class="form-field">
+      <label class="form-label">Автомобиль</label>
+      <select class="form-input" id="s-car"></select>
     </div>
-  </div>
+    <div class="form-field">
+      <label class="form-label">Филиал</label>
+      <select class="form-input" id="s-branch">
+        <option value="">Выберите филиал</option>
+        <option>Рохат</option><option>Ахмад Дониш</option><option>Самарканд</option>
+        <option>Бухара</option><option>Наманган</option><option>Карши</option><option>Навои</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Дата визита</label>
+      <input type="date" class="form-input" id="s-date">
+    </div>
+    <div class="form-field">
+      <label class="form-label">Время</label>
+      <select class="form-input" id="s-time"><option value="">Выберите время</option></select>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Причина обращения</label>
+      <input type="text" class="form-input" id="s-reason" placeholder="Опишите проблему или услугу">
+    </div>
+    <button class="btn btn-primary" onclick="submitSchedule()">Записаться</button>
+  </div></div>
 </div>
 
 <!-- HISTORY -->
 <div class="page" id="page-history">
-  <div class="section-title">История ремонта</div>
-  <div class="card" id="history-list">
-    <div class="loading">
-      <div class="spinner"></div>
-      <div class="loading-text">Загрузка истории...</div>
-    </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="section-title" style="margin-bottom:0">История ремонта</div>
+    <select class="form-input" id="history-car-filter" style="width:auto;font-size:12px;padding:6px 30px 6px 10px" onchange="renderHistory()"></select>
   </div>
+  <div class="card" id="history-list"></div>
 </div>
 
 <!-- CONTACTS -->
 <div class="page" id="page-contacts">
   <div class="section-title">Наши филиалы</div>
-  <div class="branch-card">
-    <div class="branch-name">Рохат (Ташкент)</div>
-    <div class="branch-addr">ул. Рохат, 1, Ташкент</div>
-    <a href="tel:+998555069898" class="branch-phone">📞 +998 55 506 98 98</a>
-  </div>
-  <div class="branch-card">
-    <div class="branch-name">Ахмад Дониш (Ташкент)</div>
-    <div class="branch-addr">ул. Ахмад Дониш, Ташкент</div>
-    <a href="tel:+998555062662" class="branch-phone">📞 +998 55 506 26 62</a>
-  </div>
-  <div class="branch-card">
-    <div class="branch-name">Самарканд</div>
-    <div class="branch-addr">г. Самарканд</div>
-    <a href="tel:+998662000000" class="branch-phone">📞 +998 66 200 00 00</a>
-  </div>
-  <div class="branch-card">
-    <div class="branch-name">Бухара</div>
-    <div class="branch-addr">г. Бухара</div>
-    <a href="tel:+998652000000" class="branch-phone">📞 +998 65 200 00 00</a>
-  </div>
-  <div class="branch-card">
-    <div class="branch-name">Наманган</div>
-    <div class="branch-addr">г. Наманган</div>
-    <a href="tel:+998692000000" class="branch-phone">📞 +998 69 200 00 00</a>
-  </div>
-  <div class="branch-card">
-    <div class="branch-name">Карши</div>
-    <div class="branch-addr">г. Карши</div>
-    <a href="tel:+998752000000" class="branch-phone">📞 +998 75 200 00 00</a>
-  </div>
-  <div class="branch-card">
-    <div class="branch-name">Навои</div>
-    <div class="branch-addr">г. Навои</div>
-    <a href="tel:+998792000000" class="branch-phone">📞 +998 79 200 00 00</a>
-  </div>
+  <div class="branch-card"><div class="branch-name">Рохат (Ташкент)</div><div class="branch-addr">ул. Рохат, 1, Ташкент</div><a href="tel:+998555069898" class="branch-phone">📞 +998 55 506 98 98</a></div>
+  <div class="branch-card"><div class="branch-name">Ахмад Дониш (Ташкент)</div><div class="branch-addr">ул. Ахмад Дониш, Ташкент</div><a href="tel:+998555062662" class="branch-phone">📞 +998 55 506 26 62</a></div>
+  <div class="branch-card"><div class="branch-name">Самарканд</div><div class="branch-addr">г. Самарканд</div><a href="tel:+998662000000" class="branch-phone">📞 +998 66 200 00 00</a></div>
+  <div class="branch-card"><div class="branch-name">Бухара</div><div class="branch-addr">г. Бухара</div><a href="tel:+998652000000" class="branch-phone">📞 +998 65 200 00 00</a></div>
+  <div class="branch-card"><div class="branch-name">Наманган</div><div class="branch-addr">г. Наманган</div><a href="tel:+998692000000" class="branch-phone">📞 +998 69 200 00 00</a></div>
+  <div class="branch-card"><div class="branch-name">Карши</div><div class="branch-addr">г. Карши</div><a href="tel:+998752000000" class="branch-phone">📞 +998 75 200 00 00</a></div>
+  <div class="branch-card"><div class="branch-name">Навои</div><div class="branch-addr">г. Навои</div><a href="tel:+998792000000" class="branch-phone">📞 +998 79 200 00 00</a></div>
 </div>
 
 <!-- PROFILE -->
 <div class="page" id="page-profile">
-  <div class="section-title">Мой профиль</div>
+  <!-- Просмотр профиля -->
   <div id="profile-view" style="display:none">
-    <div class="card">
-      <div class="card-body">
-        <div class="info-row"><span class="info-label">ФИО</span><span class="info-value" id="p-name">—</span></div>
-        <div class="info-row"><span class="info-label">Телефон</span><span class="info-value" id="p-phone">—</span></div>
-        <div class="info-row"><span class="info-label">Марка</span><span class="info-value" id="p-brand">—</span></div>
-        <div class="info-row"><span class="info-label">Модель</span><span class="info-value" id="p-model">—</span></div>
-        <div class="info-row"><span class="info-label">VIN</span><span class="info-value" id="p-vin" style="font-size:11px;font-family:monospace">—</span></div>
-      </div>
+    <div class="section-title">Личные данные</div>
+    <div class="card"><div class="card-body">
+      <div class="info-row"><span class="info-label">ФИО</span><span class="info-value" id="p-name">—</span></div>
+      <div class="info-row"><span class="info-label">Телефон</span><span class="info-value" id="p-phone">—</span></div>
+    </div></div>
+    <button class="btn btn-secondary" style="margin-bottom:20px" onclick="showEditPersonal()">✏️ Редактировать данные</button>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="section-title" style="margin-bottom:0">Мои автомобили</div>
+      <button class="btn btn-accent btn-sm" onclick="showAddCar()">+ Добавить авто</button>
     </div>
-    <button class="btn btn-secondary" onclick="showEditProfile()">✏️ Редактировать</button>
+    <div id="cars-list"></div>
   </div>
-  <div id="profile-form">
-    <div class="card">
-      <div class="card-body">
-        <div class="form-field">
-          <label class="form-label">ФИО</label>
-          <input type="text" class="form-input" id="reg-name" placeholder="Иванов Иван Иванович">
-        </div>
-        <div class="form-field">
-          <label class="form-label">Телефон</label>
-          <input type="tel" class="form-input" id="reg-phone" placeholder="+998 90 000 00 00" oninput="phoneMask(this)">
-        </div>
-        <div class="form-field">
-          <label class="form-label">Марка автомобиля</label>
-          <select class="form-input" id="reg-brand" onchange="onRegBrandChange()">
-            <option value="">Выберите марку</option>
-            <option>Chevrolet</option><option>Chery</option><option>Haval</option>
-            <option>KIA</option><option>BYD</option><option>Changan</option>
-            <option>Lixiang</option><option>Deepal</option><option>Jetour</option>
-            <option>Dongfeng</option><option>LADA</option><option>Hyundai</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Модель</label>
-          <select class="form-input" id="reg-model"><option value="">Сначала выберите марку</option></select>
-        </div>
-        <div class="form-field">
-          <label class="form-label">VIN код <span style="color:#9CA3AF">(необязательно)</span></label>
-          <input type="text" class="form-input" id="reg-vin" placeholder="17 символов" style="font-family:monospace" maxlength="17">
-        </div>
-        <button class="btn btn-primary" onclick="saveProfile()">Сохранить</button>
+
+  <!-- Форма личных данных -->
+  <div id="profile-personal-form" style="display:none">
+    <div class="section-title">Личные данные</div>
+    <div class="card"><div class="card-body">
+      <div class="form-field">
+        <label class="form-label">ФИО *</label>
+        <input type="text" class="form-input" id="reg-name" placeholder="Иванов Иван Иванович">
+        <div class="form-error" id="err-name">Введите ФИО</div>
       </div>
+      <div class="form-field">
+        <label class="form-label">Телефон *</label>
+        <input type="tel" class="form-input" id="reg-phone" placeholder="+998 90 000 00 00" oninput="phoneMask(this)">
+        <div class="form-error" id="err-phone">Введите полный номер телефона</div>
+      </div>
+      <button class="btn btn-primary" onclick="savePersonal()">Сохранить</button>
+      <button class="btn btn-secondary" onclick="cancelPersonalEdit()">Отмена</button>
+    </div></div>
+  </div>
+
+  <!-- Форма добавления/редактирования авто -->
+  <div id="car-form" style="display:none">
+    <div class="section-title" id="car-form-title">Добавить автомобиль</div>
+    <div class="card"><div class="card-body">
+      <div class="form-field">
+        <label class="form-label">Марка *</label>
+        <select class="form-input" id="car-brand" onchange="onCarBrandChange()">
+          <option value="">Выберите марку</option>
+          <option>Chevrolet</option><option>Chery</option><option>Haval</option><option>KIA</option>
+          <option>BYD</option><option>Changan</option><option>Lixiang</option><option>Deepal</option>
+          <option>Jetour</option><option>Dongfeng</option><option>LADA</option><option>Hyundai</option>
+        </select>
+        <div class="form-error" id="err-brand">Выберите марку</div>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Модель *</label>
+        <select class="form-input" id="car-model">
+          <option value="">Сначала выберите марку</option>
+        </select>
+        <div class="form-error" id="err-model">Выберите модель</div>
+      </div>
+      <div class="form-field">
+        <label class="form-label">VIN код * <span style="color:#9CA3AF">(17 символов, латиница)</span></label>
+        <input type="text" class="form-input vin-input" id="car-vin" placeholder="XWBAD6HJ0CG000001" maxlength="17" oninput="onVinInput(this)">
+        <div class="vin-counter" id="vin-counter">0 / 17</div>
+        <div class="form-error" id="err-vin">VIN должен содержать ровно 17 символов (латиница и цифры)</div>
+      </div>
+      <button class="btn btn-primary" onclick="saveCar()">Сохранить</button>
+      <button class="btn btn-secondary" onclick="cancelCarForm()">Отмена</button>
+    </div></div>
+  </div>
+
+  <!-- Первичная регистрация -->
+  <div id="first-register" style="display:none">
+    <div class="register-page" style="min-height:auto;padding:0 0 20px">
+      <div class="register-icon">👤</div>
+      <div class="register-title">Регистрация</div>
+      <div class="register-sub">Заполните данные для доступа к личному кабинету</div>
     </div>
+    <div class="section-title">Шаг 1 — Личные данные</div>
+    <div class="card"><div class="card-body">
+      <div class="form-field">
+        <label class="form-label">ФИО *</label>
+        <input type="text" class="form-input" id="freg-name" placeholder="Иванов Иван Иванович">
+        <div class="form-error" id="ferr-name">Введите ФИО</div>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Телефон *</label>
+        <input type="tel" class="form-input" id="freg-phone" placeholder="+998 90 000 00 00" oninput="phoneMask(this)">
+        <div class="form-error" id="ferr-phone">Введите полный номер телефона</div>
+      </div>
+    </div></div>
+    <div class="section-title">Шаг 2 — Ваш автомобиль</div>
+    <div class="card"><div class="card-body">
+      <div class="form-field">
+        <label class="form-label">Марка *</label>
+        <select class="form-input" id="freg-brand" onchange="onFregBrandChange()">
+          <option value="">Выберите марку</option>
+          <option>Chevrolet</option><option>Chery</option><option>Haval</option><option>KIA</option>
+          <option>BYD</option><option>Changan</option><option>Lixiang</option><option>Deepal</option>
+          <option>Jetour</option><option>Dongfeng</option><option>LADA</option><option>Hyundai</option>
+        </select>
+        <div class="form-error" id="ferr-brand">Выберите марку</div>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Модель *</label>
+        <select class="form-input" id="freg-model"><option value="">Сначала выберите марку</option></select>
+        <div class="form-error" id="ferr-model">Выберите модель</div>
+      </div>
+      <div class="form-field">
+        <label class="form-label">VIN код * <span style="color:#9CA3AF">(17 символов, латиница)</span></label>
+        <input type="text" class="form-input vin-input" id="freg-vin" placeholder="XWBAD6HJ0CG000001" maxlength="17" oninput="onVinInput(this, 'freg-vin-counter')">
+        <div class="vin-counter" id="freg-vin-counter">0 / 17</div>
+        <div class="form-error" id="ferr-vin">VIN должен содержать ровно 17 символов (латиница и цифры)</div>
+      </div>
+      <button class="btn btn-primary" onclick="firstRegister()">Зарегистрироваться</button>
+    </div></div>
   </div>
 </div>
 
-<!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <button class="nav-item active" onclick="goTo('home')" id="nav-home">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
@@ -361,12 +374,10 @@
   </button>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ── CONFIG ────────────────────────────────────────────────
-const SCRIPT_URL = ""; // Вставить URL Google Apps Script
+const SCRIPT_URL = "";
 const BRANDS_MODELS = {
   "Chevrolet": ["Cobalt","Equinox","Malibu","Spark","Tracker","Tahoe","Captiva","Lacetti","Nexia 3","Onix","Monza"],
   "Chery":     ["Tiggo 2","Tiggo 7","Tiggo 8","Arrizo 6","Arrizo 8"],
@@ -388,36 +399,82 @@ for (let h = 9; h < 20; h++) {
 }
 TIME_SLOTS.push("20:00");
 
-// ── TELEGRAM ──────────────────────────────────────────────
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 const tgUser = tg?.initDataUnsafe?.user;
 
-// ── STATE ─────────────────────────────────────────────────
-let userProfile = null;
-let userHistory = [];
-let currentPage = "home";
+// State
+let profile = null; // { name, phone, tgId, cars: [{brand, model, vin}], activeCarIndex }
+let editingCarIndex = -1; // -1 = новая машина
 
 // ── INIT ──────────────────────────────────────────────────
-window.onload = async () => {
-  // Заголовок
-  if (tgUser) {
-    document.getElementById("header-user").innerHTML =
-      `<div class="name">${tgUser.first_name}</div>`;
-  }
-
-  // Заполняем слоты времени
+window.onload = () => {
+  if (tgUser) document.getElementById("header-user").textContent = tgUser.first_name;
   const timeSel = document.getElementById("s-time");
   TIME_SLOTS.forEach(t => timeSel.innerHTML += `<option>${t}</option>`);
-
-  // Устанавливаем минимальную дату
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   document.getElementById("s-date").min = tomorrow.toISOString().split("T")[0];
-
-  // Загружаем профиль
-  await loadProfile();
+  loadProfile();
 };
+
+// ── PROFILE LOAD ──────────────────────────────────────────
+function loadProfile() {
+  const saved = localStorage.getItem("aster_profile_v2");
+  document.getElementById("home-loading").style.display = "none";
+  if (saved) {
+    profile = JSON.parse(saved);
+    if (!profile.cars) profile.cars = [];
+    if (profile.activeCarIndex === undefined) profile.activeCarIndex = 0;
+    showHome();
+  } else {
+    document.getElementById("home-register").style.display = "block";
+    showFirstRegister();
+  }
+}
+
+function saveProfileLocal() {
+  localStorage.setItem("aster_profile_v2", JSON.stringify(profile));
+}
+
+// ── HOME ──────────────────────────────────────────────────
+function showHome() {
+  document.getElementById("home-content").style.display = "block";
+  document.getElementById("home-register").style.display = "none";
+  document.getElementById("home-name").textContent = profile.name;
+  renderCarSelector();
+  updateScheduleCarSelect();
+  updateHistoryCarFilter();
+}
+
+function renderCarSelector() {
+  const sel = document.getElementById("home-car-selector");
+  sel.innerHTML = "";
+  profile.cars.forEach((car, i) => {
+    const chip = document.createElement("div");
+    chip.className = "car-chip" + (i === profile.activeCarIndex ? " active" : "");
+    chip.textContent = car.brand + " " + car.model;
+    chip.onclick = () => setActiveCar(i);
+    sel.appendChild(chip);
+  });
+  updateHomeCarInfo();
+}
+
+function setActiveCar(i) {
+  profile.activeCarIndex = i;
+  saveProfileLocal();
+  renderCarSelector();
+  updateHistoryCarFilter();
+}
+
+function updateHomeCarInfo() {
+  const car = profile.cars[profile.activeCarIndex];
+  if (car) {
+    document.getElementById("home-vin").textContent = car.vin;
+  } else {
+    document.getElementById("home-vin").textContent = "—";
+  }
+}
 
 // ── NAVIGATION ────────────────────────────────────────────
 function goTo(page) {
@@ -426,112 +483,43 @@ function goTo(page) {
   document.getElementById("page-" + page).classList.add("active");
   const nav = document.getElementById("nav-" + page);
   if (nav) nav.classList.add("active");
-  currentPage = page;
-
-  if (page === "history") loadHistory();
-}
-
-// ── PROFILE ───────────────────────────────────────────────
-async function loadProfile() {
-  const saved = localStorage.getItem("aster_profile");
-  if (saved) {
-    userProfile = JSON.parse(saved);
-    showProfile();
-  } else {
-    document.getElementById("home-loading").style.display = "none";
-    document.getElementById("home-register").style.display = "block";
-    document.getElementById("profile-view").style.display = "none";
-    document.getElementById("profile-form").style.display = "block";
-  }
-}
-
-function showProfile() {
-  if (!userProfile) return;
-  const p = userProfile;
-
-  // Home
-  document.getElementById("home-loading").style.display = "none";
-  document.getElementById("home-content").style.display = "block";
-  document.getElementById("home-name").textContent = p.name || "—";
-  document.getElementById("home-car").textContent = (p.brand || "") + " " + (p.model || "");
-  document.getElementById("home-vin").textContent = "VIN: " + (p.vin || "не указан");
-
-  // Profile
-  document.getElementById("p-name").textContent = p.name || "—";
-  document.getElementById("p-phone").textContent = p.phone || "—";
-  document.getElementById("p-brand").textContent = p.brand || "—";
-  document.getElementById("p-model").textContent = p.model || "—";
-  document.getElementById("p-vin").textContent = p.vin || "не указан";
-  document.getElementById("profile-view").style.display = "block";
-  document.getElementById("profile-form").style.display = "none";
-}
-
-function showEditProfile() {
-  const p = userProfile || {};
-  document.getElementById("reg-name").value = p.name || "";
-  document.getElementById("reg-phone").value = p.phone || "";
-  document.getElementById("reg-brand").value = p.brand || "";
-  onRegBrandChange();
-  setTimeout(() => document.getElementById("reg-model").value = p.model || "", 50);
-  document.getElementById("reg-vin").value = p.vin || "";
-  document.getElementById("profile-view").style.display = "none";
-  document.getElementById("profile-form").style.display = "block";
-}
-
-async function saveProfile() {
-  const name = document.getElementById("reg-name").value.trim();
-  const phone = document.getElementById("reg-phone").value.trim();
-  const brand = document.getElementById("reg-brand").value;
-  const model = document.getElementById("reg-model").value;
-  const vin = document.getElementById("reg-vin").value.trim().toUpperCase();
-
-  if (!name || !phone || !brand || !model) {
-    showToast("Заполните все обязательные поля"); return;
-  }
-
-  userProfile = { name, phone, brand, model, vin, tgId: tgUser?.id, tgName: tgUser?.first_name };
-  localStorage.setItem("aster_profile", JSON.stringify(userProfile));
-
-  // Отправляем в Google Sheets
-  if (SCRIPT_URL) {
-    await apiCall({ action: "registerClient", client: userProfile });
-  }
-
-  showProfile();
-  showToast("Профиль сохранён ✓");
-  goTo("home");
+  if (page === "history") renderHistory();
+  if (page === "profile") renderProfileView();
 }
 
 // ── HISTORY ───────────────────────────────────────────────
-async function loadHistory() {
+function updateHistoryCarFilter() {
+  const sel = document.getElementById("history-car-filter");
+  sel.innerHTML = "";
+  if (!profile || !profile.cars.length) return;
+  profile.cars.forEach((car, i) => {
+    sel.innerHTML += `<option value="${i}">${car.brand} ${car.model}</option>`;
+  });
+  sel.value = profile.activeCarIndex || 0;
+}
+
+function renderHistory() {
+  if (!profile) return;
+  const sel = document.getElementById("history-car-filter");
+  const carIdx = parseInt(sel.value) || 0;
+  const car = profile.cars[carIdx];
   const list = document.getElementById("history-list");
-  if (!userProfile) {
-    list.innerHTML = '<div class="card-body" style="color:#9CA3AF;text-align:center;padding:30px">Сначала заполните профиль</div>';
+
+  if (!car) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">🚗</div>Добавьте автомобиль в профиле</div>';
     return;
   }
 
-  list.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">Загрузка...</div></div>';
-
-  // Загружаем из Google Sheets по телефону
-  let history = [];
-  if (SCRIPT_URL) {
-    const res = await apiCall({ action: "getHistory", phone: userProfile.phone });
-    history = res?.history || [];
-  }
-
-  // Демо-данные если нет реальных
-  if (!history.length) {
-    history = [
+  // Демо-данные привязаны к VIN
+  const demoHistory = {
+    default: [
       { doc: "ЗН-00004156", date: "22.06.2026", amount: "450 000", items: "Замена масла двигателя\nМасляный фильтр\nДиагностика ходовой" },
       { doc: "ЗН-00003891", date: "15.04.2026", amount: "1 250 000", items: "Замена тормозных колодок\nРегулировка развал-схождения\nЗамена воздушного фильтра" },
       { doc: "ЗН-00003102", date: "10.01.2026", amount: "320 000", items: "ТО плановое\nЗамена свечей зажигания" },
-    ];
-  }
+    ]
+  };
 
-  if (!history.length) {
-    list.innerHTML = '<div class="card-body" style="color:#9CA3AF;text-align:center;padding:30px">История пуста</div>';
-    return;
-  }
+  const history = demoHistory[car.vin] || demoHistory.default;
 
   list.innerHTML = history.map((h, i) => `
     <div class="history-item" onclick="toggleHistory(${i})">
@@ -539,55 +527,55 @@ async function loadHistory() {
         <span class="history-doc">${h.doc}</span>
         <span class="history-amount">${h.amount} сум</span>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px">
         <span class="history-date">📅 ${h.date}</span>
-        <span class="history-arrow" id="arrow-${i}">▼</span>
+        <span class="history-arrow" id="arr-${i}">▼</span>
       </div>
-      <div class="history-detail" id="detail-${i}">${(h.items||"").split("\n").map(s => "• " + s).join("<br>")}</div>
-    </div>
-  `).join("");
+      <div class="history-detail" id="det-${i}">${(h.items||"").split("\n").map(s=>"• "+s).join("<br>")}</div>
+    </div>`).join("");
 }
 
 function toggleHistory(i) {
-  const detail = document.getElementById("detail-" + i);
-  const arrow = document.getElementById("arrow-" + i);
-  detail.classList.toggle("open");
-  arrow.classList.toggle("open");
+  document.getElementById("det-"+i).classList.toggle("open");
+  document.getElementById("arr-"+i).classList.toggle("open");
 }
 
 // ── SCHEDULE ──────────────────────────────────────────────
+function updateScheduleCarSelect() {
+  const sel = document.getElementById("s-car");
+  sel.innerHTML = "";
+  if (!profile || !profile.cars.length) {
+    sel.innerHTML = '<option value="">Нет автомобилей — добавьте в профиле</option>';
+    return;
+  }
+  profile.cars.forEach((car, i) => {
+    sel.innerHTML += `<option value="${i}">${car.brand} ${car.model} (${car.vin})</option>`;
+  });
+  sel.value = profile.activeCarIndex || 0;
+}
+
 async function submitSchedule() {
-  if (!userProfile) { showToast("Сначала заполните профиль"); goTo("profile"); return; }
+  if (!profile || !profile.cars.length) { showToast("Добавьте автомобиль в профиле"); goTo("profile"); return; }
+  const carIdx = parseInt(document.getElementById("s-car").value);
+  const car = profile.cars[carIdx];
   const branch = document.getElementById("s-branch").value;
   const date = document.getElementById("s-date").value;
   const time = document.getElementById("s-time").value;
   const reason = document.getElementById("s-reason").value.trim();
-
   if (!branch || !date || !time) { showToast("Заполните все поля"); return; }
-
   const record = {
-    operator: "Бот",
-    station: branch,
-    clientName: userProfile.name,
-    phone: userProfile.phone,
-    car: userProfile.brand + " " + userProfile.model,
-    visitDate: date,
-    visitTime: time,
-    service: reason || "Не указана",
-    status: "Записан",
-    note: "Запись через Telegram бот",
+    operator: "Бот", station: branch,
+    clientName: profile.name, phone: profile.phone,
+    car: car.brand + " " + car.model,
+    visitDate: date, visitTime: time,
+    service: reason || "Не указана", status: "Записан",
+    note: "VIN: " + car.vin + " | Запись через Telegram бот",
   };
-
-  if (SCRIPT_URL) {
-    await apiCall({ action: "add", record });
-  }
-
-  // Показываем ближайшую запись на главной
+  if (SCRIPT_URL) await apiCall({ action: "add", record });
   const dateStr = new Date(date).toLocaleDateString("ru-RU", { day: "numeric", month: "long", weekday: "long" });
   document.getElementById("home-appt").style.display = "block";
   document.getElementById("appt-date").textContent = dateStr + " в " + time;
   document.getElementById("appt-info").textContent = branch + (reason ? " • " + reason : "");
-
   showToast("Запись оформлена ✓");
   document.getElementById("s-branch").value = "";
   document.getElementById("s-date").value = "";
@@ -596,25 +584,208 @@ async function submitSchedule() {
   goTo("home");
 }
 
+// ── PROFILE VIEW ──────────────────────────────────────────
+function renderProfileView() {
+  if (!profile) { showFirstRegister(); return; }
+  document.getElementById("first-register").style.display = "none";
+  document.getElementById("profile-personal-form").style.display = "none";
+  document.getElementById("car-form").style.display = "none";
+  document.getElementById("profile-view").style.display = "block";
+  document.getElementById("p-name").textContent = profile.name;
+  document.getElementById("p-phone").textContent = profile.phone;
+  renderCarsList();
+}
+
+function renderCarsList() {
+  const list = document.getElementById("cars-list");
+  if (!profile.cars.length) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">🚗</div>Нет автомобилей. Добавьте первый!</div>';
+    return;
+  }
+  list.innerHTML = profile.cars.map((car, i) => `
+    <div class="car-card ${i === profile.activeCarIndex ? 'active-car' : ''}">
+      <div class="car-card-top">
+        <div>
+          <div class="car-card-name">${car.brand} ${car.model} ${i === profile.activeCarIndex ? '<span class="active-badge">Активный</span>' : ''}</div>
+          <div class="car-card-vin">VIN: ${car.vin}</div>
+        </div>
+      </div>
+      <div class="car-card-actions" style="margin-top:10px">
+        ${i !== profile.activeCarIndex ? `<button class="car-card-btn car-card-btn-select" onclick="setActiveCar(${i});renderProfileView()">Выбрать</button>` : ""}
+        <button class="car-card-btn" style="background:#F3F4F6;color:#374151" onclick="editCar(${i})">✏️ Изменить</button>
+        ${profile.cars.length > 1 ? `<button class="car-card-btn car-card-btn-delete" onclick="deleteCar(${i})">🗑 Удалить</button>` : ""}
+      </div>
+    </div>`).join("");
+}
+
+// ── CAR FORM ──────────────────────────────────────────────
+function showAddCar() {
+  editingCarIndex = -1;
+  document.getElementById("car-form-title").textContent = "Добавить автомобиль";
+  document.getElementById("car-brand").value = "";
+  document.getElementById("car-model").innerHTML = '<option value="">Сначала выберите марку</option>';
+  document.getElementById("car-vin").value = "";
+  document.getElementById("vin-counter").textContent = "0 / 17";
+  document.getElementById("vin-counter").className = "vin-counter";
+  clearCarFormErrors();
+  document.getElementById("profile-view").style.display = "none";
+  document.getElementById("car-form").style.display = "block";
+}
+
+function editCar(i) {
+  editingCarIndex = i;
+  const car = profile.cars[i];
+  document.getElementById("car-form-title").textContent = "Редактировать автомобиль";
+  document.getElementById("car-brand").value = car.brand;
+  onCarBrandChange();
+  setTimeout(() => document.getElementById("car-model").value = car.model, 50);
+  document.getElementById("car-vin").value = car.vin;
+  onVinInput(document.getElementById("car-vin"));
+  clearCarFormErrors();
+  document.getElementById("profile-view").style.display = "none";
+  document.getElementById("car-form").style.display = "block";
+}
+
+function deleteCar(i) {
+  if (!confirm("Удалить этот автомобиль?")) return;
+  profile.cars.splice(i, 1);
+  if (profile.activeCarIndex >= profile.cars.length) profile.activeCarIndex = 0;
+  saveProfileLocal();
+  renderProfileView();
+  renderCarSelector();
+  showToast("Автомобиль удалён");
+}
+
+function saveCar() {
+  const brand = document.getElementById("car-brand").value;
+  const model = document.getElementById("car-model").value;
+  const vin = document.getElementById("car-vin").value.trim().toUpperCase();
+  let valid = true;
+  if (!brand) { showFieldError("err-brand"); valid = false; } else hideFieldError("err-brand");
+  if (!model) { showFieldError("err-model"); valid = false; } else hideFieldError("err-model");
+  if (!validateVin(vin)) { showFieldError("err-vin"); valid = false; } else hideFieldError("err-vin");
+  if (!valid) return;
+
+  // Проверяем дубль VIN
+  const dupIdx = profile.cars.findIndex((c, i) => c.vin === vin && i !== editingCarIndex);
+  if (dupIdx !== -1) { showFieldError("err-vin", "Автомобиль с таким VIN уже добавлен"); return; }
+
+  const car = { brand, model, vin };
+  if (editingCarIndex === -1) {
+    profile.cars.push(car);
+    profile.activeCarIndex = profile.cars.length - 1;
+  } else {
+    profile.cars[editingCarIndex] = car;
+  }
+  saveProfileLocal();
+  if (SCRIPT_URL) apiCall({ action: "registerClient", client: profile });
+  showToast(editingCarIndex === -1 ? "Автомобиль добавлен ✓" : "Изменения сохранены ✓");
+  editingCarIndex = -1;
+  renderProfileView();
+  renderCarSelector();
+  updateScheduleCarSelect();
+  updateHistoryCarFilter();
+}
+
+function cancelCarForm() {
+  editingCarIndex = -1;
+  document.getElementById("car-form").style.display = "none";
+  document.getElementById("profile-view").style.display = "block";
+}
+
+function onCarBrandChange() {
+  const brand = document.getElementById("car-brand").value;
+  const sel = document.getElementById("car-model");
+  sel.innerHTML = '<option value="">Выберите модель</option>';
+  if (brand && BRANDS_MODELS[brand]) BRANDS_MODELS[brand].forEach(m => sel.innerHTML += `<option>${m}</option>`);
+}
+
+// ── PERSONAL FORM ─────────────────────────────────────────
+function showFirstRegister() {
+  document.getElementById("profile-view").style.display = "none";
+  document.getElementById("profile-personal-form").style.display = "none";
+  document.getElementById("car-form").style.display = "none";
+  document.getElementById("first-register").style.display = "block";
+}
+
+function showEditPersonal() {
+  document.getElementById("reg-name").value = profile.name;
+  document.getElementById("reg-phone").value = profile.phone;
+  document.getElementById("profile-view").style.display = "none";
+  document.getElementById("profile-personal-form").style.display = "block";
+}
+
+function cancelPersonalEdit() {
+  document.getElementById("profile-personal-form").style.display = "none";
+  document.getElementById("profile-view").style.display = "block";
+}
+
+function savePersonal() {
+  const name = document.getElementById("reg-name").value.trim();
+  const phone = document.getElementById("reg-phone").value.trim();
+  let valid = true;
+  if (!name) { showFieldError("err-name"); valid = false; } else hideFieldError("err-name");
+  if (!isPhoneComplete(phone)) { showFieldError("err-phone"); valid = false; } else hideFieldError("err-phone");
+  if (!valid) return;
+  profile.name = name;
+  profile.phone = phone;
+  saveProfileLocal();
+  showToast("Данные сохранены ✓");
+  renderProfileView();
+}
+
+function firstRegister() {
+  const name = document.getElementById("freg-name").value.trim();
+  const phone = document.getElementById("freg-phone").value.trim();
+  const brand = document.getElementById("freg-brand").value;
+  const model = document.getElementById("freg-model").value;
+  const vin = document.getElementById("freg-vin").value.trim().toUpperCase();
+  let valid = true;
+  if (!name) { showFieldError("ferr-name"); valid = false; } else hideFieldError("ferr-name");
+  if (!isPhoneComplete(phone)) { showFieldError("ferr-phone"); valid = false; } else hideFieldError("ferr-phone");
+  if (!brand) { showFieldError("ferr-brand"); valid = false; } else hideFieldError("ferr-brand");
+  if (!model) { showFieldError("ferr-model"); valid = false; } else hideFieldError("ferr-model");
+  if (!validateVin(vin)) { showFieldError("ferr-vin"); valid = false; } else hideFieldError("ferr-vin");
+  if (!valid) return;
+  profile = { name, phone, tgId: tgUser?.id, tgName: tgUser?.first_name, cars: [{ brand, model, vin }], activeCarIndex: 0 };
+  saveProfileLocal();
+  if (SCRIPT_URL) apiCall({ action: "registerClient", client: profile });
+  showHome();
+  document.getElementById("home-register").style.display = "none";
+  showToast("Добро пожаловать, " + name + "! ✓");
+  goTo("home");
+}
+
+// ── VIN VALIDATION ────────────────────────────────────────
+function validateVin(vin) {
+  return /^[A-HJ-NPR-Z0-9]{17}$/.test(vin);
+}
+
+function onVinInput(input, counterId) {
+  // Только латиница и цифры, исключая I, O, Q
+  input.value = input.value.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g, "");
+  const len = input.value.length;
+  const cid = counterId || "vin-counter";
+  const counter = document.getElementById(cid);
+  counter.textContent = len + " / 17";
+  counter.className = "vin-counter" + (len === 17 ? " full" : "");
+}
+
 // ── CALLBACK ──────────────────────────────────────────────
 async function requestCallback() {
-  if (!userProfile) { showToast("Сначала заполните профиль"); goTo("profile"); return; }
-  if (SCRIPT_URL) {
-    await apiCall({ action: "callback", client: userProfile });
-  }
+  if (!profile) { showToast("Сначала зарегистрируйтесь"); goTo("profile"); return; }
+  if (SCRIPT_URL) await apiCall({ action: "callback", client: profile });
   showToast("Заявка принята! Перезвоним в течение 30 минут 📞");
 }
 
-// ── API ───────────────────────────────────────────────────
-async function apiCall(payload) {
-  if (!SCRIPT_URL) return null;
-  try {
-    const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-    return await res.json();
-  } catch(e) { return null; }
+// ── HELPERS ───────────────────────────────────────────────
+function onFregBrandChange() {
+  const brand = document.getElementById("freg-brand").value;
+  const sel = document.getElementById("freg-model");
+  sel.innerHTML = '<option value="">Выберите модель</option>';
+  if (brand && BRANDS_MODELS[brand]) BRANDS_MODELS[brand].forEach(m => sel.innerHTML += `<option>${m}</option>`);
 }
 
-// ── HELPERS ───────────────────────────────────────────────
 function phoneMask(input) {
   let v = input.value.replace(/\D/g, "");
   if (v.startsWith("998")) v = v.slice(3);
@@ -627,13 +798,22 @@ function phoneMask(input) {
   input.value = m;
 }
 
-function onRegBrandChange() {
-  const brand = document.getElementById("reg-brand").value;
-  const sel = document.getElementById("reg-model");
-  sel.innerHTML = '<option value="">Выберите модель</option>';
-  if (brand && BRANDS_MODELS[brand]) {
-    BRANDS_MODELS[brand].forEach(m => sel.innerHTML += `<option>${m}</option>`);
-  }
+function isPhoneComplete(val) {
+  const d = val.replace(/\D/g,"");
+  const loc = d.startsWith("998") ? d.slice(3) : d;
+  return loc.length === 9;
+}
+
+function showFieldError(id, msg) {
+  const el = document.getElementById(id);
+  if (el) { if (msg) el.textContent = msg; el.classList.add("show"); }
+}
+function hideFieldError(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove("show");
+}
+function clearCarFormErrors() {
+  ["err-brand","err-model","err-vin"].forEach(hideFieldError);
 }
 
 function showToast(msg) {
@@ -641,6 +821,14 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+async function apiCall(payload) {
+  if (!SCRIPT_URL) return null;
+  try {
+    const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+    return await res.json();
+  } catch(e) { return null; }
 }
 </script>
 </body>
