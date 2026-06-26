@@ -159,13 +159,13 @@
   <div id="home-loading" class="loading"><div class="spinner"></div><div class="loading-text">Загрузка...</div></div>
   <div id="home-content" style="display:none">
     <div class="welcome-banner">
-      <div class="welcome-hi">Добро пожаловать 👋</div>
+      <div class="welcome-hi" id="home-hi">Добро пожаловать 👋</div>
       <div class="welcome-name" id="home-name">—</div>
       <div class="car-selector" id="home-car-selector"></div>
       <div style="font-size:13px;color:#94A3B8">VIN: <span id="home-vin" style="font-family:monospace;color:#fff">—</span></div>
     </div>
     <div id="home-appt" style="display:none">
-      <div class="section-title">Ближайший визит</div>
+      <div class="section-title" id="home-appt-title">Ближайший визит</div>
       <div class="appt-card">
         <div class="appt-date" id="appt-date">—</div>
         <div class="appt-info" id="appt-info">—</div>
@@ -173,32 +173,32 @@
     </div>
     <div class="section-title">Быстрые действия</div>
     <div class="quick-grid">
-      <div class="quick-btn" onclick="goTo('schedule')"><div class="icon">📅</div><div class="label">Записаться на сервис</div></div>
-      <div class="quick-btn" onclick="goTo('history')"><div class="icon">📋</div><div class="label">История ремонта</div></div>
-      <div class="quick-btn" onclick="requestCallback()"><div class="icon">📞</div><div class="label">Обратный звонок</div></div>
-      <div class="quick-btn" onclick="goTo('contacts')"><div class="icon">🏢</div><div class="label">Наши филиалы</div></div>
+      <div class="quick-btn" onclick="goTo('schedule')"><div class="icon">📅</div><div class="label" id="quick-book">Записаться на сервис</div></div>
+      <div class="quick-btn" onclick="goTo('history')"><div class="icon">📋</div><div class="label" id="quick-history">История ремонта</div></div>
+      <div class="quick-btn" onclick="requestCallback()"><div class="icon">📞</div><div class="label" id="quick-call">Обратный звонок</div></div>
+      <div class="quick-btn" onclick="goTo('contacts')"><div class="icon">🏢</div><div class="label" id="quick-branches">Наши филиалы</div></div>
     </div>
   </div>
   <div id="home-register" style="display:none">
     <div class="register-page">
       <div class="register-icon">🔑</div>
-      <div class="register-title">Добро пожаловать!</div>
-      <div class="register-sub">Зарегистрируйтесь чтобы получить доступ к истории обслуживания и онлайн-записи</div>
-      <button class="btn btn-primary" onclick="goTo('profile')">Зарегистрироваться</button>
+      <div class="register-title" id="home-reg-title">Добро пожаловать!</div>
+      <div class="register-sub" id="home-reg-sub">Зарегистрируйтесь чтобы получить доступ к истории обслуживания и онлайн-записи</div>
+      <button class="btn btn-primary" id="home-reg-btn" onclick="goTo('profile')">Зарегистрироваться</button>
     </div>
   </div>
 </div>
 
 <!-- SCHEDULE -->
 <div class="page" id="page-schedule">
-  <div class="section-title">Запись на сервис</div>
+  <div class="section-title" id="sched-page-title">Запись на сервис</div>
   <div class="card"><div class="card-body">
     <div class="form-field">
-      <label class="form-label">Автомобиль</label>
+      <label class="form-label" id="s-car-label">Автомобиль</label>
       <select class="form-input" id="s-car"></select>
     </div>
     <div class="form-field">
-      <label class="form-label">Филиал</label>
+      <label class="form-label" id="s-branch-label">Филиал</label>
       <select class="form-input" id="s-branch">
         <option value="">Выберите филиал</option>
         <option>Рохат</option><option>Ахмад Дониш</option><option>Самарканд</option>
@@ -206,25 +206,25 @@
       </select>
     </div>
     <div class="form-field">
-      <label class="form-label">Дата визита</label>
+      <label class="form-label" id="s-date-label">Дата визита</label>
       <input type="date" class="form-input" id="s-date">
     </div>
     <div class="form-field">
-      <label class="form-label">Время</label>
+      <label class="form-label" id="s-time-label">Время</label>
       <select class="form-input" id="s-time"><option value="">Выберите время</option></select>
     </div>
     <div class="form-field">
-      <label class="form-label">Причина обращения</label>
+      <label class="form-label" id="s-reason-label">Причина обращения</label>
       <input type="text" class="form-input" id="s-reason" placeholder="Опишите проблему или услугу">
     </div>
-    <button class="btn btn-primary" onclick="submitSchedule()">Записаться</button>
+    <button class="btn btn-primary" id="s-submit-btn" onclick="submitSchedule()">Записаться</button>
   </div></div>
 </div>
 
 <!-- HISTORY -->
 <div class="page" id="page-history">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-    <div class="section-title" style="margin-bottom:0">История ремонта</div>
+    <div class="section-title" id="hist-page-title" style="margin-bottom:0">История ремонта</div>
     <select class="form-input" id="history-car-filter" style="width:auto;font-size:12px;padding:6px 30px 6px 10px" onchange="renderHistory()"></select>
   </div>
   <div class="card" id="history-list"></div>
@@ -281,31 +281,31 @@
 <div class="page" id="page-profile">
   <!-- Просмотр профиля -->
   <div id="profile-view" style="display:none">
-    <div class="section-title">Личные данные</div>
+    <div class="section-title" id="profile-personal-title">Личные данные</div>
     <div class="card"><div class="card-body">
       <div class="info-row"><span class="info-label">ФИО</span><span class="info-value" id="p-name">—</span></div>
       <div class="info-row"><span class="info-label">Телефон</span><span class="info-value" id="p-phone">—</span></div>
     </div></div>
-    <button class="btn btn-secondary" style="margin-bottom:20px" onclick="showEditPersonal()">✏️ Редактировать данные</button>
+    <button class="btn btn-secondary" id="profile-edit-btn" style="margin-bottom:20px" onclick="showEditPersonal()">✏️ Редактировать данные</button>
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div class="section-title" style="margin-bottom:0">Мои автомобили</div>
-      <button class="btn btn-accent btn-sm" onclick="showAddCar()">+ Добавить авто</button>
+      <div class="section-title" id="profile-cars-title" style="margin-bottom:0">Мои автомобили</div>
+      <button class="btn btn-accent btn-sm" id="profile-add-car-btn" onclick="showAddCar()">+ Добавить авто</button>
     </div>
     <div id="cars-list"></div>
   </div>
 
   <!-- Форма личных данных -->
   <div id="profile-personal-form" style="display:none">
-    <div class="section-title">Личные данные</div>
+    <div class="section-title" id="profile-personal-title">Личные данные</div>
     <div class="card"><div class="card-body">
       <div class="form-field">
-        <label class="form-label">ФИО *</label>
+        <label class="form-label" id="reg-name-label">ФИО *</label>
         <input type="text" class="form-input" id="reg-name" placeholder="Иванов Иван Иванович">
         <div class="form-error" id="err-name">Введите ФИО</div>
       </div>
       <div class="form-field">
-        <label class="form-label">Телефон *</label>
+        <label class="form-label" id="reg-phone-label">Телефон *</label>
         <input type="tel" class="form-input" id="reg-phone" placeholder="+998 90 000 00 00" oninput="phoneMask(this)">
         <div class="form-error" id="err-phone">Введите полный номер телефона</div>
       </div>
@@ -316,10 +316,10 @@
 
   <!-- Форма добавления/редактирования авто -->
   <div id="car-form" style="display:none">
-    <div class="section-title" id="car-form-title">Добавить автомобиль</div>
+    <div class="section-title"><span id="car-form-title-txt">Добавить автомобиль</span></div>
     <div class="card"><div class="card-body">
       <div class="form-field">
-        <label class="form-label">Марка *</label>
+        <label class="form-label" id="car-brand-label">Марка *</label>
         <select class="form-input" id="car-brand" onchange="onCarBrandChange()">
           <option value="">Выберите марку</option>
           <option>Chevrolet</option><option>Chery</option><option>Haval</option><option>KIA</option>
@@ -329,20 +329,20 @@
         <div class="form-error" id="err-brand">Выберите марку</div>
       </div>
       <div class="form-field">
-        <label class="form-label">Модель *</label>
+        <label class="form-label" id="car-model-label">Модель *</label>
         <select class="form-input" id="car-model">
           <option value="">Сначала выберите марку</option>
         </select>
         <div class="form-error" id="err-model">Выберите модель</div>
       </div>
       <div class="form-field">
-        <label class="form-label">VIN код * <span style="color:#9CA3AF">(17 символов, латиница)</span></label>
+        <label class="form-label" id="car-vin-label">VIN код * <span style="color:#9CA3AF">(17 символов, латиница)</span></label>
         <input type="text" class="form-input vin-input" id="car-vin" placeholder="XWBAD6HJ0CG000001" maxlength="17" oninput="onVinInput(this)">
         <div class="vin-counter" id="vin-counter">0 / 17</div>
         <div class="form-error" id="err-vin">VIN должен содержать ровно 17 символов (латиница и цифры)</div>
       </div>
-      <button class="btn btn-primary" onclick="saveCar()">Сохранить</button>
-      <button class="btn btn-secondary" onclick="cancelCarForm()">Отмена</button>
+      <button class="btn btn-primary" id="car-save-btn" onclick="saveCar()">Сохранить</button>
+      <button class="btn btn-secondary" id="car-cancel-btn" onclick="cancelCarForm()">Отмена</button>
     </div></div>
   </div>
 
@@ -350,26 +350,26 @@
   <div id="first-register" style="display:none">
     <div class="register-page" style="min-height:auto;padding:0 0 20px">
       <div class="register-icon">👤</div>
-      <div class="register-title">Регистрация</div>
-      <div class="register-sub">Заполните данные для доступа к личному кабинету</div>
+      <div class="register-title" id="freg-title">Регистрация</div>
+      <div class="register-sub" id="freg-sub">Заполните данные для доступа к личному кабинету</div>
     </div>
-    <div class="section-title">Шаг 1 — Личные данные</div>
+    <div class="section-title" id="freg-step1">Шаг 1 — Личные данные</div>
     <div class="card"><div class="card-body">
       <div class="form-field">
-        <label class="form-label">ФИО *</label>
+        <label class="form-label" id="freg-name-label">ФИО *</label>
         <input type="text" class="form-input" id="freg-name" placeholder="Иванов Иван Иванович">
         <div class="form-error" id="ferr-name">Введите ФИО</div>
       </div>
       <div class="form-field">
-        <label class="form-label">Телефон *</label>
+        <label class="form-label" id="freg-phone-label">Телефон *</label>
         <input type="tel" class="form-input" id="freg-phone" placeholder="+998 90 000 00 00" oninput="phoneMask(this)">
         <div class="form-error" id="ferr-phone">Введите полный номер телефона</div>
       </div>
     </div></div>
-    <div class="section-title">Шаг 2 — Ваш автомобиль</div>
+    <div class="section-title" id="freg-step2">Шаг 2 — Ваш автомобиль</div>
     <div class="card"><div class="card-body">
       <div class="form-field">
-        <label class="form-label">Марка *</label>
+        <label class="form-label" id="freg-brand-label">Марка *</label>
         <select class="form-input" id="freg-brand" onchange="onFregBrandChange()">
           <option value="">Выберите марку</option>
           <option>Chevrolet</option><option>Chery</option><option>Haval</option><option>KIA</option>
@@ -379,17 +379,17 @@
         <div class="form-error" id="ferr-brand">Выберите марку</div>
       </div>
       <div class="form-field">
-        <label class="form-label">Модель *</label>
+        <label class="form-label" id="freg-model-label">Модель *</label>
         <select class="form-input" id="freg-model"><option value="">Сначала выберите марку</option></select>
         <div class="form-error" id="ferr-model">Выберите модель</div>
       </div>
       <div class="form-field">
-        <label class="form-label">VIN код * <span style="color:#9CA3AF">(17 символов, латиница)</span></label>
+        <label class="form-label" id="freg-vin-label">VIN код * <span style="color:#9CA3AF">(17 символов, латиница)</span></label>
         <input type="text" class="form-input vin-input" id="freg-vin" placeholder="XWBAD6HJ0CG000001" maxlength="17" oninput="onVinInput(this, 'freg-vin-counter')">
         <div class="vin-counter" id="freg-vin-counter">0 / 17</div>
         <div class="form-error" id="ferr-vin">VIN должен содержать ровно 17 символов (латиница и цифры)</div>
       </div>
-      <button class="btn btn-primary" onclick="firstRegister()">Зарегистрироваться</button>
+      <button class="btn btn-primary" id="freg-submit-btn" onclick="firstRegister()">Зарегистрироваться</button>
     </div></div>
   </div>
 </div>
@@ -592,26 +592,82 @@ function setLang(lang) {
 
 function applyLang() {
   // Нижняя навигация
-  const navLabels = ["home","schedule","history","contacts","profile"];
-  navLabels.forEach(k => {
+  ["home","schedule","history","contacts","profile"].forEach(k => {
     const el = document.querySelector(`#nav-${k}`);
     if (el) el.childNodes[el.childNodes.length-1].textContent = t(k);
   });
-  // Секции
+
+  // Главная
+  safeText("home-hi", t("welcomeHi"));
+  safeText("home-appt-title", t("nearVisit"));
+  safeText("quick-book", t("quickBook"));
+  safeText("quick-history", t("quickHistory"));
+  safeText("quick-call", t("quickCall"));
+  safeText("quick-branches", t("quickBranches"));
+
+  // Экран регистрации на главной
+  safeText("home-reg-title", t("regWelcome"));
+  safeText("home-reg-sub", t("regWelcomeSub"));
+  safeText("home-reg-btn", t("regBtn2"));
+
+  // Запись
+  safeText("sched-page-title", t("schedTitle"));
+  safeAttr("s-car", "data-ph", "");
+  safeText("s-car-label", t("schedCar"));
+  safeText("s-branch-label", t("schedBranch"));
+  safeText("s-date-label", t("schedDate"));
+  safeText("s-time-label", t("schedTime"));
+  safeText("s-reason-label", t("schedReason"));
+  safeAttr("s-reason", "placeholder", t("schedReasonPH"));
+  safeText("s-submit-btn", t("schedBtn"));
+
+  // История
+  safeText("hist-page-title", t("histTitle"));
+
+  // Контакты
   safeText("contacts-title", t("contactsTitle"));
-  // Маршрут
   document.querySelectorAll("[data-i='route']").forEach(el => el.textContent = t("route"));
+
+  // Профиль — заголовки
+  safeText("profile-personal-title", t("profileTitle"));
+  safeText("profile-cars-title", t("profileCars"));
+  safeText("profile-edit-btn", t("profileEdit"));
+  safeText("profile-add-car-btn", t("profileAddCar"));
+
+  // Форма личных данных
+  safeText("reg-name-label", t("fioLabel"));
+  safeAttr("reg-name", "placeholder", t("fioPH"));
+  safeText("reg-phone-label", t("phoneLabel"));
+
+  // Форма авто
+  safeText("car-form-title-txt", t("carFormAdd"));
+  safeText("car-brand-label", t("brandLabel"));
+  safeText("car-model-label", t("modelLabel"));
+  safeText("car-vin-label", t("vinLabel"));
+  safeText("car-save-btn", t("save"));
+  safeText("car-cancel-btn", t("cancel"));
+
+  // Первичная регистрация
+  safeText("freg-title", t("regTitle"));
+  safeText("freg-sub", t("regSub"));
+  safeText("freg-step1", t("regStep1"));
+  safeText("freg-step2", t("regStep2"));
+  safeText("freg-name-label", t("fioLabel"));
+  safeAttr("freg-name", "placeholder", t("fioPH"));
+  safeText("freg-phone-label", t("phoneLabel"));
+  safeText("freg-brand-label", t("brandLabel"));
+  safeText("freg-model-label", t("modelLabel"));
+  safeText("freg-vin-label", t("vinLabel"));
+  safeText("freg-submit-btn", t("regBtn"));
+
   // Callback modal
   safeText("cb-title", t("cbTitle"));
-  safeAttr("cb-city", "data-placeholder", t("selectBranch"));
   safeText("cb-city-label", t("cbCity"));
   safeText("cb-comment-label", t("cbComment"));
   safeAttr("cb-comment", "placeholder", t("cbCommentPH"));
   safeText("cb-submit-btn", t("cbSubmit"));
   safeText("cb-cancel-btn", t("cancel"));
-  // Профиль
-  safeText("p-name-label", t("profileName"));
-  safeText("p-phone-label", t("profilePhone"));
+
   // Перерисовываем динамические секции
   if (profile) {
     renderCarsList();
@@ -777,14 +833,14 @@ function updateScheduleCarSelect() {
 }
 
 async function submitSchedule() {
-  if (!profile || !profile.cars.length) { showToast("Добавьте автомобиль в профиле"); goTo("profile"); return; }
+  if (!profile || !profile.cars.length) { showToast(t("noCars")); goTo("profile"); return; }
   const carIdx = parseInt(document.getElementById("s-car").value);
   const car = profile.cars[carIdx];
   const branch = document.getElementById("s-branch").value;
   const date = document.getElementById("s-date").value;
   const time = document.getElementById("s-time").value;
   const reason = document.getElementById("s-reason").value.trim();
-  if (!branch || !date || !time) { showToast("Заполните все поля"); return; }
+  if (!branch || !date || !time) { showToast(t("fillAll")); return; }
   const record = {
     operator: "Бот", station: branch,
     clientName: profile.name, phone: profile.phone,
@@ -798,7 +854,7 @@ async function submitSchedule() {
   document.getElementById("home-appt").style.display = "block";
   document.getElementById("appt-date").textContent = dateStr + " в " + time;
   document.getElementById("appt-info").textContent = branch + (reason ? " • " + reason : "");
-  showToast("Запись оформлена ✓");
+  showToast(t("schedBooked"));
   document.getElementById("s-branch").value = "";
   document.getElementById("s-date").value = "";
   document.getElementById("s-time").value = "";
@@ -869,13 +925,13 @@ function editCar(i) {
 }
 
 function deleteCar(i) {
-  if (!confirm("Удалить этот автомобиль?")) return;
+  if (!confirm(t("carConfirmDelete"))) return;
   profile.cars.splice(i, 1);
   if (profile.activeCarIndex >= profile.cars.length) profile.activeCarIndex = 0;
   saveProfileLocal();
   renderProfileView();
   renderCarSelector();
-  showToast("Автомобиль удалён");
+  showToast(t("carDeleted"));
 }
 
 function saveCar() {
@@ -901,7 +957,7 @@ function saveCar() {
   }
   saveProfileLocal();
   if (SCRIPT_URL) apiCall({ action: "registerClient", client: profile });
-  showToast(editingCarIndex === -1 ? "Автомобиль добавлен ✓" : "Изменения сохранены ✓");
+  showToast(editingCarIndex === -1 ? t("carAdded") : t("carEdited"));
   editingCarIndex = -1;
   renderProfileView();
   renderCarSelector();
@@ -974,7 +1030,7 @@ function firstRegister() {
   if (SCRIPT_URL) apiCall({ action: "registerClient", client: profile });
   showHome();
   document.getElementById("home-register").style.display = "none";
-  showToast("Добро пожаловать, " + name + "! ✓");
+  showToast(t("welcome") + ", " + name + "! ✓");
   goTo("home");
 }
 
