@@ -738,35 +738,77 @@ function showQrConfirm(qrData) {
   document.getElementById("home-loading").style.display = "none";
   document.getElementById("home-register").style.display = "none";
 
-  const safeName = (qrData.name || "").replace(/"/g, "");
-  const safeBrand = (qrData.brand || "").replace(/"/g, "");
-  const safeModel = (qrData.model || "").replace(/"/g, "");
-  const safeVin = (qrData.vin || "").replace(/"/g, "");
-  const safeType = (qrData.clientType || "existing").replace(/"/g, "");
+  const el = document.getElementById("home-content");
+  el.style.display = "block";
+  el.innerHTML = "";
 
-  document.getElementById("home-content").innerHTML =
-    "<div style='padding:20px'>" +
-    "<div style='text-align:center;margin-bottom:24px'>" +
-    "<div style='font-size:48px;margin-bottom:12px'>👋</div>" +
+  // Строим DOM без innerHTML строк с кавычками
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "padding:20px";
+
+  // Заголовок
+  const header = document.createElement("div");
+  header.style.cssText = "text-align:center;margin-bottom:24px";
+  header.innerHTML = "<div style='font-size:48px;margin-bottom:12px'>👋</div>" +
     "<div style='font-size:20px;font-weight:700;margin-bottom:8px'>Добро пожаловать!</div>" +
-    "<div style='font-size:14px;color:#6B7280'>Проверьте данные и подтвердите регистрацию</div>" +
-    "</div>" +
-    "<div style='background:#F8FAFC;border-radius:14px;padding:16px;margin-bottom:20px'>" +
-    "<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F3F4F6;font-size:13px'><span style='color:#9CA3AF'>ФИО</span><span style='font-weight:600'>" + safeName + "</span></div>" +
-    "<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F3F4F6;font-size:13px'><span style='color:#9CA3AF'>Автомобиль</span><span style='font-weight:600'>" + safeBrand + " " + safeModel + "</span></div>" +
-    "<div style='display:flex;justify-content:space-between;padding:8px 0;font-size:13px'><span style='color:#9CA3AF'>VIN</span><span style='font-weight:600;font-family:monospace;font-size:11px'>" + safeVin + "</span></div>" +
-    "</div>" +
-    "<div style='margin-bottom:14px'>" +
-    "<label style='font-size:12px;color:#6B7280;font-weight:600;display:block;margin-bottom:6px'>Ваш телефон *</label>" +
-    "<input type='tel' id='qr-phone' placeholder='+998 90 000 00 00' style='width:100%;padding:12px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none' oninput='phoneMask(this)'>" +
-    "</div>" +
-    "<button onclick='confirmQrReg("" + safeVin + "","" + safeName + "","" + safeBrand + "","" + safeModel + "","" + safeType + "")' " +
-    "style='width:100%;padding:14px;background:#1B3A5C;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer'>" +
-    "✅ Подтвердить и зарегистрироваться</button>" +
-    "</div>";
+    "<div style='font-size:14px;color:#6B7280'>Проверьте данные и подтвердите регистрацию</div>";
+  wrap.appendChild(header);
 
-  document.getElementById("home-content").style.display = "block";
+  // Данные клиента
+  const info = document.createElement("div");
+  info.style.cssText = "background:#F8FAFC;border-radius:14px;padding:16px;margin-bottom:20px";
+  const rows = [
+    ["ФИО", qrData.name],
+    ["Автомобиль", (qrData.brand || "") + " " + (qrData.model || "")],
+    ["VIN", qrData.vin]
+  ];
+  rows.forEach(function(r) {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F3F4F6;font-size:13px";
+    const label = document.createElement("span");
+    label.style.color = "#9CA3AF";
+    label.textContent = r[0];
+    const val = document.createElement("span");
+    val.style.cssText = "font-weight:600;font-family:" + (r[0] === "VIN" ? "monospace" : "inherit") + ";font-size:" + (r[0] === "VIN" ? "11px" : "13px");
+    val.textContent = r[1];
+    row.appendChild(label);
+    row.appendChild(val);
+    info.appendChild(row);
+  });
+  wrap.appendChild(info);
+
+  // Телефон
+  const phoneWrap = document.createElement("div");
+  phoneWrap.style.marginBottom = "14px";
+  const phoneLabel = document.createElement("label");
+  phoneLabel.style.cssText = "font-size:12px;color:#6B7280;font-weight:600;display:block;margin-bottom:6px";
+  phoneLabel.textContent = "Ваш телефон *";
+  const phoneInput = document.createElement("input");
+  phoneInput.type = "tel";
+  phoneInput.id = "qr-phone";
+  phoneInput.placeholder = "+998 90 000 00 00";
+  phoneInput.style.cssText = "width:100%;padding:12px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none;box-sizing:border-box";
+  phoneInput.addEventListener("input", function() { phoneMask(this); });
+  phoneWrap.appendChild(phoneLabel);
+  phoneWrap.appendChild(phoneInput);
+  wrap.appendChild(phoneWrap);
+
+  // Кнопка
+  const btn = document.createElement("button");
+  btn.style.cssText = "width:100%;padding:14px;background:#1B3A5C;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer";
+  btn.textContent = "✅ Подтвердить и зарегистрироваться";
+  const vin = qrData.vin;
+  const name = qrData.name;
+  const brand = qrData.brand;
+  const model = qrData.model;
+  const clientType = qrData.clientType;
+  btn.addEventListener("click", function() {
+    confirmQrReg(vin, name, brand, model, clientType);
+  });
+  wrap.appendChild(btn);
+  el.appendChild(wrap);
 }
+
 
 async function confirmQrReg(vin, name, brand, model, clientType) {
   const phone = document.getElementById("qr-phone").value.trim();
