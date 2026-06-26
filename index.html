@@ -108,6 +108,7 @@
   .branch-name { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 4px; }
   .branch-addr { font-size: 12px; color: #6B7280; margin-bottom: 10px; }
   .branch-phone { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #4A9FBF; font-weight: 600; text-decoration: none; }
+  .branch-nav { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #10B981; font-weight: 600; text-decoration: none; margin-top: 8px; }
 
   .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; gap: 14px; }
   .spinner { width: 36px; height: 36px; border: 3px solid #E5E7EB; border-top-color: #4A9FBF; border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -127,6 +128,7 @@
 
   .divider { height: 1px; background: #F3F4F6; margin: 16px 0; }
   .empty-state { text-align: center; padding: 40px 20px; color: #9CA3AF; font-size: 14px; }
+  .lang-btn-mini.active { background: #3B82F6 !important; color: #fff !important; }
   .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
 </style>
 </head>
@@ -143,7 +145,13 @@
     <div class="brand"><span>Aster</span> Service</div>
     <div class="sub">Личный кабинет</div>
   </div>
-  <div class="header-user" id="header-user"></div>
+  <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
+    <div style="display:flex;background:#1E293B;border-radius:6px;padding:2px">
+      <button class="lang-btn-mini active" id="lbtn-ru" onclick="setLang('ru')" style="background:transparent;color:#94A3B8;border:none;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:11px;font-weight:700;transition:all 0.15s">RU</button>
+      <button class="lang-btn-mini" id="lbtn-uz" onclick="setLang('uz')" style="background:transparent;color:#94A3B8;border:none;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:11px;font-weight:700;transition:all 0.15s">UZ</button>
+    </div>
+    <div class="header-user" id="header-user"></div>
+  </div>
 </div>
 
 <!-- HOME -->
@@ -224,14 +232,49 @@
 
 <!-- CONTACTS -->
 <div class="page" id="page-contacts">
-  <div class="section-title">Наши филиалы</div>
-  <div class="branch-card"><div class="branch-name">Рохат (Ташкент)</div><div class="branch-addr">ул. Рохат, 1, Ташкент</div><a href="tel:+998555069898" class="branch-phone">📞 +998 55 506 98 98</a></div>
-  <div class="branch-card"><div class="branch-name">Ахмад Дониш (Ташкент)</div><div class="branch-addr">ул. Ахмад Дониш, Ташкент</div><a href="tel:+998555062662" class="branch-phone">📞 +998 55 506 26 62</a></div>
-  <div class="branch-card"><div class="branch-name">Самарканд</div><div class="branch-addr">г. Самарканд</div><a href="tel:+998662000000" class="branch-phone">📞 +998 66 200 00 00</a></div>
-  <div class="branch-card"><div class="branch-name">Бухара</div><div class="branch-addr">г. Бухара</div><a href="tel:+998652000000" class="branch-phone">📞 +998 65 200 00 00</a></div>
-  <div class="branch-card"><div class="branch-name">Наманган</div><div class="branch-addr">г. Наманган</div><a href="tel:+998692000000" class="branch-phone">📞 +998 69 200 00 00</a></div>
-  <div class="branch-card"><div class="branch-name">Карши</div><div class="branch-addr">г. Карши</div><a href="tel:+998752000000" class="branch-phone">📞 +998 75 200 00 00</a></div>
-  <div class="branch-card"><div class="branch-name">Навои</div><div class="branch-addr">г. Навои</div><a href="tel:+998792000000" class="branch-phone">📞 +998 79 200 00 00</a></div>
+  <div id="contacts-title" class="section-title">Наши филиалы</div>
+  <div class="branch-card">
+    <div class="branch-name">Рохат (Ташкент)</div>
+    <div class="branch-addr">Бектемирский район, мх. Нурафшон</div>
+    <a href="tel:+998555063838" class="branch-phone">📞 +998 55 506 38 38</a>
+    <a href="https://yandex.ru/navi/org/adm_aster/215116590272?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
+  </div>
+  <div class="branch-card">
+    <div class="branch-name">Ахмад Дониш (Ташкент)</div>
+    <div class="branch-addr">ул. Байроктол, 36Б</div>
+    <a href="tel:+998555063838" class="branch-phone">📞 +998 55 506 38 38</a>
+    <a href="https://yandex.ru/navi/org/aster_auto_city/210418048375?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
+  </div>
+  <div class="branch-card">
+    <div class="branch-name">Самарканд</div>
+    <div class="branch-addr">Самаркандская кольцевая дорога, 50A</div>
+    <a href="tel:+998555063838" class="branch-phone">📞 +998 55 506 38 38</a>
+    <a href="https://yandex.ru/navi/org/aster_auto_city/190021696533?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
+  </div>
+  <div class="branch-card">
+    <div class="branch-name">Бухара</div>
+    <div class="branch-addr">ул. Мустакиллик, 55/1А</div>
+    <a href="tel:+998555063838" class="branch-phone">📞 +998 55 506 38 38</a>
+    <a href="https://yandex.ru/navi/org/aster_auto_city/133684389451?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
+  </div>
+  <div class="branch-card">
+    <div class="branch-name">Наманган</div>
+    <div class="branch-addr">мх. Мингчинор, ул. Косонсой</div>
+    <a href="tel:+998555063838" class="branch-phone">📞 +998 55 506 38 38</a>
+    <a href="https://yandex.ru/navi/org/aster_auto_city/130905742415?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
+  </div>
+  <div class="branch-card">
+    <div class="branch-name">Навои</div>
+    <div class="branch-addr">Кармана, мх. Талкок, ул. Янги Хаёт, 111</div>
+    <a href="tel:+998555063838" class="branch-phone">📞 +998 55 506 38 38</a>
+    <a href="https://yandex.ru/navi/org/aster_auto_city/97988622505?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
+  </div>
+  <div class="branch-card">
+    <div class="branch-name">Карши</div>
+    <div class="branch-addr">нп. Тукмангит, ул. Тукмангит, 142</div>
+    <a href="tel:+998555063838" class="branch-phone">📞 +998 55 506 38 38</a>
+    <a href="https://yandex.ru/navi/org/adm_aster_changan/224804077608?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
+  </div>
 </div>
 
 <!-- PROFILE -->
@@ -374,10 +417,36 @@
   </button>
 </div>
 
+<!-- CALLBACK MODAL -->
+<div id="callback-modal" style="display:none;position:fixed;inset:0;background:#0008;z-index:100;align-items:flex-end;justify-content:center">
+  <div style="background:#fff;border-radius:20px 20px 0 0;padding:24px 20px;width:100%;max-width:500px">
+    <div style="font-size:16px;font-weight:700;margin-bottom:16px" id="cb-title">📞 Обратный звонок</div>
+    <div class="form-field">
+      <label class="form-label" id="cb-city-label">Филиал</label>
+      <select class="form-input" id="cb-city">
+        <option value="">Выберите филиал</option>
+        <option>Рохат (Ташкент)</option>
+        <option>Ахмад Дониш (Ташкент)</option>
+        <option>Самарканд</option>
+        <option>Бухара</option>
+        <option>Наманган</option>
+        <option>Навои</option>
+        <option>Карши</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label class="form-label" id="cb-comment-label">Суть обращения</label>
+      <input type="text" class="form-input" id="cb-comment" placeholder="Кратко опишите вопрос...">
+    </div>
+    <button class="btn btn-primary" onclick="submitCallback()" id="cb-submit-btn">Отправить заявку</button>
+    <button class="btn btn-secondary" onclick="document.getElementById('callback-modal').style.display='none'" id="cb-cancel-btn">Отмена</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-const SCRIPT_URL = "";
+const SCRIPT_URL = "ВСТАВЬ_URL_СЮДА"; // URL Google Apps Script
 const BRANDS_MODELS = {
   "Chevrolet": ["Cobalt","Equinox","Malibu","Spark","Tracker","Tahoe","Captiva","Lacetti","Nexia 3","Onix","Monza"],
   "Chery":     ["Tiggo 2","Tiggo 7","Tiggo 8","Arrizo 6","Arrizo 8"],
@@ -407,6 +476,158 @@ const tgUser = tg?.initDataUnsafe?.user;
 let profile = null; // { name, phone, tgId, cars: [{brand, model, vin}], activeCarIndex }
 let editingCarIndex = -1; // -1 = новая машина
 
+// ── ЯЗЫК ──────────────────────────────────────────────────
+const I18N = {
+  ru: {
+    home: "Главная", schedule: "Запись", history: "История",
+    contacts: "Филиалы", profile: "Профиль",
+    welcomeHi: "Добро пожаловать 👋",
+    quickBook: "Записаться на сервис", quickHistory: "История ремонта",
+    quickCall: "Обратный звонок", quickBranches: "Наши филиалы",
+    nearVisit: "Ближайший визит",
+    schedTitle: "Запись на сервис", schedCar: "Автомобиль",
+    schedBranch: "Филиал", schedDate: "Дата визита",
+    schedTime: "Время", schedReason: "Причина обращения",
+    schedReasonPH: "Опишите проблему или услугу",
+    schedBtn: "Записаться", schedNoCars: "Нет автомобилей — добавьте в профиле",
+    histTitle: "История ремонта", histEmpty: "История пуста",
+    histNoCar: "Добавьте автомобиль в профиле",
+    contactsTitle: "Наши филиалы", route: "Построить маршрут",
+    profileTitle: "Личные данные", profileCars: "Мои автомобили",
+    profileEdit: "✏️ Редактировать данные", profileAddCar: "+ Добавить авто",
+    profileName: "ФИО", profilePhone: "Телефон",
+    profileBrand: "Марка", profileModel: "Модель", profileVin: "VIN",
+    profileActive: "Активный", profileSelect: "Выбрать",
+    profileChange: "✏️ Изменить", profileDelete: "🗑 Удалить",
+    regTitle: "Регистрация",
+    regSub: "Заполните данные для доступа к личному кабинету",
+    regStep1: "Шаг 1 — Личные данные", regStep2: "Шаг 2 — Ваш автомобиль",
+    regBtn: "Зарегистрироваться",
+    fioLabel: "ФИО *", fioPH: "Иванов Иван Иванович", fioErr: "Введите ФИО",
+    phoneLabel: "Телефон *", phoneErr: "Введите полный номер телефона",
+    brandLabel: "Марка *", brandErr: "Выберите марку",
+    modelLabel: "Модель *", modelErr: "Выберите модель",
+    vinLabel: "VIN код * (17 символов, латиница)", vinErr: "VIN должен содержать ровно 17 символов",
+    vinDupErr: "Автомобиль с таким VIN уже добавлен",
+    carFormAdd: "Добавить автомобиль", carFormEdit: "Редактировать автомобиль",
+    save: "Сохранить", cancel: "Отмена", carAdded: "Автомобиль добавлен ✓",
+    carEdited: "Изменения сохранены ✓", carDeleted: "Автомобиль удалён",
+    carConfirmDelete: "Удалить этот автомобиль?",
+    personalSaved: "Данные сохранены ✓", welcome: "Добро пожаловать",
+    regWelcome: "Добро пожаловать!",
+    regWelcomeSub: "Зарегистрируйтесь чтобы получить доступ к истории обслуживания и онлайн-записи",
+    regBtn2: "Зарегистрироваться",
+    cbTitle: "📞 Обратный звонок", cbCity: "Филиал", cbCityReq: "Выберите филиал",
+    cbComment: "Суть обращения", cbCommentPH: "Кратко опишите вопрос...",
+    cbSubmit: "Отправить заявку", cbSent: "Заявка принята! Перезвоним в течение 30 минут 📞",
+    schedBooked: "Запись оформлена ✓", noCars: "Добавьте автомобиль в профиле",
+    callbackReq: "Сначала зарегистрируйтесь",
+    selectBranch: "Выберите филиал", selectTime: "Выберите время",
+    fillAll: "Заполните все поля",
+    firstChooseBrand: "Сначала выберите марку", firstChooseModel: "Сначала выберите модель",
+  },
+  uz: {
+    home: "Asosiy", schedule: "Yozuv", history: "Tarix",
+    contacts: "Filiallar", profile: "Profil",
+    welcomeHi: "Xush kelibsiz 👋",
+    quickBook: "Servisga yozilish", quickHistory: "Ta'mirlash tarixi",
+    quickCall: "Qayta qo'ng'iroq", quickBranches: "Bizning filiallar",
+    nearVisit: "Yaqin tashrif",
+    schedTitle: "Servisga yozilish", schedCar: "Avtomobil",
+    schedBranch: "Filial", schedDate: "Tashrif sanasi",
+    schedTime: "Vaqt", schedReason: "Murojaat sababi",
+    schedReasonPH: "Muammo yoki xizmatni tavsiflang",
+    schedBtn: "Yozilish", schedNoCars: "Avtomobil yo'q — profilga qo'shing",
+    histTitle: "Ta'mirlash tarixi", histEmpty: "Tarix bo'sh",
+    histNoCar: "Profilga avtomobil qo'shing",
+    contactsTitle: "Bizning filiallar", route: "Yo'nalish qurish",
+    profileTitle: "Shaxsiy ma'lumotlar", profileCars: "Mening avtomobillarim",
+    profileEdit: "✏️ Ma'lumotlarni tahrirlash", profileAddCar: "+ Avtomobil qo'shish",
+    profileName: "F.I.Sh.", profilePhone: "Telefon",
+    profileBrand: "Marka", profileModel: "Model", profileVin: "VIN",
+    profileActive: "Faol", profileSelect: "Tanlash",
+    profileChange: "✏️ O'zgartirish", profileDelete: "🗑 O'chirish",
+    regTitle: "Ro'yxatdan o'tish",
+    regSub: "Shaxsiy kabinetga kirish uchun ma'lumotlarni to'ldiring",
+    regStep1: "1-qadam — Shaxsiy ma'lumotlar", regStep2: "2-qadam — Avtomobilingiz",
+    regBtn: "Ro'yxatdan o'tish",
+    fioLabel: "F.I.Sh. *", fioPH: "Ivanov Ivan Ivanovich", fioErr: "F.I.Sh. kiriting",
+    phoneLabel: "Telefon *", phoneErr: "To'liq telefon raqamini kiriting",
+    brandLabel: "Marka *", brandErr: "Markani tanlang",
+    modelLabel: "Model *", modelErr: "Modelni tanlang",
+    vinLabel: "VIN kod * (17 ta belgi, lotin)", vinErr: "VIN 17 ta belgidan iborat bo'lishi kerak",
+    vinDupErr: "Bunday VIN bilan avtomobil allaqachon qo'shilgan",
+    carFormAdd: "Avtomobil qo'shish", carFormEdit: "Avtomobilni tahrirlash",
+    save: "Saqlash", cancel: "Bekor qilish", carAdded: "Avtomobil qo'shildi ✓",
+    carEdited: "O'zgarishlar saqlandi ✓", carDeleted: "Avtomobil o'chirildi",
+    carConfirmDelete: "Bu avtomobilni o'chirishni tasdiqlaysizmi?",
+    personalSaved: "Ma'lumotlar saqlandi ✓", welcome: "Xush kelibsiz",
+    regWelcome: "Xush kelibsiz!",
+    regWelcomeSub: "Ta'mirlash tarixi va onlayn yozuv uchun ro'yxatdan o'ting",
+    regBtn2: "Ro'yxatdan o'tish",
+    cbTitle: "📞 Qayta qo'ng'iroq", cbCity: "Filial", cbCityReq: "Filialni tanlang",
+    cbComment: "Murojaat mohiyati", cbCommentPH: "Savolingizni qisqacha tasvirlab bering...",
+    cbSubmit: "Ariza yuborish", cbSent: "Ariza qabul qilindi! 30 daqiqa ichida qo'ng'iroq qilamiz 📞",
+    schedBooked: "Yozuv rasmiylashtirildi ✓", noCars: "Profilga avtomobil qo'shing",
+    callbackReq: "Avval ro'yxatdan o'ting",
+    selectBranch: "Filialni tanlang", selectTime: "Vaqtni tanlang",
+    fillAll: "Barcha maydonlarni to'ldiring",
+    firstChooseBrand: "Avval markani tanlang", firstChooseModel: "Avval modelni tanlang",
+  }
+};
+
+let currentLang = localStorage.getItem("aster_lang") || "ru";
+
+function t(key) {
+  return I18N[currentLang][key] || I18N["ru"][key] || key;
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem("aster_lang", lang);
+  document.getElementById("lbtn-ru").classList.toggle("active", lang === "ru");
+  document.getElementById("lbtn-uz").classList.toggle("active", lang === "uz");
+  applyLang();
+}
+
+function applyLang() {
+  // Нижняя навигация
+  const navLabels = ["home","schedule","history","contacts","profile"];
+  navLabels.forEach(k => {
+    const el = document.querySelector(`#nav-${k}`);
+    if (el) el.childNodes[el.childNodes.length-1].textContent = t(k);
+  });
+  // Секции
+  safeText("contacts-title", t("contactsTitle"));
+  // Маршрут
+  document.querySelectorAll("[data-i='route']").forEach(el => el.textContent = t("route"));
+  // Callback modal
+  safeText("cb-title", t("cbTitle"));
+  safeAttr("cb-city", "data-placeholder", t("selectBranch"));
+  safeText("cb-city-label", t("cbCity"));
+  safeText("cb-comment-label", t("cbComment"));
+  safeAttr("cb-comment", "placeholder", t("cbCommentPH"));
+  safeText("cb-submit-btn", t("cbSubmit"));
+  safeText("cb-cancel-btn", t("cancel"));
+  // Профиль
+  safeText("p-name-label", t("profileName"));
+  safeText("p-phone-label", t("profilePhone"));
+  // Перерисовываем динамические секции
+  if (profile) {
+    renderCarsList();
+    renderCarSelector();
+  }
+}
+
+function safeText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+function safeAttr(id, attr, val) {
+  const el = document.getElementById(id);
+  if (el) el.setAttribute(attr === "data-placeholder" ? "placeholder" : attr, val);
+}
+
 // ── INIT ──────────────────────────────────────────────────
 window.onload = () => {
   if (tgUser) document.getElementById("header-user").textContent = tgUser.first_name;
@@ -416,6 +637,7 @@ window.onload = () => {
   tomorrow.setDate(tomorrow.getDate() + 1);
   document.getElementById("s-date").min = tomorrow.toISOString().split("T")[0];
   loadProfile();
+  applyLang();
 };
 
 // ── PROFILE LOAD ──────────────────────────────────────────
@@ -772,10 +994,21 @@ function onVinInput(input, counterId) {
 }
 
 // ── CALLBACK ──────────────────────────────────────────────
-async function requestCallback() {
+function requestCallback() {
   if (!profile) { showToast("Сначала зарегистрируйтесь"); goTo("profile"); return; }
-  if (SCRIPT_URL) await apiCall({ action: "callback", client: profile });
-  showToast("Заявка принята! Перезвоним в течение 30 минут 📞");
+  // Показываем модальное окно обратного звонка
+  document.getElementById("callback-modal").style.display = "flex";
+  document.getElementById("cb-city").value = "";
+  document.getElementById("cb-comment").value = "";
+}
+
+async function submitCallback() {
+  const city = document.getElementById("cb-city").value;
+  const comment = document.getElementById("cb-comment").value.trim();
+  if (!city) { showToast(t("cbCityReq")); return; }
+  document.getElementById("callback-modal").style.display = "none";
+  if (SCRIPT_URL) await apiCall({ action: "callback", client: { ...profile, city, comment } });
+  showToast("✓ " + t("cbSent"));
 }
 
 // ── HELPERS ───────────────────────────────────────────────
