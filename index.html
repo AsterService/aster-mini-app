@@ -684,6 +684,19 @@ function safeAttr(id, attr, val) {
   if (el) el.setAttribute(attr === "data-placeholder" ? "placeholder" : attr, val);
 }
 
+// ── DECODE QR PARAMS ──────────────────────────────────────
+function decodeStartParam() {
+  try {
+    const startParam = tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param ? tg.initDataUnsafe.start_param : "";
+    if (!startParam) return null;
+    const base64 = startParam.replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = decodeURIComponent(escape(atob(base64)));
+    const parts = decoded.split("|");
+    if (parts.length < 2) return null;
+    return { vin: parts[0]||"", name: parts[1]||"", brand: parts[2]||"", model: parts[3]||"", clientType: parts[4]||"existing" };
+  } catch(e) { return null; }
+}
+
 // ── INIT ──────────────────────────────────────────────────
 window.onload = () => {
   if (tgUser) document.getElementById("header-user").textContent = tgUser.first_name;
@@ -692,9 +705,87 @@ window.onload = () => {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   document.getElementById("s-date").min = tomorrow.toISOString().split("T")[0];
-  loadProfile();
+
+  const qrData = decodeStartParam();
+  if (qrData && qrData.vin) {
+    showQrConfirm(qrData);
+  } else {
+    loadProfile();
+  }
   applyLang();
 };
+
+// ── QR CONFIRM ────────────────────────────────────────────
+function showQrConfirm(qrData) {
+  const saved = localStorage.getItem("aster_profile_v2");
+  if (saved) {
+    profile = JSON.parse(saved);
+    if (!profile.cars) profile.cars = [];
+    const exists = profile.cars.find(function(c) { return c.vin === qrData.vin; });
+    if (!exists && qrData.vin && qrData.brand && qrData.model) {
+      profile.cars.push({ brand: qrData.brand, model: qrData.model, vin: qrData.vin });
+      profile.activeCarIndex = profile.cars.length - 1;
+      saveProfileLocal();
+      if (SCRIPT_URL && SCRIPT_URL !== "ВСТАВЬ_URL_СЮДА") {
+        apiCall({ action: "registerClient", client: profile });
+      }
+    }
+    showHome();
+    showToast("Данные из QR добавлены");
+    return;
+  }
+
+  document.getElementById("home-loading").style.display = "none";
+  document.getElementById("home-register").style.display = "none";
+
+  const safeName = (qrData.name || "").replace(/"/g, "");
+  const safeBrand = (qrData.brand || "").replace(/"/g, "");
+  const safeModel = (qrData.model || "").replace(/"/g, "");
+  const safeVin = (qrData.vin || "").replace(/"/g, "");
+  const safeType = (qrData.clientType || "existing").replace(/"/g, "");
+
+  document.getElementById("home-content").innerHTML =
+    "<div style='padding:20px'>" +
+    "<div style='text-align:center;margin-bottom:24px'>" +
+    "<div style='font-size:48px;margin-bottom:12px'>👋</div>" +
+    "<div style='font-size:20px;font-weight:700;margin-bottom:8px'>Добро пожаловать!</div>" +
+    "<div style='font-size:14px;color:#6B7280'>Проверьте данные и подтвердите регистрацию</div>" +
+    "</div>" +
+    "<div style='background:#F8FAFC;border-radius:14px;padding:16px;margin-bottom:20px'>" +
+    "<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F3F4F6;font-size:13px'><span style='color:#9CA3AF'>ФИО</span><span style='font-weight:600'>" + safeName + "</span></div>" +
+    "<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F3F4F6;font-size:13px'><span style='color:#9CA3AF'>Автомобиль</span><span style='font-weight:600'>" + safeBrand + " " + safeModel + "</span></div>" +
+    "<div style='display:flex;justify-content:space-between;padding:8px 0;font-size:13px'><span style='color:#9CA3AF'>VIN</span><span style='font-weight:600;font-family:monospace;font-size:11px'>" + safeVin + "</span></div>" +
+    "</div>" +
+    "<div style='margin-bottom:14px'>" +
+    "<label style='font-size:12px;color:#6B7280;font-weight:600;display:block;margin-bottom:6px'>Ваш телефон *</label>" +
+    "<input type='tel' id='qr-phone' placeholder='+998 90 000 00 00' style='width:100%;padding:12px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none' oninput='phoneMask(this)'>" +
+    "</div>" +
+    "<button onclick='confirmQrReg("" + safeVin + "","" + safeName + "","" + safeBrand + "","" + safeModel + "","" + safeType + "")' " +
+    "style='width:100%;padding:14px;background:#1B3A5C;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer'>" +
+    "✅ Подтвердить и зарегистрироваться</button>" +
+    "</div>";
+
+  document.getElementById("home-content").style.display = "block";
+}
+
+async function confirmQrReg(vin, name, brand, model, clientType) {
+  const phone = document.getElementById("qr-phone").value.trim();
+  if (!isPhoneComplete(phone)) { showToast("Введите полный номер телефона"); return; }
+  profile = {
+    name: name, phone: phone,
+    tgId: tgUser ? tgUser.id : "",
+    tgName: tgUser ? tgUser.first_name : "",
+    clientType: clientType || "existing",
+    cars: [{ brand: brand, model: model, vin: vin }],
+    activeCarIndex: 0
+  };
+  saveProfileLocal();
+  if (SCRIPT_URL && SCRIPT_URL !== "ВСТАВЬ_URL_СЮДА") {
+    await apiCall({ action: "registerClient", client: profile });
+  }
+  showToast("Регистрация завершена ✓");
+  showHome();
+}
 
 // ── PROFILE LOAD ──────────────────────────────────────────
 function loadProfile() {
@@ -776,7 +867,7 @@ function updateHistoryCarFilter() {
   sel.value = profile.activeCarIndex || 0;
 }
 
-function renderHistory() {
+async function renderHistory() {
   if (!profile) return;
   const sel = document.getElementById("history-car-filter");
   const carIdx = parseInt(sel.value) || 0;
@@ -784,32 +875,36 @@ function renderHistory() {
   const list = document.getElementById("history-list");
 
   if (!car) {
-    list.innerHTML = '<div class="empty-state"><div class="icon">🚗</div>Добавьте автомобиль в профиле</div>';
+    list.innerHTML = '<div class="empty-state"><div class="icon">🚗</div>' + t("histNoCar") + '</div>';
     return;
   }
 
-  // Демо-данные привязаны к VIN
-  const demoHistory = {
-    default: [
-      { doc: "ЗН-00004156", date: "22.06.2026", amount: "450 000", items: "Замена масла двигателя\nМасляный фильтр\nДиагностика ходовой" },
-      { doc: "ЗН-00003891", date: "15.04.2026", amount: "1 250 000", items: "Замена тормозных колодок\nРегулировка развал-схождения\nЗамена воздушного фильтра" },
-      { doc: "ЗН-00003102", date: "10.01.2026", amount: "320 000", items: "ТО плановое\nЗамена свечей зажигания" },
-    ]
-  };
+  // Показываем загрузку
+  list.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">Загрузка...</div></div>';
 
-  const history = demoHistory[car.vin] || demoHistory.default;
+  let history = [];
+
+  if (SCRIPT_URL && SCRIPT_URL !== "ВСТАВЬ_URL_СЮДА") {
+    const res = await apiCall({ action: "getHistory", phone: profile.phone, vin: car.vin });
+    history = res?.history || [];
+  }
+
+  if (!history.length) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">📋</div>' + t("histEmpty") + '</div>';
+    return;
+  }
 
   list.innerHTML = history.map((h, i) => `
     <div class="history-item" onclick="toggleHistory(${i})">
       <div class="history-top">
-        <span class="history-doc">${h.doc}</span>
-        <span class="history-amount">${h.amount} сум</span>
+        <span class="history-doc">${h.doc || ""}</span>
+        <span class="history-amount">${h.amount ? h.amount + " сум" : ""}</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px">
-        <span class="history-date">📅 ${h.date}</span>
+        <span class="history-date">📅 ${h.date || ""}</span>
         <span class="history-arrow" id="arr-${i}">▼</span>
       </div>
-      <div class="history-detail" id="det-${i}">${(h.items||"").split("\n").map(s=>"• "+s).join("<br>")}</div>
+      ${h.items ? '<div class="history-detail" id="det-'+i+'">'+h.items.split("\n").map(s=>"• "+s).join("<br>")+'</div>' : ''}
     </div>`).join("");
 }
 
@@ -1113,11 +1208,11 @@ function showToast(msg) {
 }
 
 async function apiCall(payload) {
-  if (!SCRIPT_URL) return null;
+  if (!SCRIPT_URL || SCRIPT_URL === "ВСТАВЬ_URL_СЮДА") return null;
   try {
     const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
     return await res.json();
-  } catch(e) { return null; }
+  } catch(e) { console.error("API error:", e); return null; }
 }
 </script>
 </body>
