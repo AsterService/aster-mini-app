@@ -795,20 +795,37 @@ function showQrConfirm(qrData) {
   });
   wrap.appendChild(info);
 
-  // Телефон
+  // Телефон — запрос через Telegram или ручной ввод
   const phoneWrap = document.createElement("div");
   phoneWrap.style.marginBottom = "14px";
   const phoneLabel = document.createElement("label");
   phoneLabel.style.cssText = "font-size:12px;color:#6B7280;font-weight:600;display:block;margin-bottom:6px";
   phoneLabel.textContent = "Ваш телефон *";
+  phoneWrap.appendChild(phoneLabel);
+
+  // Кнопка запроса телефона через Telegram
+  const tgPhoneBtn = document.createElement("button");
+  tgPhoneBtn.id = "tg-phone-btn";
+  tgPhoneBtn.style.cssText = "width:100%;padding:12px 14px;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;font-size:14px;font-family:inherit;color:#1D4ED8;font-weight:600;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px";
+  tgPhoneBtn.innerHTML = "📱 Поделиться номером из Telegram";
+  tgPhoneBtn.addEventListener("click", function() { requestTgPhone(); });
+  phoneWrap.appendChild(tgPhoneBtn);
+
+  // Поле ручного ввода
+  const phoneManualWrap = document.createElement("div");
+  phoneManualWrap.id = "phone-manual-wrap";
+  const phoneManualLabel = document.createElement("div");
+  phoneManualLabel.style.cssText = "font-size:11px;color:#9CA3AF;margin-bottom:6px;text-align:center";
+  phoneManualLabel.textContent = "или введите вручную";
   const phoneInput = document.createElement("input");
   phoneInput.type = "tel";
   phoneInput.id = "qr-phone";
   phoneInput.placeholder = "+998 90 000 00 00";
   phoneInput.style.cssText = "width:100%;padding:12px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none;box-sizing:border-box";
   phoneInput.addEventListener("input", function() { phoneMask(this); });
-  phoneWrap.appendChild(phoneLabel);
-  phoneWrap.appendChild(phoneInput);
+  phoneManualWrap.appendChild(phoneManualLabel);
+  phoneManualWrap.appendChild(phoneInput);
+  phoneWrap.appendChild(phoneManualWrap);
   wrap.appendChild(phoneWrap);
 
   // Кнопка
@@ -827,6 +844,40 @@ function showQrConfirm(qrData) {
   el.appendChild(wrap);
 }
 
+
+function requestTgPhone() {
+  // Запрашиваем номер через Telegram WebApp
+  if (tg && tg.requestContact) {
+    tg.requestContact(function(result) {
+      if (result && result.contact && result.contact.phone_number) {
+        let phone = result.contact.phone_number.replace(/\D/g, "");
+        if (phone.startsWith("998")) phone = phone.slice(3);
+        phone = phone.slice(-9);
+        // Форматируем
+        let formatted = "+998";
+        if (phone.length > 0) formatted += " " + phone.slice(0,2);
+        if (phone.length > 2) formatted += " " + phone.slice(2,5);
+        if (phone.length > 5) formatted += " " + phone.slice(5,7);
+        if (phone.length > 7) formatted += " " + phone.slice(7,9);
+        const phoneInput = document.getElementById("qr-phone");
+        if (phoneInput) phoneInput.value = formatted;
+        // Подсвечиваем кнопку как успешную
+        const btn = document.getElementById("tg-phone-btn");
+        if (btn) {
+          btn.style.background = "#ECFDF5";
+          btn.style.borderColor = "#6EE7B7";
+          btn.style.color = "#065F46";
+          btn.innerHTML = "✅ Номер получен: " + formatted;
+        }
+      }
+    });
+  } else {
+    // Если requestContact недоступен — скрываем кнопку
+    const btn = document.getElementById("tg-phone-btn");
+    if (btn) btn.style.display = "none";
+    showToast("Введите номер вручную");
+  }
+}
 
 async function confirmQrReg(vin, name, brand, model, clientType) {
   const phone = document.getElementById("qr-phone").value.trim();
