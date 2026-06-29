@@ -446,7 +446,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const SCRIPT_URL = "ВСТАВЬ_URL_СЮДА"; // URL Google Apps Script
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSRiKMcUsiRTe4gBm6tcV2ehtNTYfzj5y1K69YvwQEqGVuxGkmqDK9X2fOiaPW4IF4tw/exec"; // URL Google Apps Script
 const BRANDS_MODELS = {
   "Chevrolet": ["Cobalt","Equinox","Malibu","Spark","Tracker","Tahoe","Captiva","Lacetti","Nexia 3","Onix","Monza"],
   "Chery":     ["Tiggo 2","Tiggo 7","Tiggo 8","Arrizo 6","Arrizo 8"],
@@ -687,14 +687,32 @@ function safeAttr(id, attr, val) {
 // ── DECODE QR PARAMS ──────────────────────────────────────
 function decodeStartParam() {
   try {
-    const startParam = tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param ? tg.initDataUnsafe.start_param : "";
+    // Способ 1: параметр из Telegram WebApp (когда открыт через t.me/bot?start=)
+    let startParam = tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param
+      ? tg.initDataUnsafe.start_param : "";
+
+    // Способ 2: параметр из URL (когда открыт напрямую через ссылку)
+    if (!startParam) {
+      const urlParams = new URLSearchParams(window.location.search);
+      startParam = urlParams.get("tgWebAppStartParam") || urlParams.get("start") || "";
+    }
+
+    // Способ 3: из хэша URL
+    if (!startParam && window.location.hash) {
+      startParam = window.location.hash.replace("#", "");
+    }
+
     if (!startParam) return null;
+
     const base64 = startParam.replace(/-/g, "+").replace(/_/g, "/");
     const decoded = decodeURIComponent(escape(atob(base64)));
     const parts = decoded.split("|");
     if (parts.length < 2) return null;
     return { vin: parts[0]||"", name: parts[1]||"", brand: parts[2]||"", model: parts[3]||"", clientType: parts[4]||"existing" };
-  } catch(e) { return null; }
+  } catch(e) {
+    console.error("QR decode error:", e);
+    return null;
+  }
 }
 
 // ── INIT ──────────────────────────────────────────────────
@@ -1188,20 +1206,24 @@ function onVinInput(input, counterId) {
 
 // ── CALLBACK ──────────────────────────────────────────────
 function requestCallback() {
-  if (!profile) { showToast("Сначала зарегистрируйтесь"); goTo("profile"); return; }
-  // Показываем модальное окно обратного звонка
-  document.getElementById("callback-modal").style.display = "flex";
+  if (!profile) { showToast(t("callbackReq")); goTo("profile"); return; }
   document.getElementById("cb-city").value = "";
   document.getElementById("cb-comment").value = "";
+  document.getElementById("callback-modal").style.display = "flex";
 }
 
 async function submitCallback() {
   const city = document.getElementById("cb-city").value;
   const comment = document.getElementById("cb-comment").value.trim();
   if (!city) { showToast(t("cbCityReq")); return; }
+  const submitBtn = document.getElementById("cb-submit-btn");
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "..."; }
   document.getElementById("callback-modal").style.display = "none";
-  if (SCRIPT_URL) await apiCall({ action: "callback", client: { ...profile, city, comment } });
-  showToast("✓ " + t("cbSent"));
+  if (SCRIPT_URL && SCRIPT_URL !== "ВСТАВЬ_URL_СЮДА") {
+    await apiCall({ action: "callback", client: { ...profile, city, comment } });
+  }
+  if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = t("cbSubmit"); }
+  showToast(t("cbSent"));
 }
 
 // ── HELPERS ───────────────────────────────────────────────
