@@ -919,6 +919,7 @@ function saveProfileLocal() {
 
 // ── HOME ──────────────────────────────────────────────────
 function showHome() {
+  document.getElementById("home-loading").style.display = "none";
   document.getElementById("home-content").style.display = "block";
   document.getElementById("home-register").style.display = "none";
   document.getElementById("home-name").textContent = profile.name;
@@ -1271,10 +1272,12 @@ async function submitCallback() {
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "..."; }
   document.getElementById("callback-modal").style.display = "none";
   if (SCRIPT_URL && SCRIPT_URL !== "ВСТАВЬ_URL_СЮДА") {
-    await apiCall({ action: "callback", client: { ...profile, city, comment } });
+    apiCall({ action: "callback", client: { ...profile, city, comment } }); // не ждём
   }
   if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = t("cbSubmit"); }
   showToast(t("cbSent"));
+  // Возвращаемся на главную без перезагрузки
+  goTo("home");
 }
 
 // ── HELPERS ───────────────────────────────────────────────
