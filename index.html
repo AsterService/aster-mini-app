@@ -687,14 +687,14 @@ function safeAttr(id, attr, val) {
 // ── DECODE QR PARAMS ──────────────────────────────────────
 function decodeStartParam() {
   try {
-    // Способ 1: параметр из Telegram WebApp (когда открыт через t.me/bot?start=)
+    // Способ 1: startapp параметр (t.me/bot/app?startapp=...)
     let startParam = tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param
       ? tg.initDataUnsafe.start_param : "";
 
-    // Способ 2: параметр из URL (когда открыт напрямую через ссылку)
+    // Способ 2: параметр из URL
     if (!startParam) {
       const urlParams = new URLSearchParams(window.location.search);
-      startParam = urlParams.get("tgWebAppStartParam") || urlParams.get("start") || "";
+      startParam = urlParams.get("startapp") || urlParams.get("tgWebAppStartParam") || urlParams.get("start") || "";
     }
 
     // Способ 3: из хэша URL
