@@ -969,6 +969,21 @@ function goTo(page) {
   if (nav) nav.classList.add("active");
   if (page === "history") renderHistory();
   if (page === "profile") renderProfileView();
+  if (page === "schedule") {
+    // Обновляем минимальную дату каждый раз при открытии
+    const todayFresh = new Date();
+    const minDate = todayFresh.toISOString().split("T")[0];
+    const dateEl = document.getElementById("s-date");
+    if (dateEl) {
+      dateEl.min = minDate;
+      // Если выбранная дата стала прошедшей — сбрасываем
+      if (dateEl.value && dateEl.value < minDate) {
+        dateEl.value = "";
+        document.getElementById("s-time").value = "";
+      }
+    }
+    filterTimeSlots(dateEl ? dateEl.value : "");
+  }
   // При переходе на главную — убираем загрузку если профиль есть
   if (page === "home" && profile) {
     document.getElementById("home-loading").style.display = "none";
