@@ -720,9 +720,12 @@ window.onload = () => {
   if (tgUser) document.getElementById("header-user").textContent = tgUser.first_name;
   const timeSel = document.getElementById("s-time");
   TIME_SLOTS.forEach(t => timeSel.innerHTML += `<option>${t}</option>`);
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  document.getElementById("s-date").min = tomorrow.toISOString().split("T")[0];
+  // Минимальная дата — сегодня (не вчера и не раньше)
+  const today = new Date();
+  document.getElementById("s-date").min = today.toISOString().split("T")[0];
+  document.getElementById("s-date").addEventListener("change", function() {
+    filterTimeSlots(this.value);
+  });
 
   const qrData = decodeStartParam();
   if (qrData && qrData.vin) {
@@ -966,6 +969,12 @@ function goTo(page) {
   if (nav) nav.classList.add("active");
   if (page === "history") renderHistory();
   if (page === "profile") renderProfileView();
+  // При переходе на главную — убираем загрузку если профиль есть
+  if (page === "home" && profile) {
+    document.getElementById("home-loading").style.display = "none";
+    document.getElementById("home-content").style.display = "block";
+    document.getElementById("home-register").style.display = "none";
+  }
 }
 
 // ── HISTORY ───────────────────────────────────────────────
@@ -1048,6 +1057,10 @@ async function submitSchedule() {
   const time = document.getElementById("s-time").value;
   const reason = document.getElementById("s-reason").value.trim();
   if (!branch || !date || !time) { showToast(t("fillAll")); return; }
+  // Защита от двойного нажатия
+  const schedBtn = document.getElementById("s-submit-btn");
+  if (schedBtn && schedBtn.disabled) return;
+  if (schedBtn) { schedBtn.disabled = true; schedBtn.textContent = "..."; }
   const record = {
     operator: "Бот", station: branch,
     clientName: profile.name, phone: profile.phone,
@@ -1286,6 +1299,33 @@ function onFregBrandChange() {
   const sel = document.getElementById("freg-model");
   sel.innerHTML = '<option value="">Выберите модель</option>';
   if (brand && BRANDS_MODELS[brand]) BRANDS_MODELS[brand].forEach(m => sel.innerHTML += `<option>${m}</option>`);
+}
+
+function filterTimeSlots(selectedDate) {
+  const timeSel = document.getElementById("s-time");
+  const now = new Date();
+  const todayStr = now.toISOString().split("T")[0];
+  const currentHour = now.getHours();
+  const currentMin = now.getMinutes();
+
+  Array.from(timeSel.options).forEach(opt => {
+    if (!opt.value) return;
+    if (selectedDate === todayStr) {
+      const parts = opt.value.split(":");
+      const h = parseInt(parts[0]);
+      const m = parseInt(parts[1]);
+      // Скрываем прошедшее время + добавляем буфер 1 час
+      opt.disabled = (h * 60 + m) <= (currentHour * 60 + currentMin + 60);
+      opt.style.display = opt.disabled ? "none" : "";
+    } else {
+      opt.disabled = false;
+      opt.style.display = "";
+    }
+  });
+  // Сбрасываем выбранное время если оно стало недоступным
+  if (timeSel.options[timeSel.selectedIndex] && timeSel.options[timeSel.selectedIndex].disabled) {
+    timeSel.value = "";
+  }
 }
 
 function phoneMask(input) {
