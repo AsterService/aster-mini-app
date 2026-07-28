@@ -219,7 +219,7 @@
         placeholder="Опишите проблему или услугу"
         enterkeyhint="done"
         inputmode="text"
-        onfocus="setTimeout(function(){ document.getElementById('s-reason').scrollIntoView({behavior:'smooth', block:'center'}); }, 300)">
+        onfocus="setTimeout(function(){ document.getElementById('s-submit-btn').scrollIntoView({behavior:'smooth', block:'center'}); }, 300)" onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }">
     </div>
     <button class="btn btn-primary" id="s-submit-btn" onclick="submitSchedule()">Записаться</button>
   </div></div>
@@ -740,6 +740,7 @@ window.onload = () => {
   applyLang();
 };
 
+function restoreAppt() { const saved = localStorage.getItem("aster_appt"); if (!saved) return; try { const appt = JSON.parse(saved); const todayCheck = new Date(); todayCheck.setHours(0,0,0,0); const visitDate = new Date(appt.date); if (visitDate < todayCheck) { localStorage.removeItem("aster_appt"); return; } const dateStr = visitDate.toLocaleDateString("ru-RU", { day: "numeric", month: "long", weekday: "long" }); document.getElementById("home-appt").style.display = "block"; document.getElementById("appt-date").textContent = dateStr + " в " + appt.time; document.getElementById("appt-info").textContent = appt.branch + (appt.reason ? " • " + appt.reason : ""); } catch (e) {} } const _origShowHome = showHome; showHome = function() { _origShowHome(); restoreAppt(); };
 // ── QR CONFIRM ────────────────────────────────────────────
 function showQrConfirm(qrData) {
   const saved = localStorage.getItem("aster_profile_v2");
@@ -1097,7 +1098,7 @@ async function submitSchedule() {
   const dateStr = new Date(date).toLocaleDateString("ru-RU", { day: "numeric", month: "long", weekday: "long" });
   document.getElementById("home-appt").style.display = "block";
   document.getElementById("appt-date").textContent = dateStr + " в " + time;
-  document.getElementById("appt-info").textContent = branch + (reason ? " • " + reason : "");
+  document.getElementById("appt-info").textContent = branch + (reason ? " • " + reason : ""); localStorage.setItem("aster_appt", JSON.stringify({ date, time, branch, reason }));
   showToast(t("schedBooked"));
   document.getElementById("s-branch").value = "";
   document.getElementById("s-date").value = "";
