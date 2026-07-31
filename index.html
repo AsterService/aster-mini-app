@@ -120,7 +120,7 @@
   .register-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
   .register-sub { font-size: 14px; color: #6B7280; margin-bottom: 30px; line-height: 1.5; }
 
-  .toast { position: fixed; top: 80px; left: 20px; right: 20px; background: #0F172A; color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 14px; text-align: center; z-index: 100; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .toast { position: fixed; top: 80px; left: 20px; right: 20px; background: #1E293B; color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 14px; text-align: center; z-index: 100; opacity: 0; transition: opacity 0.3s; pointer-events: none; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
   .toast.show { opacity: 1; }
 
   .vin-counter { font-size: 11px; color: #9CA3AF; text-align: right; margin-top: 4px; }
@@ -219,7 +219,7 @@
         placeholder="Опишите проблему или услугу"
         enterkeyhint="done"
         inputmode="text"
-        onfocus="setTimeout(function(){ document.getElementById('s-submit-btn').scrollIntoView({behavior:'smooth', block:'center'}); }, 300)" onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }">
+        onfocus="setTimeout(function(){ document.getElementById('s-reason').scrollIntoView({behavior:'smooth', block:'nearest'}); }, 300)" onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }">
     </div>
     <button class="btn btn-primary" id="s-submit-btn" onclick="submitSchedule()">Записаться</button>
   </div></div>
@@ -523,7 +523,7 @@ const I18N = {
     regBtn2: "Зарегистрироваться",
     cbTitle: "📞 Обратный звонок", cbCity: "Филиал", cbCityReq: "Выберите филиал",
     cbComment: "Суть обращения", cbCommentPH: "Кратко опишите вопрос...",
-    cbSubmit: "Отправить заявку", cbSent: "Заявка принята! Перезвоним в течение 30 минут 📞",
+    cbSubmit: "Отправить заявку", cbSent: "Заявка принята! Перезвоним в течение 30 минут 📞", cbSentAfterHours: "Заявка принята! Мы перезвоним Вам в рабочее время Сервисного центра 📞",
     schedBooked: "Запись оформлена ✓", noCars: "Добавьте автомобиль в профиле",
     callbackReq: "Сначала зарегистрируйтесь",
     selectBranch: "Выберите филиал", selectTime: "Выберите время",
@@ -571,7 +571,7 @@ const I18N = {
     regBtn2: "Ro'yxatdan o'tish",
     cbTitle: "📞 Qayta qo'ng'iroq", cbCity: "Filial", cbCityReq: "Filialni tanlang",
     cbComment: "Murojaat mohiyati", cbCommentPH: "Savolingizni qisqacha tasvirlab bering...",
-    cbSubmit: "Ariza yuborish", cbSent: "Ariza qabul qilindi! 30 daqiqa ichida qo'ng'iroq qilamiz 📞",
+    cbSubmit: "Ariza yuborish", cbSent: "Ariza qabul qilindi! 30 daqiqa ichida qo'ng'iroq qilamiz 📞", cbSentAfterHours: "Ariza qabul qilindi! Xizmat markazi ish vaqtida qo'ng'iroq qilamiz 📞",
     schedBooked: "Yozuv rasmiylashtirildi ✓", noCars: "Profilga avtomobil qo'shing",
     callbackReq: "Avval ro'yxatdan o'ting",
     selectBranch: "Filialni tanlang", selectTime: "Vaqtni tanlang",
@@ -1313,7 +1313,7 @@ async function submitCallback() {
     apiCall({ action: "callback", client: { ...profile, city, comment } }); // не ждём
   }
   if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = t("cbSubmit"); }
-  showToast(t("cbSent"));
+  const _cbNow = new Date(); const _cbMin = _cbNow.getHours()*60 + _cbNow.getMinutes(); const _cbWorking = _cbMin >= 510 && _cbMin < 1200; showToast(_cbWorking ? t("cbSent") : t("cbSentAfterHours"));
   // Возвращаемся на главную без перезагрузки
   goTo("home");
 }
