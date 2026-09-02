@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aster Service — Планировщик (Оператор)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F8FAFC; color: #111827; min-height: 100vh; }
+
+  .header { background: #0F172A; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; }
+  .header-logo { display: flex; align-items: center; gap: 10px; }
+  .header-logo-icon { width: 28px; height: 28px; background: #3B82F6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .header-logo-name { color: #F8FAFC; font-weight: 700; font-size: 15px; }
+  .header-logo-sub { color: #475569; font-size: 12px; margin-left: 4px; }
+  .header-tabs { display: flex; gap: 2px; }
+  .tab-btn { background: transparent; color: #94A3B8; border: none; border-radius: 6px; padding: 6px 14px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; white-space: nowrap; }
+  .tab-btn.active { background: #1E293B; color: #F8FAFC; }
+
+  .setup-banner { background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; }
+  .setup-banner h3 { font-size: 14px; font-weight: 700; color: #92400E; margin-bottom: 8px; }
+  .setup-banner p { font-size: 13px; color: #78350F; line-height: 1.5; }
+  .setup-input-row { display: flex; gap: 10px; margin-top: 12px; }
+  .setup-input-row input { flex: 1; padding: 8px 12px; border: 1.5px solid #FCD34D; border-radius: 8px; font-size: 13px; background: #fff; outline: none; }
+
+  .main { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
+
+  .btn-primary { background: #3B82F6; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; cursor: pointer; font-weight: 600; font-size: 13px; white-space: nowrap; }
+  .btn-primary:hover { background: #2563EB; }
+  .btn-primary:disabled { background: #93C5FD; cursor: not-allowed; }
+  .btn-secondary { background: #fff; color: #374151; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 9px 18px; cursor: pointer; font-weight: 500; font-size: 13px; white-space: nowrap; }
+  .btn-secondary:hover { background: #F9FAFB; }
+  .btn-success { background: #10B981; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer; font-weight: 600; font-size: 13px; }
+  .btn-branch { background: #fff; color: #374151; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 7px 14px; cursor: pointer; font-weight: 500; font-size: 13px; white-space: nowrap; transition: all 0.15s; }
+  .btn-branch:hover { background: #F0F9FF; border-color: #BAE6FD; }
+  .btn-branch.active { background: #EFF6FF; border-color: #3B82F6; color: #3B82F6; font-weight: 700; }
+
+  input, select { width: 100%; padding: 9px 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; font-size: 14px; background: #fff; color: #111827; outline: none; font-family: inherit; }
+  input:focus, select:focus { border-color: #3B82F6; }
+  input.error, select.error { border-color: #EF4444; }
+  .field-error { font-size: 11px; color: #EF4444; margin-top: 3px; display: none; }
+  .field-error.show { display: block; }
+
+  .badge { border-radius: 6px; padding: 2px 10px; font-size: 12px; font-weight: 600; white-space: nowrap; border: 1px solid transparent; display: inline-block; }
+  .badge-Записан { background: #EFF6FF; color: #3B82F6; border-color: #BFDBFE; }
+  .badge-Приехал { background: #ECFDF5; color: #10B981; border-color: #A7F3D0; }
+  .badge-Не-приехал { background: #FEF2F2; color: #EF4444; border-color: #FECACA; }
+  .badge-Перенесён { background: #FFFBEB; color: #F59E0B; border-color: #FDE68A; }
+
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .top-bar h1 { font-size: 20px; font-weight: 700; }
+  .top-bar p { font-size: 13px; color: #6B7280; margin-top: 2px; }
+  .top-bar-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  .sync-indicator { font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 5px; }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #10B981; display: inline-block; }
+  .sync-dot.syncing { background: #F59E0B; animation: pulse 1s infinite; }
+  .sync-dot.error { background: #EF4444; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .alert { background: #ECFDF5; border: 1px solid #6EE7B7; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .alert span { font-size: 13px; color: #065F46; font-weight: 500; }
+  .alert-close { background: none; border: none; color: #6EE7B7; cursor: pointer; font-size: 20px; }
+  .alert-error { background: #FEF2F2; border-color: #FECACA; }
+  .alert-error span { color: #991B1B; }
+
+  .form-panel { background: #fff; border: 1px solid #E5E7EB; border-radius: 14px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 24px #0000000A; }
+  .form-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .form-panel-header h2 { font-size: 16px; font-weight: 700; }
+  .form-close { background: none; border: none; font-size: 22px; cursor: pointer; color: #9CA3AF; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-field { display: flex; flex-direction: column; gap: 4px; }
+  .form-actions { margin-top: 16px; display: flex; gap: 10px; justify-content: flex-end; }
+
+  .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filters select, .filters input[type=date] { max-width: 180px; font-size: 13px; }
+
+  .table-wrap { background: #fff; border-radius: 12px; border: 1px solid #E5E7EB; overflow: hidden; }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: #F9FAFB; border-bottom: 1px solid #E5E7EB; }
+  th { padding: 10px 14px; text-align: left; font-weight: 600; color: #6B7280; white-space: nowrap; font-size: 12px; }
+  tbody tr { border-bottom: 1px solid #F3F4F6; }
+  tbody tr:nth-child(even) { background: #FAFAFA; }
+  td { padding: 10px 14px; vertical-align: middle; }
+  td.mono { font-family: monospace; font-size: 12px; }
+  td.muted { color: #6B7280; }
+  td.bold { font-weight: 600; }
+  .status-cell { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .status-select { border: none !important; background: transparent !important; cursor: pointer; font-size: 12px; padding: 2px 4px !important; width: auto !important; }
+  .empty-row td { padding: 40px; text-align: center; color: #9CA3AF; }
+
+  .skeleton { background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 6px; height: 16px; }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  .hint { margin-top: 14px; padding: 10px 16px; background: #F0F9FF; border: 1px solid #BAE6FD; border-radius: 8px; font-size: 12px; color: #0369A1; }
+  .hint code { background: #E0F2FE; border-radius: 4px; padding: 1px 5px; font-size: 11px; }
+
+  /* DASHBOARD */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 28px; }
+  .kpi-card { background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px 18px; }
+  .kpi-icon { font-size: 20px; margin-bottom: 6px; }
+  .kpi-value { font-size: 26px; font-weight: 800; }
+  .kpi-label { font-size: 12px; color: #6B7280; margin-top: 2px; }
+  .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .analytics-card { background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px 24px; }
+  .analytics-card.full { grid-column: 1 / -1; }
+  .analytics-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 20px; color: #374151; }
+  .funnel-item { margin-bottom: 16px; }
+  .funnel-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .funnel-label { font-size: 13px; color: #6B7280; font-weight: 500; }
+  .funnel-val { font-size: 15px; font-weight: 700; color: #111827; }
+  .funnel-track { height: 10px; background: #F3F4F6; border-radius: 99px; overflow: hidden; }
+  .funnel-bar { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+  .funnel-pct { font-size: 11px; color: #9CA3AF; margin-top: 3px; }
+  .op-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .op-table th { text-align: left; padding: 6px 0; color: #9CA3AF; font-size: 11px; font-weight: 600; border-bottom: 1px solid #F3F4F6; }
+  .op-table th:not(:first-child) { text-align: right; }
+  .op-table td { padding: 10px 0; border-bottom: 1px solid #F9FAFB; }
+  .op-table td:not(:first-child) { text-align: right; }
+  .op-table td:first-child { font-weight: 600; }
+  .conv-badge { border-radius: 6px; padding: 2px 8px; font-weight: 700; font-size: 12px; }
+  .conv-good { background: #ECFDF5; color: #065F46; }
+  .conv-bad { background: #FEF2F2; color: #991B1B; }
+  .station-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .station-card { border: 1px solid #F3F4F6; border-radius: 10px; padding: 14px 16px; }
+  .station-name { font-size: 12px; color: #6B7280; margin-bottom: 8px; font-weight: 500; }
+  .station-row { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: flex-end; }
+  .station-total { font-size: 22px; font-weight: 800; color: #111827; }
+  .station-arrived { font-size: 14px; font-weight: 700; color: #10B981; }
+  .station-track { height: 6px; background: #F3F4F6; border-radius: 99px; overflow: hidden; }
+  .station-bar { height: 100%; background: #3B82F6; border-radius: 99px; }
+  .station-pct { font-size: 11px; color: #9CA3AF; margin-top: 4px; }
+
+  /* SCHEDULE */
+  .branch-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .schedule-date-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+  .schedule-date-bar label { font-size: 13px; color: #6B7280; font-weight: 500; }
+  .schedule-date-bar input[type=date] { width: auto; max-width: 160px; font-size: 13px; padding: 7px 10px; }
+  .schedule-wrap { background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; overflow: hidden; }
+  .schedule-scroll { overflow-x: hidden; }
+  .schedule-table { border-collapse: collapse; font-size: 11px; width: 100%; table-layout: fixed; }
+  .schedule-table th { background: #F9FAFB; padding: 4px 2px; text-align: center; font-weight: 600; color: #6B7280; border: 1px solid #E5E7EB; white-space: nowrap; font-size: 10px; position: sticky; top: 0; z-index: 2; overflow: hidden; }
+  .schedule-table th.master-col { text-align: left; width: 110px; min-width: 110px; position: sticky; left: 0; z-index: 3; background: #F9FAFB; padding: 4px 8px; }
+  .schedule-table td { border: 1px solid #F3F4F6; padding: 0; height: 36px; vertical-align: middle; text-align: center; cursor: pointer; transition: background 0.1s; overflow: hidden; }
+  .schedule-table td:hover { background: #F0F9FF !important; }
+  .schedule-table td.master-name { background: #FAFAFA; padding: 4px 8px; font-weight: 600; font-size: 11px; color: #374151; text-align: left; cursor: default; position: sticky; left: 0; z-index: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 110px; min-width: 110px; max-width: 110px; height: 36px; }
+  .schedule-table td.master-name:hover { background: #FAFAFA !important; }
+  .schedule-table td.booked { background: #DBEAFE; cursor: pointer; }
+  .schedule-table td.booked:hover { background: #BFDBFE !important; }
+  .cell-content { font-size: 9px; color: #1D4ED8; font-weight: 600; padding: 1px 2px; line-height: 1.2; overflow: hidden; }
+  .schedule-empty { padding: 40px; text-align: center; color: #9CA3AF; font-size: 14px; }
+  .schedule-legend { display: flex; gap: 16px; margin-top: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6B7280; }
+  .legend-dot { width: 14px; height: 14px; border-radius: 3px; }
+
+  /* BOOKING MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: #0005; display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { background: #fff; border-radius: 14px; padding: 24px; width: 380px; max-width: 95vw; box-shadow: 0 20px 60px #0002; }
+  .modal h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .modal-sub { font-size: 12px; color: #6B7280; margin-bottom: 18px; }
+  .modal-info { background: #F8FAFC; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; }
+  .modal-info div { margin-bottom: 4px; }
+  .modal-info span { color: #6B7280; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+
+  .lang-btn.active { background: #3B82F6 !important; color: #fff !important; }
+  @media (max-width: 700px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .analytics-grid { grid-template-columns: 1fr; }
+    .analytics-card.full { grid-column: 1; }
+    .header-logo-sub { display: none; }
+    .setup-input-row { flex-direction: column; }
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">
+    <div class="header-logo-icon" style="background:#1B3A5C;padding:3px">
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+</div>
+    <span class="header-logo-name" style="color:#4A9FBF">Aster</span><span class="header-logo-name" style="color:#fff;font-weight:400"> Service</span>
+    <span id="app-sub" class="header-logo-sub">• Планировщик загрузки</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="display:flex;background:#1E293B;border-radius:8px;padding:2px;gap:1px">
+      <button class="lang-btn active" data-lang="ru" onclick="switchLang('ru')" style="background:transparent;color:#94A3B8;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:600;transition:all 0.15s">RU</button>
+      <button class="lang-btn" data-lang="uz" onclick="switchLang('uz')" style="background:transparent;color:#94A3B8;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:600;transition:all 0.15s">UZ</button>
+    </div>
+    <div class="header-tabs">
+      <button class="tab-btn active" onclick="switchTab('registry')" id="tab-registry">Реестр</button>
+      <button class="tab-btn" onclick="switchTab('schedule')" id="tab-schedule">График загрузки</button>
+      
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- SETUP BANNER -->
+  <div class="setup-banner" id="setup-banner">
+    <h3>⚙️ Подключение к Google Sheets</h3>
+    <p>Вставьте URL вашего Google Apps Script. Это нужно сделать один раз на каждом компьютере.</p>
+    <div class="setup-input-row">
+      <input type="text" id="script-url-input" placeholder="https://script.google.com/macros/s/ВАШ_ID/exec">
+      <button class="btn-success" onclick="saveScriptUrl()">Подключить</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ REGISTRY ══ -->
+  <div id="page-registry">
+    <div class="top-bar">
+      <div>
+        <h1 id="registry-title">Реестр записей</h1>
+        <p id="record-count">Загрузка...</p>
+      </div>
+      <div class="top-bar-actions">
+        <div class="sync-indicator">
+          <span class="sync-dot" id="sync-dot"></span>
+          <span id="sync-label">Подключение...</span>
+        </div>
+        <button class="btn-secondary" id="btn-refresh" onclick="loadRecords()">↻ Обновить</button>
+        
+        <button class="btn-primary" id="btn-new" onclick="showForm()">+ Новая запись</button>
+      </div>
+    </div>
+
+    <div id="alert-box" style="display:none" class="alert">
+      <span id="alert-msg"></span>
+      <button class="alert-close" onclick="document.getElementById('alert-box').style.display='none'">×</button>
+    </div>
+
+    <!-- FORM -->
+    <div id="form-panel" class="form-panel" style="display:none">
+      <div class="form-panel-header">
+        <h2 id="form-title">Новая запись клиента</h2>
+        <button class="form-close" onclick="hideForm()">×</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-field">
+          <select id="f-operator" class="f-required"><option value="">Оператор</option></select>
+          <div class="field-error" id="err-operator">Обязательное поле</div>
+        </div>
+        <div class="form-field">
+          <select id="f-station" class="f-required" onchange="onStationChange()"><option value="">Филиал</option></select>
+          <div class="field-error" id="err-station">Обязательное поле</div>
+        </div>
+        <div class="form-field">
+          <input type="text" id="f-clientName" placeholder="ФИО клиента" class="f-required">
+          <div class="field-error" id="err-clientName">Обязательное поле</div>
+        </div>
+        <div class="form-field">
+          <input type="tel" id="f-phone" placeholder="+998 00 000 00 00" class="f-required" oninput="phoneMask(this)">
+          <div class="field-error" id="err-phone">Обязательное поле</div>
+        </div>
+        <div class="form-field">
+          <select id="f-brand" class="f-required" onchange="onBrandChange('f-model')">
+            <option value="">Марка</option>
+          </select>
+          <div class="field-error" id="err-brand">Обязательное поле</div>
+        </div>
+        <div class="form-field">
+          <select id="f-model" class="f-required">
+            <option value="">Модель</option>
+          </select>
+          <div class="field-error" id="err-model">Обязательное поле</div>
+        </div>
+        <div class="form-field">
+          <input type="date" id="f-visitDate" class="f-required" onchange="onVisitDateChange()">
+          <div class="field-error" id="err-visitDate">Обязательное поле</div>
+        </div>
+        <div class="form-field">
+          <select id="f-master" class="f-required">
+            <option value="">Мастер-консультант</option>
+          </select>
+          <div class="field-error" id="err-master">Обязательное поле</div>
+        </div>
+        <div class="form-field">
+          <select id="f-time" class="f-required">
+            <option value="">Время визита</option>
+          </select>
+          <div class="field-error" id="err-time">Обязательное поле</div>
+        </div>
+        <div class="form-field" style="grid-column: 1 / -1; position:relative">
+          <input type="text" id="f-vin" placeholder="VIN (необязательно — 6+ символов для автоподстановки)" 
+            style="font-family:monospace;text-transform:uppercase;letter-spacing:1px;padding-right:36px"
+            maxlength="17" oninput="onFormVinInput(this)">
+          <span id="f-vin-status" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:16px"></span>
+        </div>
+        <div class="form-field" style="grid-column: 1 / -1">
+          <input type="text" id="f-reason" placeholder="Причина обращения">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-secondary" id="btn-cancel-form" onclick="hideForm()">Отмена</button>
+        <button class="btn-primary" id="submit-btn" onclick="submitForm()">Сохранить запись</button>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters">
+      <select id="fil-operator" onchange="renderTable()"><option value="">Все операторы</option></select>
+      <select id="fil-station" onchange="renderTable()"><option value="">Все филиалы</option></select>
+      <select id="fil-status" onchange="renderTable()">
+        <option value="">Все статусы</option>
+        <option>Записан</option><option>Приехал</option><option>Не приехал</option><option>Перенесён</option>
+      </select>
+      <input type="date" id="fil-date" onchange="renderTable()" style="max-width:160px;font-size:13px">
+      <button class="btn-secondary" id="btn-reset-filter" onclick="clearFilters()" style="font-size:12px;padding:6px 12px">Сбросить</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead id="registry-thead">
+            <tr>
+              <th>Дата записи</th><th>Оператор</th><th>Филиал</th><th>Клиент</th>
+              <th>Телефон</th><th>VIN</th><th>Марка/Модель</th><th>Дата визита</th><th>Время</th><th>Мастер</th><th>Причина</th><th>Статус</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr><td colspan="11" style="padding:30px;text-align:center">
+              <div style="display:flex;flex-direction:column;gap:10px;max-width:400px;margin:0 auto">
+                <div class="skeleton"></div><div class="skeleton" style="width:80%"></div><div class="skeleton" style="width:90%"></div>
+              </div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- ═══════════════════════════════════════════ SCHEDULE ══ -->
+  <div id="page-schedule" style="display:none">
+    <div class="top-bar">
+      <div>
+        <h1 id="sched-title">График загрузки</h1>
+        <p id="sched-sub">Расписание мастеров-консультантов по филиалам</p>
+      </div>
+      <div class="top-bar-actions">
+        <button class="btn-secondary" id="sched-refresh-btn" onclick="scheduleRefresh()">↻ Обновить</button>
+      </div>
+    </div>
+
+    <div class="branch-selector" id="branch-selector"></div>
+
+    <div class="schedule-date-bar">
+      <label id="sched-date-label">Дата:</label>
+      <input type="date" id="sch-date" onchange="renderSchedule()">
+    </div>
+
+    <div class="schedule-wrap">
+      <div class="schedule-scroll">
+        <div id="schedule-content">
+          <div class="schedule-empty">Выберите филиал выше</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="schedule-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#DBEAFE;border:1px solid #93C5FD"></div><span> Записан клиент</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#F3F4F6;border:1px solid #E5E7EB"></div><span> Свободно</span></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ DASHBOARD ══ -->
+  <div id="page-dashboard" style="display:none">
+    <h1 style="font-size:20px;font-weight:700;margin-bottom:20px">Аналитика воронки</h1>
+    <div class="kpi-grid" id="kpi-grid"></div>
+    <div class="analytics-grid">
+      <div class="analytics-card"><h3>Воронка</h3><div id="funnel-bars"></div></div>
+      <div class="analytics-card">
+        <h3>Операторы</h3>
+        <table class="op-table">
+          <thead><tr><th>Оператор</th><th>Записей</th><th>Приехали</th><th>Конверсия</th></tr></thead>
+          <tbody id="op-table-body"></tbody>
+        </table>
+      </div>
+      <div class="analytics-card full"><h3>По филиалам</h3><div class="station-grid" id="station-grid"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="booking-modal" style="display:none" onclick="closeModal(event)">
+  <div class="modal">
+    <h3 id="modal-title">Записать клиента</h3>
+    <div class="modal-sub" id="modal-sub"></div>
+    <div class="modal-info" id="modal-info"></div>
+    <div class="form-field" style="margin-bottom:10px">
+      <label id="modal-fio-label" style="font-size:12px;color:#6B7280;margin-bottom:4px;display:block">ФИО клиента</label>
+      <input type="text" id="modal-client" placeholder="Иванов Иван Иванович">
+    </div>
+    <div class="form-field" style="margin-bottom:10px">
+      <label id="modal-phone-label" style="font-size:12px;color:#6B7280;margin-bottom:4px;display:block">Телефон</label>
+      <input type="tel" id="modal-phone" placeholder="+998 00 000 00 00" oninput="phoneMask(this)">
+    </div>
+    <div class="form-field" style="margin-bottom:10px;position:relative">
+      <label style="font-size:12px;color:#6B7280;margin-bottom:4px;display:block">VIN (необязательно)</label>
+      <input type="text" id="modal-vin" placeholder="17 символов" maxlength="17"
+        style="font-family:monospace;text-transform:uppercase;letter-spacing:1px;padding-right:36px"
+        oninput="onModalVinInput(this)">
+      <span id="modal-vin-status" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:16px"></span>
+    </div>
+    <div class="form-field" style="margin-bottom:10px">
+      <label id="modal-brand-label" style="font-size:12px;color:#6B7280;margin-bottom:4px;display:block">Марка</label>
+      <select id="modal-brand" onchange="onBrandChange('modal-model')"><option value="">Марка</option></select>
+    </div>
+    <div class="form-field" style="margin-bottom:10px">
+      <label id="modal-model-label" style="font-size:12px;color:#6B7280;margin-bottom:4px;display:block">Модель</label>
+      <select id="modal-model"><option value="">Модель</option></select>
+    </div>
+    <div class="form-field" style="margin-bottom:10px">
+      <label id="modal-reason-label" style="font-size:12px;color:#6B7280;margin-bottom:4px;display:block">Причина обращения</label>
+      <input type="text" id="modal-reason" placeholder="Опишите проблему или услугу">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="document.getElementById('booking-modal').style.display='none'">Отмена</button>
+      <button class="btn-primary" id="modal-book-btn" onclick="bookFromModal()">Записать</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── ЯЗЫК ──────────────────────────────────────────────────
+const LANGS = {
+  ru: {
+    appSub: "• Планировщик загрузки",
+    tabRegistry: "Реестр",
+    tabSchedule: "График загрузки",
+    tabDashboard: "Аналитика",
+    registryTitle: "Реестр записей",
+    btnRefresh: "↻ Обновить",
+    btn1C: "↑ Загрузить из 1С",
+    btnNew: "+ Новая запись",
+    synced: "Синхронизировано",
+    syncing: "Синхронизация...",
+    connError: "Ошибка связи",
+    noRecords: "Записей не найдено",
+    filterAllOp: "Все операторы",
+    filterAllBranch: "Все филиалы",
+    filterAllStatus: "Все статусы",
+    btnReset: "Сбросить",
+    formTitle: "Новая запись клиента",
+    fOperator: "Оператор",
+    fBranch: "Филиал",
+    fClient: "ФИО клиента",
+    fPhone: "Телефон (+998...)",
+    fBrand: "Марка",
+    fModel: "Модель",
+    fVin: "VIN (необязательно)",
+    fMaster: "Мастер-консультант",
+    fTime: "Время визита",
+    fReason: "Причина обращения",
+    btnCancel: "Отмена",
+    btnSave: "Сохранить запись",
+    colDate: "Дата записи", colOp: "Оператор", colBranch: "Филиал",
+    colClient: "Клиент", colPhone: "Телефон", colVin: "VIN", colCar: "Марка/Модель",
+    colVisit: "Дата визита", colTime: "Время", colMaster: "Мастер",
+    colReason: "Причина", colStatus: "Статус",
+    statBooked: "Записан", statArrived: "Приехал",
+    statMissed: "Не приехал", statPostponed: "Перенесён",
+    schedTitle: "График загрузки",
+    schedSub: "Расписание мастеров-консультантов по филиалам",
+    schedDate: "Дата:",
+    schedMaster: "Мастер-консультант",
+    legendBooked: "Записан клиент",
+    legendFree: "Свободно",
+    legendPast: "Прошедшее время",
+    modalBook: "Записать клиента",
+    modalInfo: "Информация о записи",
+    modalFio: "ФИО клиента",
+    modalPhone: "Телефон",
+    modalBrand: "Марка",
+    modalModel: "Модель",
+    modalReason: "Причина обращения",
+    modalReasonPH: "Опишите проблему или услугу",
+    modalBtnBook: "Записать",
+    setupTitle: "⚙️ Подключение к Google Sheets",
+    setupDesc: "Вставьте URL вашего Google Apps Script. Это нужно сделать один раз на каждом компьютере.",
+    setupBtn: "Подключить",
+    reqField: "Обязательное поле",
+    phoneFull: "Введите полный номер (+998 XX XXX XX XX)",
+    savedOk: "Запись сохранена ✓",
+    bookedOk: "Клиент записан ✓",
+    noMasters: "Нет мастеров для этого филиала. Добавьте их в лист «Мастера» в Google Sheets.",
+    hintTitle: "Формат файла из 1С:",
+    hintText: "CSV с колонками phone,visitDate. Первая строка — заголовок.",
+  },
+  uz: {
+    appSub: "• Yuklanish rejasi",
+    tabRegistry: "Ro'yxat",
+    tabSchedule: "Yuklanish jadvali",
+    tabDashboard: "Tahlil",
+    registryTitle: "Yozuvlar ro'yxati",
+    btnRefresh: "↻ Yangilash",
+    btn1C: "↑ 1C dan yuklash",
+    btnNew: "+ Yangi yozuv",
+    synced: "Sinxronlashtirildi",
+    syncing: "Sinxronlash...",
+    connError: "Aloqa xatosi",
+    noRecords: "Yozuvlar topilmadi",
+    filterAllOp: "Barcha operatorlar",
+    filterAllBranch: "Barcha filiallar",
+    filterAllStatus: "Barcha statuslar",
+    btnReset: "Tozalash",
+    formTitle: "Yangi mijoz yozuvi",
+    fOperator: "Operator",
+    fBranch: "Filial",
+    fClient: "Mijoz F.I.Sh.",
+    fPhone: "Telefon (+998...)",
+    fBrand: "Marka",
+    fModel: "Model",
+    fVin: "VIN (ixtiyoriy)",
+    fMaster: "Usta-maslahatchi",
+    fTime: "Tashrif vaqti",
+    fReason: "Murojaat sababi",
+    btnCancel: "Bekor qilish",
+    btnSave: "Yozuvni saqlash",
+    colDate: "Yozuv sanasi", colOp: "Operator", colBranch: "Filial",
+    colClient: "Mijoz", colPhone: "Telefon", colVin: "VIN", colCar: "Marka/Model",
+    colVisit: "Tashrif sanasi", colTime: "Vaqt", colMaster: "Usta",
+    colReason: "Sabab", colStatus: "Status",
+    statBooked: "Yozilgan", statArrived: "Keldi",
+    statMissed: "Kelmadi", statPostponed: "Ko'chirildi",
+    schedTitle: "Yuklanish jadvali",
+    schedSub: "Filiallar bo'yicha usta-maslahatchilar jadvali",
+    schedDate: "Sana:",
+    schedMaster: "Usta-maslahatchi",
+    legendBooked: "Mijoz yozilgan",
+    legendFree: "Bo'sh",
+    legendPast: "O'tgan vaqt",
+    modalBook: "Mijozni yozish",
+    modalInfo: "Yozuv ma'lumotlari",
+    modalFio: "Mijoz F.I.Sh.",
+    modalPhone: "Telefon",
+    modalBrand: "Marka",
+    modalModel: "Model",
+    modalReason: "Murojaat sababi",
+    modalReasonPH: "Muammo yoki xizmatni tavsiflang",
+    modalBtnBook: "Yozish",
+    setupTitle: "⚙️ Google Sheets ga ulanish",
+    setupDesc: "Google Apps Script URL manzilini kiriting. Bu har bir kompyuterda bir marta bajariladi.",
+    setupBtn: "Ulash",
+    reqField: "Majburiy maydon",
+    phoneFull: "To'liq raqam kiriting (+998 XX XXX XX XX)",
+    savedOk: "Yozuv saqlandi ✓",
+    bookedOk: "Mijoz yozildi ✓",
+    noMasters: "Bu filial uchun ustalar yo'q. Google Sheets dagi «Ustalar» varag'ini to'ldiring.",
+    hintTitle: "1C fayl formati:",
+    hintText: "phone,visitDate ustunlari bilan CSV. Birinchi qator — sarlavha.",
+  }
+};
+
+let currentLang = localStorage.getItem("servisset_lang") || "ru";
+
+function t(key) {
+  return LANGS[currentLang][key] || LANGS["ru"][key] || key;
+}
+
+function switchLang(lang) {
+  currentLang = lang;
+  localStorage.setItem("servisset_lang", lang);
+  applyLang();
+}
+
+function applyLang() {
+  const L = LANGS[currentLang];
+  const s = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = val; };
+  const p = (id, val) => { const e = document.getElementById(id); if(e) e.placeholder = val; };
+
+  // Шапка
+  s("app-sub", L.appSub);
+  s("tab-registry", L.tabRegistry);
+  s("tab-schedule", L.tabSchedule);
+  s("tab-dashboard", L.tabDashboard);
+
+  // Кнопки переключателя
+  document.querySelectorAll(".lang-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.lang === currentLang);
+  });
+
+  // Реестр
+  s("registry-title", L.registryTitle);
+  s("btn-refresh", L.btnRefresh);
+  s("btn-1c", L.btn1C);
+  s("btn-new", L.btnNew);
+  s("sync-label", L.synced);
+
+  // Фильтры
+  document.querySelector("#fil-operator option").textContent = L.filterAllBranch ? L.filterAllOp : L.filterAllOp;
+  const filOpts = document.querySelectorAll("#fil-operator option, #fil-station option, #fil-status option");
+  document.querySelector("#fil-operator option[value='']").textContent = L.filterAllOp;
+  document.querySelector("#fil-station option[value='']").textContent = L.filterAllBranch;
+  document.querySelector("#fil-status option[value='']").textContent = L.filterAllStatus;
+  s("btn-reset-filter", L.btnReset);
+
+  // Статусы в фильтре
+  document.querySelectorAll("#fil-status option:not([value=''])").forEach((opt, i) => {
+    opt.textContent = [L.statBooked, L.statArrived, L.statMissed, L.statPostponed][i] || opt.textContent;
+  });
+
+  // Форма
+  s("form-title", L.formTitle);
+  document.getElementById("f-operator").options[0].textContent = L.fOperator;
+  document.getElementById("f-station").options[0].textContent = L.fBranch;
+  p("f-clientName", L.fClient);
+  p("f-phone", L.fPhone);
+  document.getElementById("f-brand").options[0].textContent = L.fBrand;
+  document.getElementById("f-model").options[0].textContent = L.fModel;
+  document.getElementById("f-master").options[0].textContent = L.fMaster;
+  document.getElementById("f-time").options[0].textContent = L.fTime;
+  p("f-reason", L.fReason);
+  s("btn-cancel-form", L.btnCancel);
+  s("submit-btn", L.btnSave);
+
+  // Заголовки таблицы
+  const thKeys = ["colDate","colOp","colBranch","colClient","colPhone","colVin","colCar","colVisit","colTime","colMaster","colReason","colStatus"];
+  document.querySelectorAll("#registry-thead th").forEach((th, i) => {
+    if (thKeys[i]) th.textContent = L[thKeys[i]];
+  });
+
+  // График
+  s("sched-title", L.schedTitle);
+  s("sched-sub", L.schedSub);
+  s("sched-date-label", L.schedDate);
+
+  // Легенда
+  const legends = document.querySelectorAll(".legend-item span");
+  if (legends[0]) legends[0].textContent = L.legendBooked;
+  if (legends[1]) legends[1].textContent = L.legendFree;
+  if (legends[2]) legends[2].textContent = L.legendPast;
+
+  // Модальное окно
+  s("modal-fio-label", L.modalFio);
+  s("modal-phone-label", L.modalPhone);
+  s("modal-brand-label", L.modalBrand);
+  s("modal-model-label", L.modalModel);
+  s("modal-reason-label", L.modalReason);
+  p("modal-reason", L.modalReasonPH);
+  s("modal-book-btn", L.modalBtnBook);
+  p("modal-client", L.modalFio);
+
+  // Hint
+  s("hint-title", L.hintTitle);
+  s("hint-text", L.hintText);
+
+  // Перерисовываем таблицу (статусы)
+  renderTable();
+}
+
+// ── CONSTANTS ─────────────────────────────────────────────
+const STATIONS = ["Рохат","Ахмад Дониш","Самарканд","Бухара","Наманган","Карши","Навои"];
+const OPERATORS = ["Парвина","Регина","Татьяна","Мохичехра"];
+const BRANDS_MODELS = {
+  "Chevrolet": ["Cobalt","Equinox","Malibu","Spark","Tracker","Tahoe","Captiva","Lacetti","Nexia 3","Onix","Monza"],
+  "Chery":     ["Tiggo 2","Tiggo 7","Tiggo 8","Arrizo 6","Arrizo 8"],
+  "Haval":     ["M6","H6","H9","Jolion","Dargo","Wingle"],
+  "KIA":       ["Cerato","K3","K5","Sportage","Sorento","Stinger","Carnival","Sonet","Seltos","Picanto","Rio"],
+  "BYD":       ["Yuan Up","Han","Tang","Song Plus","Song Pro","SeaLion 7","Seal 6","Chazor"],
+  "Changan":   ["CS55","UNI-T","UNI-K","UNI-V"],
+  "Lixiang":   ["L6","L7","L9"],
+  "Deepal":    ["S07","S03","S05"],
+  "Jetour":    ["X50","X70","X90","Dashing","T2","T1"],
+  "Dongfeng":  ["008"],
+  "LADA":      ["Granta","Vesta","Niva Legend","Niva Travel","Largus"],
+  "Hyundai":   ["Santa Fe","Sonata","Elantra","Palisade","Tucson"]
+};
+
+// ── PHONE MASK ────────────────────────────────────────────
+function phoneMask(input) {
+  let v = input.value.replace(/\D/g, "");
+  if (v.startsWith("998")) v = v.slice(3);
+  v = v.slice(0, 9);
+  let masked = "+998";
+  if (v.length > 0) masked += " " + v.slice(0,2);
+  if (v.length > 2) masked += " " + v.slice(2,5);
+  if (v.length > 5) masked += " " + v.slice(5,7);
+  if (v.length > 7) masked += " " + v.slice(7,9);
+  input.value = masked;
+}
+
+// Проверяет что телефон полностью заполнен (9 цифр после +998)
+function isPhoneComplete(value) {
+  const digits = value.replace(/\D/g, "");
+  // Убираем 998 если есть
+  const local = digits.startsWith("998") ? digits.slice(3) : digits;
+  return local.length === 9;
+}
+
+// Нормализует телефон до 9 цифр для мэтчинга
+function normalizePhone(phone) {
+  const digits = String(phone).replace(/\D/g, "");
+  return digits.slice(-9);
+}
+const TIME_SLOTS = [];
+for (let h = 9; h < 20; h++) {
+  TIME_SLOTS.push(`${String(h).padStart(2,'0')}:00`);
+  TIME_SLOTS.push(`${String(h).padStart(2,'0')}:30`);
+}
+TIME_SLOTS.push("20:00");
+
+const SCRIPT_URL_KEY = "servisset_script_url";
+const HEADERS = ["id","createdAt","operator","station","clientName","phone","car","visitDate","visitTime","master","service","status","note"];
+
+let records = [];
+let masters = {}; // { "Рохат": ["Иванов И.И.", ...], ... }
+let scriptUrl = localStorage.getItem(SCRIPT_URL_KEY) || "";
+let modalContext = null;
+
+// ── INIT ──────────────────────────────────────────────────
+window.onload = () => {
+  populateSelects();
+  setTodayDate();
+  if (scriptUrl) {
+    document.getElementById("setup-banner").style.display = "none";
+    loadAll();
+  } else {
+    setSyncState("error", "Не подключено");
+  }
+  applyLang();
+};
+
+function setTodayDate() {
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("sch-date").value = today;
+  document.getElementById("f-visitDate").value = today;
+}
+
+function populateSelects() {
+  // Operators
+  const opSel = document.getElementById("f-operator");
+  const filOp = document.getElementById("fil-operator");
+  OPERATORS.forEach(o => {
+    opSel.innerHTML += `<option>${o}</option>`;
+    filOp.innerHTML += `<option>${o}</option>`;
+  });
+  // Stations
+  const stSel = document.getElementById("f-station");
+  const filSt = document.getElementById("fil-station");
+  STATIONS.forEach(s => {
+    stSel.innerHTML += `<option>${s}</option>`;
+    filSt.innerHTML += `<option>${s}</option>`;
+  });
+  // Time slots
+  const timeSel = document.getElementById("f-time");
+  TIME_SLOTS.forEach(t => timeSel.innerHTML += `<option>${t}</option>`);
+  // Branch buttons
+  const branchSel = document.getElementById("branch-selector");
+  STATIONS.forEach((s, i) => {
+    branchSel.innerHTML += `<button class="btn-branch ${i===0?'active':''}" onclick="selectBranch('${s}', this)">${s}</button>`;
+  });
+  // Brands — форма реестра и модальное окно
+  const brands = Object.keys(BRANDS_MODELS);
+  ["f-brand","modal-brand"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) brands.forEach(b => el.innerHTML += `<option>${b}</option>`);
+  });
+}
+
+function onBrandChange(modelId) {
+  const brandId = modelId === "modal-model" ? "modal-brand" : "f-brand";
+  const brand = document.getElementById(brandId).value;
+  const modelSel = document.getElementById(modelId);
+  modelSel.innerHTML = '<option value="">Модель</option>';
+  if (brand && BRANDS_MODELS[brand]) {
+    BRANDS_MODELS[brand].forEach(m => modelSel.innerHTML += `<option>${m}</option>`);
+  }
+}
+
+function saveScriptUrl() {
+  const val = document.getElementById("script-url-input").value.trim();
+  if (!val || !val.startsWith("https://script.google.com")) {
+    showAlert("Вставьте корректный URL вида https://script.google.com/macros/s/.../exec", true); return;
+  }
+  scriptUrl = val;
+  localStorage.setItem(SCRIPT_URL_KEY, scriptUrl);
+  document.getElementById("setup-banner").style.display = "none";
+  loadAll();
+}
+
+// ── API ───────────────────────────────────────────────────
+function showLoading(text) {
+  const ol = document.getElementById("loading-overlay");
+  document.getElementById("loading-text").textContent = text || "Сохранение...";
+  ol.style.display = "flex";
+}
+function hideLoading() {
+  document.getElementById("loading-overlay").style.display = "none";
+}
+
+async function api(payload) {
+  if (!scriptUrl) { showAlert("Сначала введите URL скрипта", true); return null; }
+  const isWrite = !["getAll","getMasters"].includes(payload.action);
+  if (isWrite) showLoading(
+    payload.action === "add" ? "Сохранение записи..." :
+    payload.action === "updateStatus" ? "Обновление статуса..." :
+    payload.action === "matchVisits" ? "Сверка с 1С..." : "Сохранение..."
+  );
+  setSyncState("syncing", "Синхронизация...");
+  try {
+    let res;
+    if (!isWrite) {
+      res = await fetch(`${scriptUrl}?action=${payload.action}`, { method: "GET" });
+    } else {
+      res = await fetch(scriptUrl, { method: "POST", body: JSON.stringify(payload) });
+    }
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    setSyncState("ok", "Синхронизировано");
+    return data;
+  } catch(e) {
+    setSyncState("error", "Ошибка связи");
+    showAlert("Ошибка: " + e.message, true);
+    return null;
+  } finally {
+    if (isWrite) hideLoading();
+  }
+}
+
+async function loadAll() {
+  await Promise.all([loadRecords(), loadMasters()]);
+}
+
+async function loadRecords() {
+  setSyncState("syncing", "Загрузка...");
+  const data = await api({ action: "getAll" });
+  if (!data) return;
+  records = (data.records || []).map(normalizeRecord);
+  renderTable();
+}
+
+// Нормализует поля записи — убирает мусор из дат и времён
+function normalizeRecord(r) {
+  // createdAt: убираем T и Z, оставляем "YYYY-MM-DD HH:MM"
+  if (r.createdAt && String(r.createdAt).includes("T")) {
+    r.createdAt = String(r.createdAt).replace("T", " ").slice(0, 16);
+  }
+  // visitDate: Google Sheets может вернуть дату как "2026-06-16T19:00:00.000Z"
+  if (r.visitDate && String(r.visitDate).includes("T")) {
+    r.visitDate = String(r.visitDate).slice(0, 10);
+  }
+  // visitTime: Google Sheets хранит время как дробь дня → "1899-12-30T05:52:49.000Z"
+  // Конвертируем обратно в "HH:MM"
+  if (r.visitTime && String(r.visitTime).includes("1899-12-30")) {
+    const d = new Date(r.visitTime);
+    // Добавляем смещение UTC → локальное (Ташкент UTC+5)
+    const totalMin = d.getUTCHours() * 60 + d.getUTCMinutes();
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    r.visitTime = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+  }
+  return r;
+}
+
+async function loadMasters() {
+  const data = await api({ action: "getMasters" });
+  if (!data) return;
+  masters = data.masters || {};
+  // Fallback demo masters if sheet empty
+  if (!Object.keys(masters).length) {
+    STATIONS.forEach(s => masters[s] = ["Мастер 1","Мастер 2","Мастер 3"]);
+  }
+}
+
+// ── SYNC STATE ────────────────────────────────────────────
+function setSyncState(state, label) {
+  const dot = document.getElementById("sync-dot");
+  dot.className = "sync-dot" + (state==="syncing"?" syncing":state==="error"?" error":"");
+  document.getElementById("sync-label").textContent = label;
+}
+
+// ── ALERT ─────────────────────────────────────────────────
+function showAlert(msg, isError=false) {
+  const box = document.getElementById("alert-box");
+  box.className = "alert" + (isError?" alert-error":"");
+  document.getElementById("alert-msg").textContent = msg;
+  box.style.display = "";
+  if (!isError) setTimeout(() => box.style.display = "none", 4000);
+}
+
+// ── TABLE ─────────────────────────────────────────────────
+function getFiltered() {
+  const op = document.getElementById("fil-operator").value;
+  const st = document.getElementById("fil-station").value;
+  const ss = document.getElementById("fil-status").value;
+  const dt = document.getElementById("fil-date").value;
+  return records.filter(r => {
+    if (op && r.operator !== op) return false;
+    if (st && r.station !== st) return false;
+    if (ss && r.status !== ss) return false;
+    if (dt && r.visitDate !== dt) return false;
+    return true;
+  });
+}
+
+function renderTable() {
+  const filtered = getFiltered();
+  document.getElementById("record-count").textContent = filtered.length + " из " + records.length + " записей";
+  const tbody = document.getElementById("table-body");
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="11">Записей не найдено</td></tr>'; return;
+  }
+  tbody.innerHTML = filtered.map(r => `
+    <tr>
+      <td>${r.createdAt||""}</td>
+      <td class="bold">${r.operator||""}</td>
+      <td class="muted">${r.station||""}</td>
+      <td>${r.clientName||""}</td>
+      <td class="mono">${r.phone||""}</td>
+      <td style="font-family:monospace;font-size:11px;color:#6B7280">${r.vin||""}</td>
+      <td>${r.car||""}</td>
+      <td>${(r.visitDate||"").slice(0,10)}</td>
+      <td style="white-space:nowrap">${r.visitTime||""}</td>
+      <td>${r.master||""}</td>
+      <td>${r.service||""}</td>
+      <td style="min-width:170px">
+        <div class="status-cell">
+          <select class="status-select" onchange="changeStatus(${r.id}, this.value)">
+            <option ${r.status==="Записан"?"selected":""}>Записан</option>
+            <option ${r.status==="Приехал"?"selected":""}>Приехал</option>
+            <option ${r.status==="Не приехал"?"selected":""}>Не приехал</option>
+            <option ${r.status==="Перенесён"?"selected":""}>Перенесён</option>
+          </select>
+          <span class="badge badge-${(r.status||"Записан").replace(" ","-")}">${r.status||"Записан"}</span>
+        </div>
+      </td>
+    </tr>`).join("");
+}
+
+function clearFilters() {
+  ["fil-operator","fil-station","fil-status","fil-date"].forEach(id => document.getElementById(id).value = "");
+  renderTable();
+}
+
+async function changeStatus(id, newStatus) {
+  records = records.map(r => r.id==id ? {...r, status: newStatus} : r);
+  renderTable();
+  await api({ action: "updateStatus", id, status: newStatus });
+}
+
+// ── FORM ──────────────────────────────────────────────────
+function showForm() { document.getElementById("form-panel").style.display = ""; }
+function hideForm() {
+  document.getElementById("form-panel").style.display = "none";
+  ["f-operator","f-station","f-clientName","f-phone","f-brand","f-model","f-visitDate","f-master","f-time","f-reason","f-vin"]
+    .forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
+  document.getElementById("f-model").innerHTML = '<option value="">Модель</option>';
+  const vinStatus = document.getElementById("f-vin-status");
+  if (vinStatus) vinStatus.textContent = "";
+  document.querySelectorAll(".field-error").forEach(el => el.classList.remove("show"));
+  document.querySelectorAll(".f-required").forEach(el => el.classList.remove("error"));
+}
+
+function onStationChange() {
+  const station = document.getElementById("f-station").value;
+  const masterSel = document.getElementById("f-master");
+  masterSel.innerHTML = '<option value="">Мастер-консультант</option>';
+  if (station && masters[station]) {
+    masters[station].forEach(m => masterSel.innerHTML += `<option>${m}</option>`);
+  }
+}
+
+function onVisitDateChange() {
+  updateTimeSlots();
+}
+
+// ── VIN АВТОПОДСТАНОВКА ───────────────────────────────────
+function onFormVinInput(input) {
+  input.value = input.value.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g, "");
+  const vin = input.value;
+  const status = document.getElementById("f-vin-status");
+
+  if (vin.length < 6) {
+    status.textContent = "";
+    return;
+  }
+
+  // Ищем клиента по последним 6+ символам VIN в базе (records — уже загружены)
+  // Сначала ищем точное совпадение по 17 символам
+  const exactMatch = records.find(r => r.vin && r.vin.toUpperCase() === vin);
+  if (exactMatch) {
+    fillFromRecord(exactMatch);
+    status.textContent = "✅";
+    return;
+  }
+
+  // Затем по 6+ символам суффикса
+  if (vin.length >= 6) {
+    const suffix = vin.slice(-6);
+    const partialMatch = records.find(r => r.vin && r.vin.toUpperCase().endsWith(suffix));
+    if (partialMatch) {
+      fillFromRecord(partialMatch);
+      status.textContent = "🔍";
+      return;
+    }
+  }
+
+  status.textContent = vin.length >= 6 ? "❓" : "";
+}
+
+function fillFromRecord(r) {
+  // Заполняем поля из найденной записи
+  if (r.clientName) document.getElementById("f-clientName").value = r.clientName;
+  if (r.phone) document.getElementById("f-phone").value = r.phone;
+
+  if (r.car) {
+    const parts = r.car.split(" ");
+    const brand = parts[0];
+    const model = parts.slice(1).join(" ");
+    const brandSel = document.getElementById("f-brand");
+    if (brandSel) {
+      brandSel.value = brand;
+      onBrandChange();
+      setTimeout(() => {
+        const modelSel = document.getElementById("f-model");
+        if (modelSel) modelSel.value = model;
+      }, 50);
+    }
+  }
+
+  // Обновляем слоты времени
+  setTimeout(updateTimeSlots, 100);
+}
+
+function onModalVinInput(input) {
+  input.value = input.value.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g, "");
+  const vin = input.value;
+  const status = document.getElementById("modal-vin-status");
+  if (vin.length < 6) { status.textContent = ""; return; }
+
+  // Ищем в базе записей
+  const exact = records.find(r => r.vin && r.vin.toUpperCase() === vin);
+  if (exact) { fillModalFromRecord(exact); status.textContent = "✅"; return; }
+  if (vin.length >= 6) {
+    const suffix = vin.slice(-6);
+    const partial = records.find(r => r.vin && r.vin.toUpperCase().endsWith(suffix));
+    if (partial) { fillModalFromRecord(partial); status.textContent = "🔍"; return; }
+  }
+  status.textContent = vin.length >= 6 ? "❓" : "";
+}
+
+function fillModalFromRecord(r) {
+  if (r.clientName) document.getElementById("modal-client").value = r.clientName;
+  if (r.phone) document.getElementById("modal-phone").value = r.phone;
+  if (r.car) {
+    const parts = r.car.split(" ");
+    const brand = parts[0];
+    const model = parts.slice(1).join(" ");
+    document.getElementById("modal-brand").value = brand;
+    onBrandChange("modal-model");
+    setTimeout(() => {
+      const ms = document.getElementById("modal-model");
+      if (ms) ms.value = model;
+    }, 50);
+  }
+}
+
+function updateTimeSlots() {
+  const station = document.getElementById("f-station").value;
+  const date = document.getElementById("f-visitDate").value;
+  const master = document.getElementById("f-master").value;
+  const timeSel = document.getElementById("f-time");
+  const currentVal = timeSel.value;
+  timeSel.innerHTML = '<option value="">Время визита</option>';
+  TIME_SLOTS.forEach(t => {
+    const booked = station && date && master && records.some(r =>
+      r.station===station && r.visitDate===date && r.master===master && r.visitTime===t && r.status!=="Не приехал"
+    );
+    timeSel.innerHTML += `<option value="${t}" ${booked?"disabled style='color:#ccc'":""} ${t===currentVal?"selected":""}>${t}${booked?" (занято)":""}</option>`;
+  });
+}
+
+async function submitForm() {
+  const fields = ["operator","station","clientName","phone","brand","model","visitDate","master","time"];
+  let valid = true;
+  fields.forEach(f => {
+    const el = document.getElementById("f-" + f);
+    const err = document.getElementById("err-" + f);
+    if (!el || !el.value.trim()) { if(el) el.classList.add("error"); if(err) err.classList.add("show"); valid = false; }
+    else { el.classList.remove("error"); if(err) err.classList.remove("show"); }
+  });
+  // Дополнительная проверка телефона
+  const phoneEl = document.getElementById("f-phone");
+  const phoneErr = document.getElementById("err-phone");
+  if (phoneEl && !isPhoneComplete(phoneEl.value)) {
+    phoneEl.classList.add("error");
+    phoneErr.textContent = "Введите полный номер (+998 XX XXX XX XX)";
+    phoneErr.classList.add("show");
+    valid = false;
+  }
+  if (!valid) return;
+
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true; btn.textContent = "Сохранение...";
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2,"0");
+  const brand = document.getElementById("f-brand").value;
+  const model = document.getElementById("f-model").value;
+  const record = {
+    createdAt: `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`,
+    operator: document.getElementById("f-operator").value,
+    station: document.getElementById("f-station").value,
+    clientName: document.getElementById("f-clientName").value,
+    phone: document.getElementById("f-phone").value,
+    vin: document.getElementById("f-vin").value.trim().toUpperCase(),
+    car: brand + (model ? " " + model : ""),
+    visitDate: document.getElementById("f-visitDate").value,
+    visitTime: document.getElementById("f-time").value,
+    master: document.getElementById("f-master").value,
+    service: document.getElementById("f-reason").value || "—",
+    status: "Записан",
+    note: "",
+  };
+
+  const res = await api({ action: "add", record });
+  btn.disabled = false; btn.textContent = "Сохранить запись";
+  if (res) {
+    records.unshift(res.record);
+    hideForm();
+    renderTable();
+    showAlert("Запись сохранена ✓");
+  }
+}
+
+// ── ЗАГРУЗКА ИЗ 1С (xlsx или csv) ───────────────────────
+const LOCATION_MAP_1C = {
+  "400": "Рохат", "404": "Ахмад Дониш", "410": "Наманган",
+  "420": "Самарканд", "430": "Навои", "440": "Карши", "450": "Бухара"
+};
+
+function handle1C(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const ext = file.name.split(".").pop().toLowerCase();
+  const reader = new FileReader();
+
+  reader.onload = async ev => {
+    let visits = [];
+
+    if (ext === "xlsx" || ext === "xls") {
+      const data = new Uint8Array(ev.target.result);
+      const wb = XLSX.read(data, { type: "array", cellDates: true, cellText: true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      // raw:false чтобы получить текстовые значения и не терять цифры в длинных числах
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false });
+
+      // Определяем формат файла по заголовку
+      // Формат А: "Последний визит по всем контрагентам"
+      //   col0=ФИО, col1=Документ, col2=Дата, col3=Автомобиль, col6=Телефон
+      // Формат Б: Сводная ведомость по ЗН
+      //   col2=Заказ-наряд №..., col4=Дата, col8=Телефон
+
+      // Определяем формат: ищем "Последний визит" в любой ячейке первых 10 строк
+      let isFormatA = false;
+      for (let ri = 0; ri < Math.min(10, rows.length); ri++) {
+        const rowStr = rows[ri].map(c => String(c || "")).join(" ").toLowerCase();
+        if (rowStr.includes("последний визит") || rowStr.includes("контрагент")) {
+          isFormatA = true; break;
+        }
+      }
+      // Если не нашли по заголовку — проверяем структуру данных
+      // Формат А: VIN выглядит как 17-символьный код в последней колонке
+      if (!isFormatA) {
+        for (let ri = 0; ri < Math.min(20, rows.length); ri++) {
+          const r1 = String(rows[ri][1] || "").trim();
+          if (r1.includes("Заказ-наряд") && rows[ri].length > 6) {
+            // Проверяем последнюю колонку — VIN там?
+            const lastVal = String(rows[ri][rows[ri].length - 1] || "").trim().toUpperCase();
+            if (/^[A-HJ-NPR-Z0-9]{17}$/.test(lastVal)) {
+              isFormatA = true; break;
+            }
+          }
+        }
+      }
+
+      // Логируем первые 10 строк чтобы понять структуру
+
+
+      for (const row of rows) {
+        const col0 = String(row[0] || "").trim();
+        const col1 = String(row[1] || "").trim();
+        const col2 = String(row[2] || "").trim();
+        const col6 = String(row[6] || "").trim();
+
+        if (isFormatA) {
+          // Формат А: Последний визит по всем контрагентам
+          // Структура: col0=ФИО, col1=Документ ЗН, col2=Дата, col4=Авто, col5=VIN, col8=Телефон
+          // ЗН в col2 (по данным из консоли)
+          if (!col2 || !col2.includes("Заказ-наряд")) continue;
+
+          // Номер ЗН из col2
+          const docMatch = col2.match(/Заказ-наряд\s+№?(\S+)/i);
+          const doc = docMatch ? docMatch[1] : col2.slice(0, 30);
+
+          // Дата из col4
+          const visitDate = parseDate1C(row[4]);
+
+          // Точная структура (из консоли):
+          // col0=ФИО, col2=ЗН, col4=Дата, col5=VIN, col6=Год, col7=Дней, col8=Телефон, col9=Адрес
+          const vinRaw = String(row[5] || "").trim().toUpperCase();
+          // VIN может быть 16-17 символов
+          const vin = /^[A-HJ-NPR-Z0-9]{15,17}$/.test(vinRaw) ? vinRaw : "";
+          const phoneRaw = String(row[8] || "").trim().replace(/\D/g, "");
+          const phone = phoneRaw.startsWith("998") ? phoneRaw.slice(3) : phoneRaw.slice(-9);
+          const car = String(row[4] || "").trim();
+          const clientName = col0;
+
+          if (visitDate && (phone || vin || doc)) {
+            visits.push({ phone, visitDate, vin, doc, amount: "", items: "", clientName, car });
+          }
+          // DEBUG: первые 3 строки логируем
+
+        } else {
+          // Формат Б: Сводная ведомость по ЗН
+          if (!col2.includes("Заказ-наряд №")) continue;
+          const docMatch = col2.match(/Заказ-наряд №(\S+)/);
+          const doc = docMatch ? docMatch[1] : "";
+          const visitDate = parseDate1C(row[4]);
+          const phone = normalizePhone(String(row[8] || ""));
+          const clientName = String(row[5] || "");
+          const amount = String(row[row.length - 1] || "");
+          if (visitDate && (phone || doc)) {
+            visits.push({ phone, visitDate, vin: "", doc, amount, items: "", clientName });
+          }
+        }
+      }
+    } else {
+      // CSV формат: phone,visitDate
+      const lines = ev.target.result.split("\n").filter(l => l.trim());
+      visits = lines.slice(1).map(l => {
+        const p = l.split(",");
+        return p.length >= 2 ? { phone: normalizePhone(p[0].trim()), visitDate: p[1].trim() } : null;
+      }).filter(Boolean);
+    }
+
+    if (!visits.length) {
+      showAlert("Не найдено записей в файле. Проверьте формат.", true);
+      return;
+    }
+
+    const res = await api({ action: "matchVisits", visits });
+    if (res) {
+      showAlert(`✓ Обработано ${visits.length} записей из 1С, сопоставлено ${res.matched}`);
+      loadRecords();
+    }
+  };
+
+  if (ext === "xlsx" || ext === "xls") {
+    reader.readAsArrayBuffer(file);
+  } else {
+    reader.readAsText(file);
+  }
+  e.target.value = "";
+}
+
+function parseDate1C(val) {
+  if (!val) return "";
+  // Если SheetJS вернул Date объект
+  if (val instanceof Date) {
+    const y = val.getFullYear();
+    const m = String(val.getMonth()+1).padStart(2,"0");
+    const d = String(val.getDate()).padStart(2,"0");
+    return `${y}-${m}-${d}`;
+  }
+  // Строка "22.06.2026"
+  const s = String(val).trim();
+  const match = s.match(/^(\d{1,2})\.(\d{2})\.(\d{4})/);
+  if (match) return `${match[3]}-${match[2].padStart(2,"0")}-${match[1].padStart(2,"0")}`;
+  // Уже в формате YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+  return "";
+}
+
+// ── SCHEDULE ──────────────────────────────────────────────
+let currentBranch = STATIONS[0];
+
+function selectBranch(branch, btn) {
+  currentBranch = branch;
+  document.querySelectorAll(".btn-branch").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderSchedule();
+}
+
+// Глобальные хранилища контекстов ячеек
+window._freeCells = [];
+window._bookedCells = [];
+
+async function scheduleRefresh() {
+  const btn = document.getElementById("sched-refresh-btn");
+  if (btn) { btn.disabled = true; btn.textContent = "↻..."; }
+  await loadAll();
+  renderSchedule();
+  if (btn) { btn.disabled = false; btn.textContent = "↻ Обновить"; }
+}
+
+// Автообновление графика каждые 2 минуты
+setInterval(function() {
+  if (currentTab === "schedule") {
+    loadAll().then(() => renderSchedule());
+  }
+}, 120000);
+
+function renderSchedule() {
+  const date = document.getElementById("sch-date").value;
+  const branch = currentBranch;
+  const branchMasters = masters[branch] || [];
+  const wrap = document.getElementById("schedule-content");
+
+  if (!branchMasters.length) {
+    wrap.innerHTML = '<div class="schedule-empty">Нет мастеров для этого филиала.<br>Добавьте их в лист «Мастера» в Google Sheets.</div>';
+    return;
+  }
+
+  const dateNorm = date ? String(date).slice(0, 10) : "";
+  const dayRecords = records.filter(r =>
+    r.station === branch &&
+    String(r.visitDate || "").slice(0, 10) === dateNorm &&
+    r.status !== "Не приехал"
+  );
+
+  // Прошедшее время — для любой прошедшей даты или времени сегодня
+  const now = new Date();
+  const todayStr = now.getFullYear() + "-" +
+    String(now.getMonth()+1).padStart(2,"0") + "-" +
+    String(now.getDate()).padStart(2,"0");
+  const isToday = dateNorm === todayStr;
+  const isPastDate = dateNorm < todayStr;
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+
+  function isPast(slot) {
+    if (isPastDate) return true; // вся дата в прошлом
+    if (!isToday) return false;  // будущая дата — всё активно
+    const parts = slot.split(":");
+    return parseInt(parts[0]) * 60 + parseInt(parts[1]) < nowMin;
+  }
+
+  // Сбрасываем контексты
+  window._freeCells = [];
+  window._bookedCells = [];
+
+  // Строим таблицу
+  const table = document.createElement("table");
+  table.className = "schedule-table";
+
+  // Заголовок
+  const thead = table.createTHead();
+  const hRow = thead.insertRow();
+  const thMaster = document.createElement("th");
+  thMaster.className = "master-col";
+  thMaster.textContent = "Мастер-консультант";
+  hRow.appendChild(thMaster);
+  TIME_SLOTS.forEach(t => {
+    const th = document.createElement("th");
+    th.textContent = t;
+    if (isPast(t)) th.style.color = "#CBD5E1";
+    hRow.appendChild(th);
+  });
+
+  // Тело
+  const tbody = table.createTBody();
+  branchMasters.forEach(master => {
+    const tr = tbody.insertRow();
+    const tdName = tr.insertCell();
+    tdName.className = "master-name";
+    tdName.textContent = master;
+
+    TIME_SLOTS.forEach(t => {
+      const td = tr.insertCell();
+      const rec = dayRecords.find(r => r.master === master && r.visitTime === t);
+
+      if (rec) {
+        // Заполненная ячейка
+        const lastName = (rec.clientName || "").split(" ")[0];
+        const car = rec.car || "";
+        const reason = rec.service || "";
+        td.className = "booked";
+        td.innerHTML = `<div class="cell-content">${lastName}<br>${car}<br><span style="color:#6B7280;font-size:9px">${reason}</span></div>`;
+
+        // Клик по заполненной ячейке — показать детали
+        const bIdx = window._bookedCells.length;
+        window._bookedCells.push(rec);
+        td.style.cursor = "pointer";
+        td.addEventListener("click", function() {
+          showBookedInfo(window._bookedCells[bIdx]);
+        });
+
+      } else if (isPast(t)) {
+        td.style.background = "#F8FAFC";
+        td.style.cursor = "not-allowed";
+
+      } else {
+        // Свободная ячейка
+        td.className = "free-cell";
+        const fIdx = window._freeCells.length;
+        window._freeCells.push({ branch, master, time: t, date });
+        td.addEventListener("click", function() {
+          const ctx = window._freeCells[fIdx];
+          openBookingModal(ctx.branch, ctx.master, ctx.time, ctx.date);
+        });
+      }
+    });
+  });
+
+  wrap.innerHTML = "";
+  wrap.appendChild(table);
+}
+
+function showBookedInfo(rec) {
+  document.getElementById("modal-title").textContent = "Информация о записи";
+  document.getElementById("modal-sub").textContent = (rec.station || "") + " • " + (rec.master || "");
+  document.getElementById("modal-info").innerHTML =
+    "<div><span>Дата:</span> <b>" + (rec.visitDate || "") + "</b></div>" +
+    "<div><span>Время:</span> <b>" + (rec.visitTime || "") + "</b></div>" +
+    "<div><span>Мастер:</span> <b>" + (rec.master || "") + "</b></div>" +
+    "<div><span>Клиент:</span> <b>" + (rec.clientName || "") + "</b></div>" +
+    "<div><span>Телефон:</span> <b>" + (rec.phone || "") + "</b></div>" +
+    "<div><span>Авто:</span> <b>" + (rec.car || "") + "</b></div>" +
+    "<div><span>Причина:</span> <b>" + (rec.service || "") + "</b></div>" +
+    "<div><span>Статус:</span> <b>" + (rec.status || "") + "</b></div>";
+  // Скрываем поля ввода, показываем только инфо
+  document.getElementById("modal-client").closest(".form-field").style.display = "none";
+  document.getElementById("modal-phone").closest(".form-field").style.display = "none";
+  document.getElementById("modal-brand").closest(".form-field").style.display = "none";
+  document.getElementById("modal-model").closest(".form-field").style.display = "none";
+  document.getElementById("modal-reason").closest(".form-field").style.display = "none";
+  document.querySelector(".modal-actions .btn-primary").style.display = "none";
+  document.getElementById("booking-modal").style.display = "flex";
+}
+
+// ── BOOKING MODAL ─────────────────────────────────────────
+function openBookingModal(branch, master, time, date) {
+  modalContext = { branch, master, time, date };
+  // Показываем все поля ввода (могли быть скрыты при просмотре записи)
+  ["modal-client","modal-phone","modal-brand","modal-model","modal-reason"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.closest(".form-field").style.display = "";
+  });
+  document.querySelector(".modal-actions .btn-primary").style.display = "";
+  document.getElementById("modal-title").textContent = "Записать клиента";
+  document.getElementById("modal-sub").textContent = branch + " • " + master;
+  document.getElementById("modal-info").innerHTML =
+    "<div><span>Дата:</span> <b>" + date + "</b></div>" +
+    "<div><span>Время:</span> <b>" + time + "</b></div>" +
+    "<div><span>Мастер:</span> <b>" + master + "</b></div>";
+  document.getElementById("modal-client").value = "";
+  document.getElementById("modal-phone").value = "";
+  if (document.getElementById("modal-vin")) { document.getElementById("modal-vin").value = ""; document.getElementById("modal-vin-status").textContent = ""; }
+  document.getElementById("modal-brand").value = "";
+  document.getElementById("modal-model").innerHTML = "<option value=''>Модель</option>";
+  document.getElementById("modal-reason").value = "";
+  document.getElementById("booking-modal").style.display = "flex";
+}
+
+function closeModal(e) {
+  if (e.target.id === "booking-modal") document.getElementById("booking-modal").style.display = "none";
+}
+
+async function bookFromModal() {
+  const bookBtn = document.querySelector(".modal-actions .btn-primary");
+  if (bookBtn.disabled) return; // защита от двойного клика
+  const client = document.getElementById("modal-client").value.trim();
+  const phone = document.getElementById("modal-phone").value.trim();
+  const brand = document.getElementById("modal-brand").value;
+  const model = document.getElementById("modal-model").value;
+  const reason = document.getElementById("modal-reason").value.trim();
+  if (!client || !phone) { alert("Введите ФИО и телефон клиента"); return; }
+  if (!isPhoneComplete(phone)) { alert("Введите полный номер телефона: +998 XX XXX XX XX"); return; }
+  bookBtn.disabled = true;
+  bookBtn.textContent = "Сохранение...";
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2,"0");
+  const modalVin = document.getElementById("modal-vin") ? document.getElementById("modal-vin").value.trim().toUpperCase() : "";
+  const record = {
+    createdAt: `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`,
+    operator: "—",
+    station: modalContext.branch,
+    clientName: client,
+    phone,
+    vin: modalVin,
+    car: brand + (model ? " " + model : ""),
+    visitDate: modalContext.date,
+    visitTime: modalContext.time,
+    master: modalContext.master,
+    service: reason || "—",
+    status: "Записан",
+    note: "",
+  };
+
+  const res = await api({ action: "add", record });
+  const bookBtn2 = document.querySelector(".modal-actions .btn-primary");
+  if (bookBtn2) { bookBtn2.disabled = false; bookBtn2.textContent = "Записать"; }
+  if (res) {
+    document.getElementById("booking-modal").style.display = "none";
+    showAlert("Клиент записан ✓");
+    await loadRecords();
+    renderSchedule();
+  }
+}
+
+// ── TAB SWITCH ────────────────────────────────────────────
+function switchTab(t) {
+  ["registry","schedule","dashboard"].forEach(id => {
+    document.getElementById("page-" + id).style.display = t===id ? "" : "none";
+    document.getElementById("tab-" + id).classList.toggle("active", t===id);
+  });
+  if (t==="dashboard") renderDashboard();
+  if (t==="schedule") renderSchedule();
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────
+function renderDashboard() {
+  const total = records.length;
+  const arrived = records.filter(r => r.status==="Приехал").length;
+  const notArrived = records.filter(r => r.status==="Не приехал").length;
+  const scheduled = records.filter(r => r.status==="Записан").length;
+  const postponed = records.filter(r => r.status==="Перенесён").length;
+  const conv = total > 0 ? Math.round(arrived/total*100) : 0;
+
+  document.getElementById("kpi-grid").innerHTML = [
+    {label:"Всего записей", value:total, color:"#3B82F6", icon:"📋"},
+    {label:"Приехали", value:arrived, color:"#10B981", icon:"✅"},
+    {label:"Не приехали", value:notArrived, color:"#EF4444", icon:"❌"},
+    {label:"Ожидается", value:scheduled, color:"#8B5CF6", icon:"⏳"},
+    {label:"Перенесено", value:postponed, color:"#F59E0B", icon:"🔄"},
+    {label:"Конверсия", value: total>0 ? conv+"%" : "—", color:"#0F172A", icon:"📈"},
+  ].map(k => `<div class="kpi-card"><div class="kpi-icon">${k.icon}</div><div class="kpi-value" style="color:${k.color}">${k.value}</div><div class="kpi-label">${k.label}</div></div>`).join("");
+
+  document.getElementById("funnel-bars").innerHTML = [
+    {label:"Всего записей", value:total, color:"#3B82F6"},
+    {label:"Приехали", value:arrived, color:"#10B981"},
+    {label:"Не приехали", value:notArrived, color:"#EF4444"},
+    {label:"Перенесено", value:postponed, color:"#F59E0B"},
+    {label:"Ожидается", value:scheduled, color:"#8B5CF6"},
+  ].map(f => {
+    const pct = total>0 ? (f.value/total*100).toFixed(1) : 0;
+    return `<div class="funnel-item"><div class="funnel-row"><span class="funnel-label">${f.label}</span><span class="funnel-val">${f.value}</span></div><div class="funnel-track"><div class="funnel-bar" style="width:${pct}%;background:${f.color}"></div></div><div class="funnel-pct">${pct}% от записей</div></div>`;
+  }).join("");
+
+  document.getElementById("op-table-body").innerHTML = OPERATORS.map(op => {
+    const ops = records.filter(r => r.operator===op);
+    if (!ops.length) return "";
+    const arr = ops.filter(r => r.status==="Приехал").length;
+    const c = Math.round(arr/ops.length*100);
+    return `<tr><td>${op}</td><td style="text-align:right;color:#3B82F6;font-weight:700">${ops.length}</td><td style="text-align:right;color:#10B981;font-weight:700">${arr}</td><td style="text-align:right"><span class="conv-badge ${c>=50?"conv-good":"conv-bad"}">${c}%</span></td></tr>`;
+  }).join("");
+
+  document.getElementById("station-grid").innerHTML = STATIONS.map(st => {
+    const sts = records.filter(r => r.station===st);
+    if (!sts.length) return "";
+    const arr = sts.filter(r => r.status==="Приехал").length;
+    const c = Math.round(arr/sts.length*100);
+    return `<div class="station-card"><div class="station-name">${st}</div><div class="station-row"><span class="station-total">${sts.length}</span><span class="station-arrived">${arr} ✓</span></div><div class="station-track"><div class="station-bar" style="width:${c}%"></div></div><div class="station-pct">Конверсия ${c}%</div></div>`;
+  }).join("");
+}
+</script>
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:#0008;z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:16px">
+  <div style="width:44px;height:44px;border:4px solid #ffffff40;border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+  <div style="color:#fff;font-size:14px;font-weight:600;font-family:Segoe UI,sans-serif" id="loading-text">Сохранение...</div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+</body>
+</html>
