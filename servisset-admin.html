@@ -226,8 +226,6 @@
           <span id="sync-label">Подключение...</span>
         </div>
         <button class="btn-secondary" id="btn-refresh" onclick="loadRecords()">↻ Обновить</button>
-        <button class="btn-secondary" id="btn-1c" onclick="document.getElementById('csv-input').click()">↑ Загрузить из 1С</button>
-        <input type="file" id="csv-input" accept=".xlsx,.csv" style="display:none" onchange="handle1C(event)">
         <button class="btn-primary" id="btn-new" onclick="showForm()">+ Новая запись</button>
       </div>
     </div>
@@ -373,7 +371,13 @@
 
   <!-- ═══════════════════════════════════════════ DASHBOARD ══ -->
   <div id="page-dashboard" style="display:none">
-    <h1 style="font-size:20px;font-weight:700;margin-bottom:20px">Аналитика воронки</h1>
+    <div class="top-bar">
+      <div><h1 style="font-size:20px;font-weight:700">Аналитика воронки</h1></div>
+      <div class="top-bar-actions">
+        <button class="btn-secondary" id="btn-1c" onclick="document.getElementById('csv-input').click()">↑ Загрузить из 1С</button>
+        <input type="file" id="csv-input" accept=".xlsx,.csv" style="display:none" onchange="handle1C(event)">
+      </div>
+    </div>
     <div class="kpi-grid" id="kpi-grid"></div>
     <div class="analytics-grid">
       <div class="analytics-card"><h3>Воронка</h3><div id="funnel-bars"></div></div>
