@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aster Service — Планировщик (Оператор)</title>
+<title>Aster Service — Планировщик (Администратор)</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F8FAFC; color: #111827; min-height: 100vh; }
@@ -196,7 +196,7 @@
     <div class="header-tabs">
       <button class="tab-btn active" onclick="switchTab('registry')" id="tab-registry">Реестр</button>
       <button class="tab-btn" onclick="switchTab('schedule')" id="tab-schedule">График загрузки</button>
-      
+      <button class="tab-btn" onclick="switchTab('dashboard')" id="tab-dashboard">Аналитика</button>
     </div>
   </div>
 </div>
@@ -226,7 +226,8 @@
           <span id="sync-label">Подключение...</span>
         </div>
         <button class="btn-secondary" id="btn-refresh" onclick="loadRecords()">↻ Обновить</button>
-        
+        <button class="btn-secondary" id="btn-1c" onclick="document.getElementById('csv-input').click()">↑ Загрузить из 1С</button>
+        <input type="file" id="csv-input" accept=".xlsx,.csv" style="display:none" onchange="handle1C(event)">
         <button class="btn-primary" id="btn-new" onclick="showForm()">+ Новая запись</button>
       </div>
     </div>
@@ -334,7 +335,7 @@
         </table>
       </div>
     </div>
-    
+    <div class="hint"><b id="hint-title">Формат файла из 1С:</b> <span id="hint-text">CSV с колонками phone,visitDate. Первая строка — заголовок.</span></div>
   </div>
 
   <!-- ═══════════════════════════════════════════ SCHEDULE ══ -->
@@ -1183,9 +1184,6 @@ function handle1C(e) {
         }
       }
 
-      // Логируем первые 10 строк чтобы понять структуру
-
-
       for (const row of rows) {
         const col0 = String(row[0] || "").trim();
         const col1 = String(row[1] || "").trim();
@@ -1218,7 +1216,6 @@ function handle1C(e) {
           if (visitDate && (phone || vin || doc)) {
             visits.push({ phone, visitDate, vin, doc, amount: "", items: "", clientName, car });
           }
-          // DEBUG: первые 3 строки логируем
 
         } else {
           // Формат Б: Сводная ведомость по ЗН
