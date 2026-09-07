@@ -1207,12 +1207,12 @@ function handle1C(e) {
 
           // Точная структура (из консоли):
           // col0=ФИО, col2=ЗН, col4=Дата, col5=VIN, col6=Год, col7=Дней, col8=Телефон, col9=Адрес
-          const vinRaw = String(row[5] || "").trim().toUpperCase();
-          // VIN может быть 16-17 символов
-          const vin = /^[A-HJ-NPR-Z0-9]{15,17}$/.test(vinRaw) ? vinRaw : "";
+          const carVinRaw = String(row[5] || "").trim();
+          const vinMatch = carVinRaw.toUpperCase().match(/([A-HJ-NPR-Z0-9]{17})$/);
+          const vin = vinMatch ? vinMatch[1] : "";
+          const car = vinMatch ? carVinRaw.slice(0, carVinRaw.length - vinMatch[1].length).trim() : carVinRaw;
           const phoneRaw = String(row[8] || "").trim().replace(/\D/g, "");
           const phone = phoneRaw.startsWith("998") ? phoneRaw.slice(3) : phoneRaw.slice(-9);
-          const car = String(row[4] || "").trim();
           const clientName = col0;
 
           if (visitDate && (phone || vin || doc)) {
