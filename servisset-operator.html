@@ -88,6 +88,8 @@
   td.bold { font-weight: 600; }
   .status-cell { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .status-select { border: none !important; background: transparent !important; cursor: pointer; font-size: 12px; padding: 2px 4px !important; width: auto !important; }
+  .icon-btn { border: 1px solid #E5E7EB; background: #fff; border-radius: 6px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; padding: 0; line-height: 1; }
+  .icon-btn:hover { background: #F3F4F6; border-color: #D1D5DB; }
   .empty-row td { padding: 40px; text-align: center; color: #9CA3AF; }
 
   .skeleton { background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 6px; height: 16px; }
@@ -425,6 +427,62 @@
     <div class="modal-actions">
       <button class="btn-secondary" onclick="document.getElementById('booking-modal').style.display='none'">Отмена</button>
       <button class="btn-primary" id="modal-book-btn" onclick="bookFromModal()">Записать</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal" style="display:none" onclick="closeEditModal(event)">
+  <div class="modal">
+    <h3>Изменить запись</h3>
+    <div class="modal-sub" id="edit-modal-sub"></div>
+    <div class="form-field" style="margin-bottom:10px">
+      <label style="font-size:12px;color:#6B7280;margin-bottom:4px;display:block">ФИО клиента</label>
+      <input type="text" id="edit-client">
+    </div>
+    <div class="form-field" style="margin-bottom:10px">
+      <label style="font-size:12px;color:#6B7280;margin-bottom:4px;display:block">Телефон</label>
+      <input type="tel" id="edit-phone" oninput="phoneMask(this)">
+    </div>
+    <div class="form-field" style="margin-bottom:10px;position:relative">
+      <label style="font-size:12px;color:#6B7280;margin-bottom:4px;display:block">VIN</label>
+      <input type="text" id="edit-vin" maxlength="17" style="font-family:monospace;text-transform:uppercase;letter-spacing:1px">
+    </div>
+    <div class="form-field" style="margin-bottom:10px">
+      <label style="font-size:12px;color:#6B7280;margin-bottom:4px;display:block">Марка/Модель</label>
+      <input type="text" id="edit-car">
+    </div>
+    <div class="form-field" style="margin-bottom:10px">
+      <label style="font-size:12px;color:#6B7280;margin-bottom:4px;display:block">Мастер</label>
+      <input type="text" id="edit-master">
+    </div>
+    <div class="form-field" style="margin-bottom:10px">
+      <label style="font-size:12px;color:#6B7280;margin-bottom:4px;display:block">Причина обращения</label>
+      <input type="text" id="edit-service">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="document.getElementById('edit-modal').style.display='none'">Отмена</button>
+      <button class="btn-primary" id="edit-save-btn" onclick="saveEditRecord()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESCHEDULE MODAL -->
+<div class="modal-overlay" id="reschedule-modal" style="display:none" onclick="closeRescheduleModal(event)">
+  <div class="modal">
+    <h3>Перенести запись</h3>
+    <div class="modal-sub" id="reschedule-modal-sub"></div>
+    <div class="form-field" style="margin-bottom:10px">
+      <label style="font-size:12px;color:#6B7280;margin-bottom:4px;display:block">Новая дата</label>
+      <input type="date" id="reschedule-date">
+    </div>
+    <div class="form-field" style="margin-bottom:10px">
+      <label style="font-size:12px;color:#6B7280;margin-bottom:4px;display:block">Новое время</label>
+      <select id="reschedule-time"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="document.getElementById('reschedule-modal').style.display='none'">Отмена</button>
+      <button class="btn-primary" id="reschedule-save-btn" onclick="saveReschedule()">Перенести</button>
     </div>
   </div>
 </div>
@@ -931,6 +989,8 @@ function renderTable() {
             <option ${r.status==="Перенесён"?"selected":""}>Перенесён</option>
           </select>
           <span class="badge badge-${(r.status||"Записан").replace(" ","-")}">${r.status||"Записан"}</span>
+          <button class="icon-btn" title="Изменить запись" onclick="openEditModal(${r.id})">✏️</button>
+          <button class="icon-btn" title="Перенести на другую дату" onclick="openRescheduleModal(${r.id})">📅</button>
         </div>
       </td>
     </tr>`).join("");
@@ -945,6 +1005,93 @@ async function changeStatus(id, newStatus) {
   records = records.map(r => r.id==id ? {...r, status: newStatus} : r);
   renderTable();
   await api({ action: "updateStatus", id, status: newStatus });
+}
+
+// ── РЕДАКТИРОВАНИЕ ЗАПИСИ ────────────────────────────────
+let editRecordId = null;
+
+function openEditModal(id) {
+  const r = records.find(x => x.id == id);
+  if (!r) return;
+  editRecordId = id;
+  document.getElementById("edit-modal-sub").textContent =
+    (r.station||"") + " • " + (r.visitDate||"").slice(0,10) + " " + (r.visitTime||"");
+  document.getElementById("edit-client").value = r.clientName || "";
+  document.getElementById("edit-phone").value = r.phone || "";
+  document.getElementById("edit-vin").value = r.vin || "";
+  document.getElementById("edit-car").value = r.car || "";
+  document.getElementById("edit-master").value = r.master || "";
+  document.getElementById("edit-service").value = r.service || "";
+  document.getElementById("edit-modal").style.display = "flex";
+}
+
+function closeEditModal(e) {
+  if (e.target.id === "edit-modal") document.getElementById("edit-modal").style.display = "none";
+}
+
+async function saveEditRecord() {
+  if (!editRecordId) return;
+  const btn = document.getElementById("edit-save-btn");
+  btn.disabled = true; btn.textContent = "Сохранение...";
+  const fields = {
+    clientName: document.getElementById("edit-client").value.trim(),
+    phone: document.getElementById("edit-phone").value.trim(),
+    vin: document.getElementById("edit-vin").value.trim().toUpperCase(),
+    car: document.getElementById("edit-car").value.trim(),
+    master: document.getElementById("edit-master").value.trim(),
+    service: document.getElementById("edit-service").value.trim(),
+  };
+  const res = await api({ action: "updateRecord", id: editRecordId, fields });
+  btn.disabled = false; btn.textContent = "Сохранить";
+  if (res) {
+    records = records.map(r => r.id == editRecordId ? {...r, ...fields} : r);
+    renderTable();
+    document.getElementById("edit-modal").style.display = "none";
+    showAlert("Запись обновлена ✓");
+  }
+}
+
+// ── ПЕРЕНОС ЗАПИСИ ────────────────────────────────────────
+let rescheduleRecordId = null;
+
+function openRescheduleModal(id) {
+  const r = records.find(x => x.id == id);
+  if (!r) return;
+  rescheduleRecordId = id;
+  document.getElementById("reschedule-modal-sub").textContent =
+    (r.clientName||"") + " • " + (r.station||"") + " • сейчас на " + (r.visitDate||"").slice(0,10) + " " + (r.visitTime||"");
+  const dateInput = document.getElementById("reschedule-date");
+  dateInput.value = (r.visitDate||"").slice(0,10);
+  dateInput.min = new Date().toISOString().slice(0,10);
+  fillRescheduleTimes(r.visitTime);
+  document.getElementById("reschedule-modal").style.display = "flex";
+}
+
+function closeRescheduleModal(e) {
+  if (e.target.id === "reschedule-modal") document.getElementById("reschedule-modal").style.display = "none";
+}
+
+function fillRescheduleTimes(preselect) {
+  const sel = document.getElementById("reschedule-time");
+  const cur = preselect || sel.value;
+  sel.innerHTML = "";
+  TIME_SLOTS.forEach(t => sel.innerHTML += `<option ${t===cur?"selected":""}>${t}</option>`);
+}
+
+async function saveReschedule() {
+  if (!rescheduleRecordId) return;
+  const newDate = document.getElementById("reschedule-date").value;
+  const newTime = document.getElementById("reschedule-time").value;
+  if (!newDate) { alert("Выберите дату"); return; }
+  const btn = document.getElementById("reschedule-save-btn");
+  btn.disabled = true; btn.textContent = "Перенос...";
+  const res = await api({ action: "reschedule", id: rescheduleRecordId, visitDate: newDate, visitTime: newTime });
+  btn.disabled = false; btn.textContent = "Перенести";
+  if (res) {
+    document.getElementById("reschedule-modal").style.display = "none";
+    showAlert("Запись перенесена ✓");
+    await loadRecords();
+  }
 }
 
 // ── FORM ──────────────────────────────────────────────────
