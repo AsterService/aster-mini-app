@@ -41,7 +41,7 @@
   .field-error { font-size: 11px; color: #EF4444; margin-top: 3px; display: none; }
   .field-error.show { display: block; }
 
-  .badge { border-radius: 6px; padding: 2px 10px; font-size: 12px; font-weight: 600; white-space: nowrap; border: 1px solid transparent; display: inline-block; }
+  .badge { border-radius: 6px; padding: 1px 7px; font-size: 10.5px; font-weight: 600; white-space: nowrap; border: 1px solid transparent; display: inline-block; }
   .badge-Записан { background: #EFF6FF; color: #3B82F6; border-color: #BFDBFE; }
   .badge-Приехал { background: #ECFDF5; color: #10B981; border-color: #A7F3D0; }
   .badge-Не-приехал { background: #FEF2F2; color: #EF4444; border-color: #FECACA; }
@@ -77,17 +77,18 @@
 
   .table-wrap { background: #fff; border-radius: 12px; border: 1px solid #E5E7EB; overflow: hidden; }
   .table-scroll { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table { table-layout: fixed; width: 1062px; border-collapse: collapse; font-size: 11.5px; }
   thead tr { background: #F9FAFB; border-bottom: 1px solid #E5E7EB; }
-  th { padding: 10px 14px; text-align: left; font-weight: 600; color: #6B7280; white-space: nowrap; font-size: 12px; }
+  th { padding: 6px 8px; text-align: left; font-weight: 600; color: #6B7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 10.5px; }
   tbody tr { border-bottom: 1px solid #F3F4F6; }
   tbody tr:nth-child(even) { background: #FAFAFA; }
-  td { padding: 10px 14px; vertical-align: middle; }
-  td.mono { font-family: monospace; font-size: 12px; }
+  td { padding: 6px 8px; vertical-align: middle; overflow: hidden; }
+  td.mono { font-family: monospace; font-size: 11px; white-space: nowrap; }
   td.muted { color: #6B7280; }
   td.bold { font-weight: 600; }
-  .status-cell { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .status-select { border: none !important; background: transparent !important; cursor: pointer; font-size: 12px; padding: 2px 4px !important; width: auto !important; }
+  td.ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .status-cell { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .status-select { border: none !important; background: transparent !important; cursor: pointer; font-size: 11px; padding: 2px !important; width: auto !important; }
   .empty-row td { padding: 40px; text-align: center; color: #9CA3AF; }
 
   .skeleton { background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 6px; height: 16px; }
@@ -317,6 +318,11 @@
     <div class="table-wrap">
       <div class="table-scroll">
         <table>
+          <colgroup>
+            <col style="width:88px"><col style="width:68px"><col style="width:76px"><col style="width:90px">
+            <col style="width:130px"><col style="width:130px"><col style="width:90px"><col style="width:80px">
+            <col style="width:48px"><col style="width:76px"><col style="width:76px"><col style="width:110px">
+          </colgroup>
           <thead id="registry-thead">
             <tr>
               <th>Дата записи</th><th>Оператор</th><th>Филиал</th><th>Клиент</th>
@@ -916,18 +922,18 @@ function renderTable() {
   }
   tbody.innerHTML = filtered.map(r => `
     <tr>
-      <td>${r.createdAt||""}</td>
-      <td class="bold">${r.operator||""}</td>
-      <td class="muted">${r.station||""}</td>
-      <td>${r.clientName||""}</td>
+      <td class="ellipsis" style="white-space:nowrap">${r.createdAt||""}</td>
+      <td class="bold ellipsis">${r.operator||""}</td>
+      <td class="muted ellipsis">${r.station||""}</td>
+      <td class="ellipsis" title="${r.clientName||""}">${r.clientName||""}</td>
       <td class="mono">${r.phone||""}</td>
-      <td style="font-family:monospace;font-size:11px;color:#6B7280">${r.vin||""}</td>
-      <td>${r.car||""}</td>
-      <td>${(r.visitDate||"").slice(0,10)}</td>
+      <td style="font-family:monospace;font-size:11px;color:#6B7280;white-space:nowrap">${r.vin||""}</td>
+      <td class="ellipsis" title="${r.car||""}">${r.car||""}</td>
+      <td class="ellipsis" style="white-space:nowrap">${(r.visitDate||"").slice(0,10)}</td>
       <td style="white-space:nowrap">${r.visitTime||""}</td>
-      <td>${r.master||""}</td>
-      <td>${r.service||""}</td>
-      <td style="min-width:170px">
+      <td class="ellipsis" title="${r.master||""}">${r.master||""}</td>
+      <td class="ellipsis" title="${r.service||""}">${r.service||""}</td>
+      <td>
         <div class="status-cell">
           <select class="status-select" onchange="changeStatus(${r.id}, this.value)">
             <option ${r.status==="Записан"?"selected":""}>Записан</option>
