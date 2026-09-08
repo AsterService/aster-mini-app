@@ -77,14 +77,15 @@
 
   .table-wrap { background: #fff; border-radius: 12px; border: 1px solid #E5E7EB; overflow: hidden; }
   .table-scroll { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table { width: 100%; min-width: 1360px; border-collapse: collapse; font-size: 13px; }
   thead tr { background: #F9FAFB; border-bottom: 1px solid #E5E7EB; }
   th { padding: 10px 14px; text-align: left; font-weight: 600; color: #6B7280; white-space: nowrap; font-size: 12px; }
   tbody tr { border-bottom: 1px solid #F3F4F6; }
   tbody tr:nth-child(even) { background: #FAFAFA; }
   td { padding: 10px 14px; vertical-align: middle; }
-  td.mono { font-family: monospace; font-size: 12px; }
+  td.mono { font-family: monospace; font-size: 12px; white-space: nowrap; }
   td.muted { color: #6B7280; }
+  td.ellipsis { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   td.bold { font-weight: 600; }
   .status-cell { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .status-select { border: none !important; background: transparent !important; cursor: pointer; font-size: 12px; padding: 2px 4px !important; width: auto !important; }
@@ -969,18 +970,18 @@ function renderTable() {
   }
   tbody.innerHTML = filtered.map(r => `
     <tr>
-      <td>${r.createdAt||""}</td>
+      <td style="white-space:nowrap">${r.createdAt||""}</td>
       <td class="bold">${r.operator||""}</td>
       <td class="muted">${r.station||""}</td>
-      <td>${r.clientName||""}</td>
+      <td class="ellipsis" title="${r.clientName||""}">${r.clientName||""}</td>
       <td class="mono">${r.phone||""}</td>
-      <td style="font-family:monospace;font-size:11px;color:#6B7280">${r.vin||""}</td>
-      <td>${r.car||""}</td>
-      <td>${(r.visitDate||"").slice(0,10)}</td>
+      <td style="font-family:monospace;font-size:11px;color:#6B7280;white-space:nowrap">${r.vin||""}</td>
+      <td class="ellipsis" title="${r.car||""}">${r.car||""}</td>
+      <td style="white-space:nowrap">${(r.visitDate||"").slice(0,10)}</td>
       <td style="white-space:nowrap">${r.visitTime||""}</td>
-      <td>${r.master||""}</td>
-      <td>${r.service||""}</td>
-      <td style="min-width:170px">
+      <td class="ellipsis" title="${r.master||""}">${r.master||""}</td>
+      <td class="ellipsis" title="${r.service||""}">${r.service||""}</td>
+      <td style="min-width:210px">
         <div class="status-cell">
           <select class="status-select" onchange="changeStatus(${r.id}, this.value)">
             <option ${r.status==="Записан"?"selected":""}>Записан</option>
