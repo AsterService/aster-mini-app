@@ -77,15 +77,15 @@
 
   .table-wrap { background: #fff; border-radius: 12px; border: 1px solid #E5E7EB; overflow: hidden; }
   .table-scroll { overflow-x: auto; }
-  table { width: 100%; min-width: 1180px; border-collapse: collapse; font-size: 11.5px; }
+  table { table-layout: fixed; border-collapse: collapse; font-size: 11.5px; }
   thead tr { background: #F9FAFB; border-bottom: 1px solid #E5E7EB; }
-  th { padding: 6px 8px; text-align: left; font-weight: 600; color: #6B7280; white-space: nowrap; font-size: 10.5px; }
+  th { padding: 6px 8px; text-align: left; font-weight: 600; color: #6B7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 10.5px; }
   tbody tr { border-bottom: 1px solid #F3F4F6; }
   tbody tr:nth-child(even) { background: #FAFAFA; }
-  td { padding: 6px 8px; vertical-align: middle; }
+  td { padding: 6px 8px; vertical-align: middle; overflow: hidden; }
   td.mono { font-family: monospace; font-size: 11px; white-space: nowrap; }
   td.muted { color: #6B7280; }
-  td.ellipsis { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  td.ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   td.bold { font-weight: 600; }
   .status-cell { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
   .status-select { border: none !important; background: transparent !important; cursor: pointer; font-size: 11px; padding: 2px !important; width: auto !important; }
@@ -321,6 +321,11 @@
     <div class="table-wrap">
       <div class="table-scroll">
         <table>
+          <colgroup>
+            <col style="width:100px"><col style="width:76px"><col style="width:82px"><col style="width:90px">
+            <col style="width:130px"><col style="width:130px"><col style="width:90px"><col style="width:82px">
+            <col style="width:50px"><col style="width:80px"><col style="width:80px"><col style="width:160px">
+          </colgroup>
           <thead id="registry-thead">
             <tr>
               <th>Дата записи</th><th>Оператор</th><th>Филиал</th><th>Клиент</th>
@@ -970,18 +975,18 @@ function renderTable() {
   }
   tbody.innerHTML = filtered.map(r => `
     <tr>
-      <td style="white-space:nowrap">${r.createdAt||""}</td>
-      <td class="bold">${r.operator||""}</td>
-      <td class="muted">${r.station||""}</td>
+      <td class="ellipsis" style="white-space:nowrap">${r.createdAt||""}</td>
+      <td class="bold ellipsis">${r.operator||""}</td>
+      <td class="muted ellipsis">${r.station||""}</td>
       <td class="ellipsis" title="${r.clientName||""}">${r.clientName||""}</td>
       <td class="mono">${r.phone||""}</td>
       <td style="font-family:monospace;font-size:11px;color:#6B7280;white-space:nowrap">${r.vin||""}</td>
       <td class="ellipsis" title="${r.car||""}">${r.car||""}</td>
-      <td style="white-space:nowrap">${(r.visitDate||"").slice(0,10)}</td>
+      <td class="ellipsis" style="white-space:nowrap">${(r.visitDate||"").slice(0,10)}</td>
       <td style="white-space:nowrap">${r.visitTime||""}</td>
       <td class="ellipsis" title="${r.master||""}">${r.master||""}</td>
       <td class="ellipsis" title="${r.service||""}">${r.service||""}</td>
-      <td style="min-width:150px">
+      <td>
         <div class="status-cell">
           <select class="status-select" onchange="changeStatus(${r.id}, this.value)">
             <option ${r.status==="Записан"?"selected":""}>Записан</option>
