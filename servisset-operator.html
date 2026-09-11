@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aster Service — Планировщик (Оператор)</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="favicon-192.png">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F8FAFC; color: #111827; min-height: 100vh; }
@@ -975,7 +979,7 @@ function renderTable() {
   }
   tbody.innerHTML = filtered.map(r => `
     <tr>
-      <td class="ellipsis" style="white-space:nowrap">${r.createdAt||""}</td>
+      <td><div>${(r.createdAt||"").split(" ")[0]||""}</div><div class="muted" style="font-size:10px">${(r.createdAt||"").split(" ")[1]||""}</div></td>
       <td class="bold ellipsis">${r.operator||""}</td>
       <td class="muted ellipsis">${r.station||""}</td>
       <td class="ellipsis" title="${r.clientName||""}">${r.clientName||""}</td>
