@@ -879,20 +879,45 @@ async function api(payload) {
     payload.action === "matchVisits" ? "Сверка с 1С..." : "Сохранение..."
   );
   setSyncState("syncing", "Синхронизация...");
+  // Apps Script иногда не успевает подготовить ответ к моменту редиректа —
+  // тогда вместо JSON приходит служебная HTML-страница Google. Это временная
+  // штука, поэтому при такой ошибке пробуем ещё пару раз с небольшой паузой,
+  // прежде чем показывать ошибку оператору.
+  const MAX_ATTEMPTS = 3;
+  let lastErr;
   try {
-    let res;
-    if (!isWrite) {
-      res = await fetch(`${scriptUrl}?action=${payload.action}`, { method: "GET" });
-    } else {
-      res = await fetch(scriptUrl, { method: "POST", body: JSON.stringify(payload) });
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        let res;
+        if (!isWrite) {
+          res = await fetch(`${scriptUrl}?action=${payload.action}`, { method: "GET" });
+        } else {
+          res = await fetch(scriptUrl, { method: "POST", body: JSON.stringify(payload) });
+        }
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (parseErr) {
+          throw new Error("NOT_JSON");
+        }
+        if (data.error) throw new Error(data.error);
+        setSyncState("ok", "Синхронизировано");
+        return data;
+      } catch(e) {
+        lastErr = e;
+        if (e.message === "NOT_JSON" && attempt < MAX_ATTEMPTS) {
+          await new Promise(r => setTimeout(r, 700 * attempt));
+          continue;
+        }
+        break;
+      }
     }
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    setSyncState("ok", "Синхронизировано");
-    return data;
-  } catch(e) {
     setSyncState("error", "Ошибка связи");
-    showAlert("Ошибка: " + e.message, true);
+    const msg = lastErr && lastErr.message === "NOT_JSON"
+      ? "Google Apps Script временно не отвечает. Попробуйте обновить через несколько секунд."
+      : "Ошибка: " + (lastErr ? lastErr.message : "неизвестная ошибка");
+    showAlert(msg, true);
     return null;
   } finally {
     if (isWrite) hideLoading();
