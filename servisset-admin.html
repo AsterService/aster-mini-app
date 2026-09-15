@@ -1573,7 +1573,10 @@ function renderSchedule() {
   wrap.appendChild(table);
 }
 
+let modalViewRecordId = null;
+
 function showBookedInfo(rec) {
+  modalViewRecordId = rec.id;
   document.getElementById("modal-title").textContent = "Информация о записи";
   document.getElementById("modal-sub").textContent = (rec.station || "") + " • " + (rec.master || "");
   document.getElementById("modal-info").innerHTML =
@@ -1585,25 +1588,53 @@ function showBookedInfo(rec) {
     "<div><span>Авто:</span> <b>" + (rec.car || "") + "</b></div>" +
     "<div><span>Причина:</span> <b>" + (rec.service || "") + "</b></div>" +
     "<div><span>Статус:</span> <b>" + (rec.status || "") + "</b></div>";
-  // Скрываем поля ввода, показываем только инфо
+  // Скрываем поля ввода, показываем только инфо и VIN
   document.getElementById("modal-client").closest(".form-field").style.display = "none";
   document.getElementById("modal-phone").closest(".form-field").style.display = "none";
   document.getElementById("modal-brand").closest(".form-field").style.display = "none";
   document.getElementById("modal-model").closest(".form-field").style.display = "none";
   document.getElementById("modal-reason").closest(".form-field").style.display = "none";
-  document.querySelector(".modal-actions .btn-primary").style.display = "none";
+  // VIN — подставляем текущее значение записи (не оставляем то, что было введено в прошлый раз)
+  const vinInput = document.getElementById("modal-vin");
+  vinInput.value = rec.vin || "";
+  document.getElementById("modal-vin-status").textContent = "";
+  // Кнопка "Записать" превращается в "Сохранить VIN" для существующей записи
+  const btn = document.querySelector(".modal-actions .btn-primary");
+  btn.style.display = "";
+  btn.textContent = "Сохранить VIN";
+  btn.onclick = saveVinFromModal;
   document.getElementById("booking-modal").style.display = "flex";
+}
+
+async function saveVinFromModal() {
+  if (!modalViewRecordId) return;
+  const btn = document.querySelector(".modal-actions .btn-primary");
+  if (btn.disabled) return;
+  const vin = document.getElementById("modal-vin").value.trim().toUpperCase();
+  btn.disabled = true; btn.textContent = "Сохранение...";
+  const res = await api({ action: "updateRecord", id: modalViewRecordId, fields: { vin } });
+  btn.disabled = false; btn.textContent = "Сохранить VIN";
+  if (res) {
+    records = records.map(r => r.id == modalViewRecordId ? {...r, vin} : r);
+    document.getElementById("booking-modal").style.display = "none";
+    showAlert("VIN сохранён ✓");
+    renderSchedule();
+  }
 }
 
 // ── BOOKING MODAL ─────────────────────────────────────────
 function openBookingModal(branch, master, time, date) {
   modalContext = { branch, master, time, date };
+  modalViewRecordId = null;
   // Показываем все поля ввода (могли быть скрыты при просмотре записи)
   ["modal-client","modal-phone","modal-brand","modal-model","modal-reason"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.closest(".form-field").style.display = "";
   });
-  document.querySelector(".modal-actions .btn-primary").style.display = "";
+  const bookBtn0 = document.querySelector(".modal-actions .btn-primary");
+  bookBtn0.style.display = "";
+  bookBtn0.textContent = "Записать";
+  bookBtn0.onclick = bookFromModal;
   document.getElementById("modal-title").textContent = "Записать клиента";
   document.getElementById("modal-sub").textContent = branch + " • " + master;
   document.getElementById("modal-info").innerHTML =
