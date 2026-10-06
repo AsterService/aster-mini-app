@@ -891,7 +891,10 @@ async function api(payload) {
         let res;
         try {
           if (!isWrite) {
-            res = await fetch(`${scriptUrl}?action=${payload.action}`, { method: "GET" });
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 20000);
+            try { res = await fetch(`${scriptUrl}?action=${payload.action}`, { method: "GET", signal: ctrl.signal }); }
+            finally { clearTimeout(timer); }
           } else {
             res = await fetch(scriptUrl, { method: "POST", body: JSON.stringify(payload) });
           }
@@ -931,9 +934,18 @@ async function api(payload) {
   }
 }
 
+let lastLoadAt = Date.now();
 async function loadAll() {
   await Promise.all([loadRecords(), loadMasters()]);
+  lastLoadAt = Date.now();
 }
+
+// После долгого простоя вкладки соединение с Apps Script «протухает» — обновляем данные при возвращении
+document.addEventListener("visibilitychange", function() {
+  if (document.visibilityState === "visible" && Date.now() - lastLoadAt > 60000) {
+    loadAll().then(() => { if (typeof renderSchedule === "function" && currentTab === "schedule") renderSchedule(); });
+  }
+});
 
 async function loadRecords() {
   setSyncState("syncing", "Загрузка...");
