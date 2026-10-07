@@ -892,7 +892,7 @@ async function api(payload) {
         try {
           if (!isWrite) {
             const ctrl = new AbortController();
-            const timer = setTimeout(() => ctrl.abort(), 20000);
+            const timer = setTimeout(() => ctrl.abort(), 60000);
             try { res = await fetch(`${scriptUrl}?action=${payload.action}`, { method: "GET", signal: ctrl.signal }); }
             finally { clearTimeout(timer); }
           } else {
@@ -949,9 +949,16 @@ document.addEventListener("visibilitychange", function() {
 
 async function loadRecords() {
   setSyncState("syncing", "Загрузка...");
+  if (!records.length) {
+    try {
+      const c = JSON.parse(localStorage.getItem("servisset_records_cache") || "null");
+      if (c && c.records && c.records.length) { records = c.records.map(normalizeRecord); renderTable(); setSyncState("syncing", "Показаны данные от " + new Date(c.ts).toLocaleTimeString("ru-RU", {hour:"2-digit",minute:"2-digit"}) + ", обновляю..."); }
+    } catch (e) {}
+  }
   const data = await api({ action: "getAll" });
   if (!data) return;
   records = (data.records || []).map(normalizeRecord);
+  try { localStorage.setItem("servisset_records_cache", JSON.stringify({ ts: Date.now(), records: data.records || [] })); } catch (e) {}
   renderTable();
 }
 
@@ -979,9 +986,13 @@ function normalizeRecord(r) {
 }
 
 async function loadMasters() {
+  if (!Object.keys(masters).length) {
+    try { const c = JSON.parse(localStorage.getItem("servisset_masters_cache") || "null"); if (c) masters = c; } catch (e) {}
+  }
   const data = await api({ action: "getMasters" });
   if (!data) return;
   masters = data.masters || {};
+  try { localStorage.setItem("servisset_masters_cache", JSON.stringify(masters)); } catch (e) {}
   // Fallback demo masters if sheet empty
   if (!Object.keys(masters).length) {
     STATIONS.forEach(s => masters[s] = ["Мастер 1","Мастер 2","Мастер 3"]);
