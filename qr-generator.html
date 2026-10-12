@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aster Service — Генератор QR</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: #F8FAFC; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 30px 20px; }
+.wrap { width: 100%; max-width: 520px; }
+.header { text-align: center; margin-bottom: 28px; }
+.logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.logo-icon { width: 42px; height: 42px; background: #0F172A; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.logo-icon svg { width: 26px; height: 26px; }
+.logo-name { font-size: 22px; font-weight: 700; color: #0F172A; }
+.logo-name span { color: #4A9FBF; }
+.header-sub { font-size: 13px; color: #6B7280; }
+.card { background: #fff; border-radius: 16px; border: 1px solid #E5E7EB; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.card-title { font-size: 15px; font-weight: 700; color: #374151; margin-bottom: 20px; }
+.field { margin-bottom: 16px; }
+.label { font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; display: block; }
+input, select { width: 100%; padding: 11px 14px; border: 1.5px solid #E5E7EB; border-radius: 10px; font-size: 14px; font-family: inherit; color: #111827; outline: none; background: #fff; transition: border-color 0.15s; }
+input:focus, select:focus { border-color: #4A9FBF; }
+input.vin { font-family: monospace; text-transform: uppercase; letter-spacing: 2px; }
+.vin-hint { display: flex; justify-content: space-between; font-size: 11px; color: #9CA3AF; margin-top: 5px; }
+.vin-count { font-weight: 700; }
+.vin-count.ok { color: #10B981; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* TYPE SELECTOR */
+.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.type-card { border: 2px solid #E5E7EB; border-radius: 12px; padding: 14px 12px; text-align: center; cursor: pointer; background: #fff; transition: all 0.15s; user-select: none; }
+.type-card:hover { border-color: #BAE6FD; background: #F0F9FF; }
+.type-card.active { border-color: #4A9FBF; background: #EFF6FF; }
+.type-card.active .type-title { color: #0369A1; }
+.type-icon { font-size: 24px; margin-bottom: 6px; }
+.type-title { font-size: 13px; font-weight: 700; color: #374151; }
+.type-sub { font-size: 11px; color: #9CA3AF; margin-top: 3px; }
+
+.btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.btn-primary { background: #0F172A; color: #fff; }
+.btn-primary:hover { background: #1E293B; }
+.btn-secondary { background: #F1F5F9; color: #374151; margin-top: 10px; }
+.btn-print { background: #4A9FBF; color: #fff; margin-top: 10px; }
+
+/* RESULT */
+.result { display: none; }
+.result.show { display: block; }
+.qr-card { background: #fff; border-radius: 16px; border: 1px solid #E5E7EB; padding: 28px 24px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.badge { display: inline-block; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 700; margin-bottom: 14px; }
+.badge-new { background: #ECFDF5; color: #065F46; }
+.badge-exist { background: #EFF6FF; color: #1D4ED8; }
+.client-box { background: #F8FAFC; border-radius: 10px; padding: 14px 16px; margin-bottom: 18px; text-align: left; }
+.client-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #F3F4F6; font-size: 13px; }
+.client-row:last-child { border-bottom: none; }
+.cl { color: #9CA3AF; }
+.cv { font-weight: 600; color: #111827; font-family: monospace; }
+.cv.name { font-family: inherit; }
+.qr-wrap { display: inline-block; padding: 16px; background: #fff; border: 2px solid #E5E7EB; border-radius: 12px; margin-bottom: 16px; }
+.link-box { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 10px 14px; font-size: 11px; color: #1D4ED8; word-break: break-all; font-family: monospace; margin-bottom: 16px; cursor: pointer; }
+.link-box:hover { background: #DBEAFE; }
+.hint { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #92400E; line-height: 1.6; margin-top: 14px; }
+
+@media print {
+  body { background: #fff; padding: 0; }
+  .card { display: none; }
+  .btn-secondary, .btn-print, .link-box, .hint { display: none; }
+  .result { display: block !important; }
+  .qr-card { border: none; box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4A9FBF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </div>
+      <div class="logo-name"><span>Aster</span> Service</div>
+    </div>
+    <div class="header-sub">Генератор QR-кода для регистрации клиента</div>
+  </div>
+
+  <!-- ФОРМА -->
+  <div class="card">
+    <div class="card-title">Данные клиента из 1С</div>
+
+    <div class="field">
+      <div class="label">Тип клиента</div>
+      <div class="type-grid">
+        <div class="type-card active" id="btn-new" onclick="selectType('new')">
+          <div class="type-icon">🆕</div>
+          <div class="type-title">Новый клиент</div>
+          <div class="type-sub">Первый визит, нет ЗН</div>
+        </div>
+        <div class="type-card" id="btn-exist" onclick="selectType('existing')">
+          <div class="type-icon">🔄</div>
+          <div class="type-title">Существующий</div>
+          <div class="type-sub">Уже обслуживался</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">ФИО клиента</label>
+      <input type="text" id="inp-name" placeholder="Ибрагимов Арсен Акбарович" oninput="resetResult()">
+    </div>
+
+    <div class="field">
+      <label class="label">Филиал (где продан автомобиль)</label>
+      <select id="inp-branch" onchange="resetResult()">
+        <option value="">Выберите филиал</option>
+        <option value="Рохат">Рохат</option>
+        <option value="Ахмад Дониш">Ахмад Дониш</option>
+        <option value="Самарканд">Самарканд</option>
+        <option value="Бухара">Бухара</option>
+        <option value="Наманган">Наманган</option>
+        <option value="Карши">Карши</option>
+        <option value="Навои">Навои</option>
+      </select>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label class="label">Марка</label>
+        <select id="inp-brand" onchange="onBrand()">
+          <option value="">Выберите</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="label">Модель</label>
+        <select id="inp-model" onchange="resetResult()">
+          <option value="">Сначала марку</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">VIN код (17 символов)</label>
+      <input type="text" id="inp-vin" class="vin" placeholder="XWBAD6HJ0CG000001" maxlength="17" oninput="onVin()">
+      <div class="vin-hint">
+        <span>Только латиница и цифры, без I O Q</span>
+        <span class="vin-count" id="vin-cnt">0 / 17</span>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="generate()">Сгенерировать QR-код</button>
+  </div>
+
+  <!-- РЕЗУЛЬТАТ -->
+  <div class="result" id="result">
+    <div class="qr-card">
+      <div id="result-badge"></div>
+      <div class="client-box" id="result-info"></div>
+      <div class="qr-wrap"><div id="qr-box"></div></div>
+      <p style="font-size:12px;color:#6B7280;margin-bottom:12px">
+        Клиент сканирует QR → открывается бот → данные заполнены → нажимает «Подтвердить»
+      </p>
+      <div class="link-box" id="result-link" onclick="copyLink()"></div>
+      <button class="btn btn-print" onclick="window.print()">🖨️ Распечатать</button>
+      <button class="btn btn-secondary" onclick="resetAll()">← Новый QR</button>
+      <div class="hint">
+        <b>Инструкция:</b> Распечатайте QR и вложите в заказ-наряд. Клиент сканирует камерой телефона — откроется бот Aster Service с уже заполненными данными.
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+const BOT = "AsterService_bot";
+const BRANDS = {
+  "Chevrolet": ["Cobalt","Equinox","Malibu","Spark","Tracker","Tahoe","Captiva","Lacetti","Nexia 3","Onix","Monza"],
+  "Chery":     ["Tiggo 2","Tiggo 7","Tiggo 8","Arrizo 6","Arrizo 8"],
+  "Haval":     ["M6","H6","H9","Jolion","Dargo","Wingle"],
+  "KIA":       ["Cerato","K3","K5","Sportage","Sorento","Stinger","Carnival","Sonet","Seltos","Picanto","Rio"],
+  "BYD":       ["Yuan Up","Han","Tang","Song Plus","Song Pro","SeaLion 7","Seal 6","Chazor"],
+  "Changan":   ["CS55","UNI-T","UNI-K","UNI-V"],
+  "Lixiang":   ["L6","L7","L9"],
+  "Deepal":    ["S07","S03","S05"],
+  "Jetour":    ["X50","X70","X90","Dashing","T2","T1"],
+  "Dongfeng":  ["008"],
+  "LADA":      ["Granta","Vesta","Niva Legend","Niva Travel","Largus"],
+  "Hyundai":   ["Santa Fe","Sonata","Elantra","Palisade","Tucson"]
+};
+
+var clientType = "new";
+
+// Заполняем марки при загрузке
+window.onload = function() {
+  var brandSel = document.getElementById("inp-brand");
+  Object.keys(BRANDS).forEach(function(b) {
+    var opt = document.createElement("option");
+    opt.value = b;
+    opt.textContent = b;
+    brandSel.appendChild(opt);
+  });
+};
+
+function selectType(type) {
+  clientType = type;
+  document.getElementById("btn-new").className = "type-card" + (type === "new" ? " active" : "");
+  document.getElementById("btn-exist").className = "type-card" + (type === "existing" ? " active" : "");
+  resetResult();
+}
+
+function onBrand() {
+  var brand = document.getElementById("inp-brand").value;
+  var modelSel = document.getElementById("inp-model");
+  // Очищаем
+  while (modelSel.firstChild) modelSel.removeChild(modelSel.firstChild);
+  var defaultOpt = document.createElement("option");
+  defaultOpt.value = "";
+  defaultOpt.textContent = brand ? "Выберите модель" : "Сначала марку";
+  modelSel.appendChild(defaultOpt);
+  // Добавляем модели
+  if (brand && BRANDS[brand]) {
+    BRANDS[brand].forEach(function(m) {
+      var opt = document.createElement("option");
+      opt.value = m;
+      opt.textContent = m;
+      modelSel.appendChild(opt);
+    });
+  }
+  resetResult();
+}
+
+function onVin() {
+  var inp = document.getElementById("inp-vin");
+  inp.value = inp.value.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g, "");
+  var len = inp.value.length;
+  var cnt = document.getElementById("vin-cnt");
+  cnt.textContent = len + " / 17";
+  cnt.className = "vin-count" + (len === 17 ? " ok" : "");
+  resetResult();
+}
+
+function resetResult() {
+  document.getElementById("result").classList.remove("show");
+}
+
+function resetAll() {
+  document.getElementById("inp-name").value = "";
+  document.getElementById("inp-branch").value = "";
+  document.getElementById("inp-brand").value = "";
+  onBrand();
+  document.getElementById("inp-vin").value = "";
+  document.getElementById("vin-cnt").textContent = "0 / 17";
+  document.getElementById("vin-cnt").className = "vin-count";
+  selectType("new");
+  resetResult();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function generate() {
+  var name   = document.getElementById("inp-name").value.trim();
+  var branch = document.getElementById("inp-branch").value;
+  var brand  = document.getElementById("inp-brand").value;
+  var model  = document.getElementById("inp-model").value;
+  var vin    = document.getElementById("inp-vin").value.trim();
+
+  if (!name)   { alert("Введите ФИО клиента"); return; }
+  if (!branch) { alert("Выберите филиал"); return; }
+  if (!brand)  { alert("Выберите марку"); return; }
+  if (!model)  { alert("Выберите модель"); return; }
+  if (vin.length !== 17) { alert("VIN должен содержать ровно 17 символов"); return; }
+
+  // Кодируем данные
+  var data = [vin, name, brand, model, clientType, branch].join("|");
+  var encoded = btoa(unescape(encodeURIComponent(data)));
+  var safe = encoded.replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,"");
+  // Ссылка открывает Mini App через прямую ссылку с параметром
+  var url = "https://t.me/AsterService_bot/cabinet?startapp=" + safe;
+
+  // Бейдж
+  var badge = document.getElementById("result-badge");
+  if (clientType === "new") {
+    badge.innerHTML = '<span class="badge badge-new">🆕 Новый клиент</span>';
+  } else {
+    badge.innerHTML = '<span class="badge badge-exist">🔄 Существующий клиент</span>';
+  }
+
+  // Инфо о клиенте
+  document.getElementById("result-info").innerHTML =
+    '<div class="client-row"><span class="cl">ФИО</span><span class="cv name">' + name + '</span></div>' +
+    '<div class="client-row"><span class="cl">Филиал</span><span class="cv name">' + branch + '</span></div>' +
+    '<div class="client-row"><span class="cl">Автомобиль</span><span class="cv name">' + brand + ' ' + model + '</span></div>' +
+    '<div class="client-row"><span class="cl">VIN</span><span class="cv">' + vin + '</span></div>' +
+    '<div class="client-row"><span class="cl">Тип</span><span class="cv name">' + (clientType === "new" ? "Новый клиент" : "Существующий") + '</span></div>';
+
+  // QR
+  document.getElementById("qr-box").innerHTML = "";
+  new QRCode(document.getElementById("qr-box"), {
+    text: url,
+    width: 200,
+    height: 200,
+    colorDark: "#0F172A",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  document.getElementById("result-link").textContent = url;
+  document.getElementById("result").classList.add("show");
+  setTimeout(function() {
+    document.getElementById("result").scrollIntoView({ behavior: "smooth" });
+  }, 100);
+}
+
+function copyLink() {
+  var url = document.getElementById("result-link").textContent;
+  navigator.clipboard.writeText(url).then(function() {
+    var box = document.getElementById("result-link");
+    var orig = box.textContent;
+    box.textContent = "✓ Ссылка скопирована!";
+    setTimeout(function() { box.textContent = orig; }, 2000);
+  });
+}
+</script>
+</body>
+</html>
