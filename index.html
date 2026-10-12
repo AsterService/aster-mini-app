@@ -713,7 +713,7 @@ function decodeStartParam() {
     const decoded = decodeURIComponent(escape(atob(base64)));
     const parts = decoded.split("|");
     if (parts.length < 2) return null;
-    return { vin: parts[0]||"", name: parts[1]||"", brand: parts[2]||"", model: parts[3]||"", clientType: parts[4]||"existing" };
+    return { vin: parts[0]||"", name: parts[1]||"", brand: parts[2]||"", model: parts[3]||"", clientType: parts[4]||"existing", branch: parts[5]||"" };
   } catch(e) {
     console.error("QR decode error:", e);
     return null;
@@ -789,6 +789,7 @@ function showQrConfirm(qrData) {
     ["Автомобиль", (qrData.brand || "") + " " + (qrData.model || "")],
     ["VIN", qrData.vin]
   ];
+  if (qrData.branch) rows.push(["Филиал", qrData.branch]);
   rows.forEach(function(r) {
     const row = document.createElement("div");
     row.style.cssText = "display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F3F4F6;font-size:13px";
@@ -847,7 +848,7 @@ function showQrConfirm(qrData) {
   const model = qrData.model;
   const clientType = qrData.clientType;
   btn.addEventListener("click", function() {
-    confirmQrReg(vin, name, brand, model, clientType);
+    confirmQrReg(vin, name, brand, model, clientType, qrData.branch);
   });
   wrap.appendChild(btn);
   el.appendChild(wrap);
@@ -888,7 +889,7 @@ function requestTgPhone() {
   }
 }
 
-async function confirmQrReg(vin, name, brand, model, clientType) {
+async function confirmQrReg(vin, name, brand, model, clientType, branch) {
   const phone = document.getElementById("qr-phone").value.trim();
   if (!isPhoneComplete(phone)) { showToast("Введите полный номер телефона"); return; }
   profile = {
@@ -896,6 +897,7 @@ async function confirmQrReg(vin, name, brand, model, clientType) {
     tgId: tgUser ? tgUser.id : "",
     tgName: tgUser ? tgUser.first_name : "",
     clientType: clientType || "existing",
+    branch: branch || "",
     cars: [{ brand: brand, model: model, vin: vin }],
     activeCarIndex: 0
   };
