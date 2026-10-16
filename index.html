@@ -840,6 +840,7 @@ function showQrConfirm(qrData) {
 
   // Кнопка
   const btn = document.createElement("button");
+  btn.id = "qr-reg-btn";
   btn.style.cssText = "width:100%;padding:14px;background:#1B3A5C;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer";
   btn.textContent = "✅ Подтвердить и зарегистрироваться";
   const vin = qrData.vin;
@@ -892,6 +893,10 @@ function requestTgPhone() {
 async function confirmQrReg(vin, name, brand, model, clientType, branch) {
   const phone = document.getElementById("qr-phone").value.trim();
   if (!isPhoneComplete(phone)) { showToast("Введите полный номер телефона"); return; }
+  if (window._qrRegBusy) return;
+  window._qrRegBusy = true;
+  const regBtn = document.querySelector("#qr-reg-btn");
+  if (regBtn) { regBtn.disabled = true; regBtn.textContent = "⏳ Регистрируем..."; regBtn.style.opacity = "0.6"; }
   profile = {
     name: name, phone: phone,
     tgId: tgUser ? tgUser.id : "",
@@ -1273,6 +1278,8 @@ function firstRegister() {
   if (!model) { showFieldError("ferr-model"); valid = false; } else hideFieldError("ferr-model");
   if (!validateVin(vin)) { showFieldError("ferr-vin"); valid = false; } else hideFieldError("ferr-vin");
   if (!valid) return;
+  if (window._fregBusy) return;
+  window._fregBusy = true;
   profile = { name, phone, tgId: tgUser?.id, tgName: tgUser?.first_name, cars: [{ brand, model, vin }], activeCarIndex: 0 };
   saveProfileLocal();
   if (SCRIPT_URL) apiCall({ action: "registerClient", client: profile });
