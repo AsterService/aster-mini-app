@@ -241,43 +241,43 @@
   <div class="branch-card">
     <div class="branch-name">Рохат (Ташкент)</div>
     <div class="branch-addr">Бектемирский район, мх. Нурафшон</div>
-    <a href="tel:+998555063838" class="branch-phone">📞 +998 55 506 38 38</a>
+    <a href="tel:+998555167474" class="branch-phone">📞 +998 55 516 74 74</a>
     <a href="https://yandex.ru/navi/org/adm_aster/215116590272?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
   </div>
   <div class="branch-card">
     <div class="branch-name">Ахмад Дониш (Ташкент)</div>
     <div class="branch-addr">ул. Байроктол, 36Б</div>
-    <a href="tel:+998555063838" class="branch-phone">📞 +998 55 506 38 38</a>
+    <a href="tel:+998555167474" class="branch-phone">📞 +998 55 516 74 74</a>
     <a href="https://yandex.ru/navi/org/aster_auto_city/210418048375?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
   </div>
   <div class="branch-card">
     <div class="branch-name">Самарканд</div>
     <div class="branch-addr">Самаркандская кольцевая дорога, 50A</div>
-    <a href="tel:+998555063838" class="branch-phone">📞 +998 55 506 38 38</a>
+    <a href="tel:+998555167474" class="branch-phone">📞 +998 55 516 74 74</a>
     <a href="https://yandex.ru/navi/org/aster_auto_city/190021696533?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
   </div>
   <div class="branch-card">
     <div class="branch-name">Бухара</div>
     <div class="branch-addr">ул. Мустакиллик, 55/1А</div>
-    <a href="tel:+998555063838" class="branch-phone">📞 +998 55 506 38 38</a>
+    <a href="tel:+998555167474" class="branch-phone">📞 +998 55 516 74 74</a>
     <a href="https://yandex.ru/navi/org/aster_auto_city/133684389451?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
   </div>
   <div class="branch-card">
     <div class="branch-name">Наманган</div>
     <div class="branch-addr">мх. Мингчинор, ул. Косонсой</div>
-    <a href="tel:+998555063838" class="branch-phone">📞 +998 55 506 38 38</a>
+    <a href="tel:+998555167474" class="branch-phone">📞 +998 55 516 74 74</a>
     <a href="https://yandex.ru/navi/org/aster_auto_city/130905742415?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
   </div>
   <div class="branch-card">
     <div class="branch-name">Навои</div>
     <div class="branch-addr">Кармана, мх. Талкок, ул. Янги Хаёт, 111</div>
-    <a href="tel:+998555063838" class="branch-phone">📞 +998 55 506 38 38</a>
+    <a href="tel:+998555167474" class="branch-phone">📞 +998 55 516 74 74</a>
     <a href="https://yandex.ru/navi/org/aster_auto_city/97988622505?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
   </div>
   <div class="branch-card">
     <div class="branch-name">Карши</div>
     <div class="branch-addr">нп. Тукмангит, ул. Тукмангит, 142</div>
-    <a href="tel:+998555063838" class="branch-phone">📞 +998 55 506 38 38</a>
+    <a href="tel:+998555167474" class="branch-phone">📞 +998 55 516 74 74</a>
     <a href="https://yandex.ru/navi/org/adm_aster_changan/224804077608?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
   </div>
 </div>
@@ -1097,10 +1097,11 @@ async function submitSchedule() {
   const record = {
     operator: "Бот", station: branch,
     clientName: profile.name, phone: profile.phone,
-    car: car.brand + " " + car.model,
+    car: car.brand + " " + car.model, vin: car.vin,
     visitDate: date, visitTime: time,
     service: reason || "Не указана", status: "Записан",
     note: "VIN: " + car.vin + " | Запись через Telegram бот",
+    fromApp: true,
   };
   if (SCRIPT_URL) await apiCall({ action: "add", record });
   const dateStr = new Date(date).toLocaleDateString("ru-RU", { day: "numeric", month: "long", weekday: "long" });
