@@ -690,6 +690,21 @@ function safeAttr(id, attr, val) {
 }
 
 // ── DECODE QR PARAMS ──────────────────────────────────────
+// Приводит название локации из 1С ("420 Самарканд", "Карши 1", "400 Ташкент Рохат") к названию филиала
+function normalizeBranch(raw) {
+  const s = String(raw || "").trim();
+  if (!s) return "";
+  const byCode = { "400": "Рохат", "404": "Ахмад Дониш", "410": "Наманган", "420": "Самарканд", "430": "Навои", "440": "Карши", "450": "Бухара" };
+  const m = s.match(/^(\d+)/);
+  if (m && byCode[m[1]]) return byCode[m[1]];
+  const names = ["Рохат", "Ахмад Дониш", "Наманган", "Самарканд", "Карши", "Бухара", "Навои"];
+  const low = s.toLowerCase();
+  for (let i = 0; i < names.length; i++) {
+    if (low.indexOf(names[i].toLowerCase()) !== -1) return names[i];
+  }
+  return s;
+}
+
 function decodeStartParam() {
   try {
     // Способ 1: startapp параметр (t.me/bot/app?startapp=...)
@@ -713,7 +728,7 @@ function decodeStartParam() {
     const decoded = decodeURIComponent(escape(atob(base64)));
     const parts = decoded.split("|");
     if (parts.length < 2) return null;
-    return { vin: parts[0]||"", name: parts[1]||"", brand: parts[2]||"", model: parts[3]||"", clientType: parts[4]||"existing", branch: parts[5]||"" };
+    return { vin: parts[0]||"", name: parts[1]||"", brand: parts[2]||"", model: parts[3]||"", clientType: parts[4]||"existing", branch: normalizeBranch(parts[5]) };
   } catch(e) {
     console.error("QR decode error:", e);
     return null;
