@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Aster Service — опрос</title>
+<link rel="icon" href="favicon.ico">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F8FAFC; color: #111827; min-height: 100vh; padding-bottom: 110px; }
+
+  .header { background: #0F172A; padding: 14px 18px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 20; }
+  .brand { color: #fff; font-size: 16px; font-weight: 700; }
+  .brand span { color: #4A9FBF; }
+  .lang { margin-left: auto; display: flex; background: #1E293B; border-radius: 10px; padding: 3px; }
+  .lang button { border: 0; background: none; color: #94A3B8; font: 600 12px 'Segoe UI', system-ui, sans-serif; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+  .lang button.on { background: #4A9FBF; color: #fff; }
+
+  .wrap { padding: 18px 14px; }
+  .hello { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .intro { font-size: 13px; color: #6B7280; line-height: 1.5; margin-bottom: 16px; }
+
+  .q { background: #fff; border: 1px solid #E5E7EB; border-radius: 16px; padding: 16px 14px; margin-bottom: 14px; }
+  .q-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; line-height: 1.35; display: flex; gap: 8px; }
+  .q-num { flex: 0 0 22px; height: 22px; border-radius: 50%; background: #1B3A5C; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+
+  .stars { display: flex; gap: 1px; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: pointer; }
+  .star { flex: 1 1 0; min-width: 0; max-width: 36px; aspect-ratio: 1; }
+  .star svg { width: 100%; height: 100%; overflow: visible; display: block; }
+  .star path { fill: #E5E7EB; stroke: #D1D5DB; stroke-width: 1; stroke-linejoin: round; transform-origin: 50% 50%;
+    transition: fill .22s ease, stroke .22s ease, transform .3s cubic-bezier(.34, 1.8, .5, 1); }
+  .star.on path { fill: #F59E0B; stroke: #D97706; transform: scale(1.12); }
+  .star.pop path { animation: pop .42s cubic-bezier(.34, 1.6, .5, 1) both; }
+  @keyframes pop { 0% { transform: scale(.55); } 60% { transform: scale(1.4); } 100% { transform: scale(1.12); } }
+
+  .score { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; }
+  .score .val { font-size: 24px; font-weight: 800; color: #1B3A5C; min-width: 70px; }
+  .score .val small { font-size: 13px; font-weight: 600; color: #9CA3AF; }
+  .score .val.empty { color: #CBD5E1; }
+  .hints { font-size: 11px; color: #9CA3AF; text-align: right; line-height: 1.4; }
+
+  .why { max-height: 0; overflow: hidden; opacity: 0; transition: max-height .35s ease, opacity .3s ease, margin-top .3s ease; margin-top: 0; }
+  .why.show { max-height: 170px; opacity: 1; margin-top: 12px; }
+  .why label { display: block; font-size: 12px; font-weight: 600; color: #6B7280; margin-bottom: 6px; }
+  .why textarea { width: 100%; min-height: 72px; resize: none; padding: 10px 12px; border: 1.5px solid #E5E7EB; border-radius: 10px; font: 14px 'Segoe UI', system-ui, sans-serif; outline: none; }
+  .why textarea:focus { border-color: #4A9FBF; }
+
+  .bar { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid #E5E7EB; padding: 10px 14px 14px; z-index: 30; }
+  .progress { height: 5px; background: #E5E7EB; border-radius: 3px; overflow: hidden; margin-bottom: 8px; }
+  .progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #4A9FBF, #F59E0B); border-radius: 3px; transition: width .35s ease; }
+  .bar-info { font-size: 12px; color: #6B7280; margin-bottom: 8px; text-align: center; }
+  .btn { width: 100%; padding: 14px; border: 0; border-radius: 12px; background: #1B3A5C; color: #fff; font: 700 15px 'Segoe UI', system-ui, sans-serif; cursor: pointer; transition: opacity .2s, transform .1s; }
+  .btn:active { transform: scale(.98); }
+  .btn:disabled { opacity: .4; cursor: default; }
+
+  .center { min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; gap: 12px; }
+  .spinner { width: 34px; height: 34px; border: 3px solid #E5E7EB; border-top-color: #4A9FBF; border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .center h2 { font-size: 20px; color: #1B3A5C; }
+  .center p { font-size: 14px; color: #6B7280; line-height: 1.5; max-width: 300px; }
+  .tick { width: 72px; height: 72px; }
+  .tick circle { fill: none; stroke: #10B981; stroke-width: 4; stroke-dasharray: 190; stroke-dashoffset: 190; animation: draw .6s ease forwards; }
+  .tick path { fill: none; stroke: #10B981; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 50; stroke-dashoffset: 50; animation: draw .4s .45s ease forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .burst { display: flex; gap: 4px; }
+  .burst .star { width: 28px; flex: none; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">ASTER <span>Service</span></div>
+  <div class="lang" id="lang">
+    <button data-l="ru">RU</button>
+    <button data-l="uz">UZ</button>
+  </div>
+</div>
+
+<div id="s-loading" class="center"><div class="spinner"></div></div>
+<div id="s-message" class="center hidden"><h2 id="msg-title"></h2><p id="msg-text"></p></div>
+
+<div id="s-thanks" class="center hidden">
+  <svg class="tick" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30"/><path d="M22 37l10 10 18-21"/></svg>
+  <h2 data-t="thanksTitle"></h2>
+  <p data-t="thanksText"></p>
+  <div class="burst" id="burst"></div>
+  <button class="btn" id="btn-close" style="max-width:260px;margin-top:8px" data-t="close"></button>
+</div>
+
+<div id="s-form" class="wrap hidden">
+  <div class="hello" id="hello"></div>
+  <div class="intro" id="intro"></div>
+  <div id="questions"></div>
+</div>
+
+<div class="bar hidden" id="bar">
+  <div class="progress"><i id="progress"></i></div>
+  <div class="bar-info" id="bar-info"></div>
+  <button class="btn" id="btn-submit" disabled></button>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSRiKMcUsiRTe4gBm6tcV2ehtNTYfzj5y1K69YvwQEqGVuxGkmqDK9X2fOiaPW4IF4tw/exec";
+const WHY_BELOW = 9;
+const STAR_PATH = "M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z";
+
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+if (tg) { tg.ready(); tg.expand(); }
+const params = new URLSearchParams(location.search);
+const SID = params.get("id") || "";
+const PREVIEW = params.get("preview") === "1";
+const initData = tg ? (tg.initData || "") : "";
+
+let lang = "ru";
+try {
+  const u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+  if (u && u.language_code === "uz") lang = "uz";
+} catch (e) {}
+if (params.get("lang") === "uz" || params.get("lang") === "ru") lang = params.get("lang");
+
+const T = {
+  ru: {
+    hello: "Уважаемый(ая) {name}!",
+    intro: "Вы недавно приобрели автомобиль {car} в Aster Auto City. Нам очень важна обратная связь, чтобы становиться лучше. Ответьте, пожалуйста, на 3 вопроса — это займёт менее 1 минуты.",
+    q: [
+      "Оцените <b>процесс покупки автомобиля</b>",
+      "Оцените <b>работу персонала</b>",
+      "Насколько Вы готовы <b>рекомендовать</b> наш дилерский центр друзьям, родственникам и знакомым?"
+    ],
+    hints: ["1 — очень плохо<br>10 — отлично", "1 — очень плохо<br>10 — отлично", "1 — точно нет<br>10 — обязательно"],
+    whyLabel: "Что нам стоит улучшить?",
+    whyPh: "Напишите пару слов…",
+    answered: "Отвечено {n} из 3",
+    needWhy: "Напишите, пожалуйста, что улучшить",
+    submit: "Отправить",
+    sending: "Отправляем…",
+    thanksTitle: "Спасибо за ответы!",
+    thanksText: "Ваше мнение помогает нам становиться лучше.",
+    close: "Закрыть",
+    errTitle: "Не удалось открыть опрос",
+    errNotFound: "Ссылка устарела или опрос не найден.",
+    errTg: "Откройте опрос из сообщения в Telegram.",
+    errNet: "Не удалось связаться с сервером. Попробуйте ещё раз.",
+    doneTitle: "Вы уже прошли опрос",
+    doneText: "Спасибо за ваши ответы!",
+    retry: "Повторить"
+  },
+  uz: {
+    hello: "Hurmatli {name}!",
+    intro: "Siz yaqinda Aster Auto City'dan {car} avtomobilini xarid qildingiz. Yaxshiroq bo'lishimiz uchun sizning fikringiz biz uchun juda muhim. Iltimos, 3 ta savolga javob bering — bu 1 daqiqadan kam vaqtingizni oladi.",
+    q: [
+      "Avtomobil <b>xarid qilish jarayonini</b> baholang",
+      "<b>Xodimlar ishini</b> baholang",
+      "Dilerlik markazimizni do'stlaringiz, qarindoshlaringiz va tanishlaringizga qanchalik <b>tavsiya qilasiz</b>?"
+    ],
+    hints: ["1 — juda yomon<br>10 — a'lo", "1 — juda yomon<br>10 — a'lo", "1 — aslo<br>10 — albatta"],
+    whyLabel: "Nimani yaxshilashimiz kerak?",
+    whyPh: "Bir-ikki so'z yozing…",
+    answered: "{n} / 3 javob berildi",
+    needWhy: "Iltimos, nimani yaxshilash kerakligini yozing",
+    submit: "Yuborish",
+    sending: "Yuborilmoqda…",
+    thanksTitle: "Javoblaringiz uchun rahmat!",
+    thanksText: "Sizning fikringiz bizga yaxshiroq bo'lishga yordam beradi.",
+    close: "Yopish",
+    errTitle: "So'rovnomani ochib bo'lmadi",
+    errNotFound: "Havola eskirgan yoki so'rovnoma topilmadi.",
+    errTg: "So'rovnomani Telegramdagi xabardan oching.",
+    errNet: "Serverga ulanib bo'lmadi. Qayta urinib ko'ring.",
+    doneTitle: "Siz so'rovnomada qatnashgansiz",
+    doneText: "Javoblaringiz uchun rahmat!",
+    retry: "Qayta urinish"
+  }
+};
+
+const state = { name: "", car: "", scores: [0, 0, 0], whys: ["", "", ""], ready: false, busy: false };
+
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+function haptic(kind) { try { if (tg && tg.HapticFeedback) { kind === "ok" ? tg.HapticFeedback.notificationOccurred("success") : tg.HapticFeedback.selectionChanged(); } } catch (e) {} }
+
+function starSvg() { return '<svg viewBox="0 0 24 24"><path d="' + STAR_PATH + '"/></svg>'; }
+
+function buildQuestions() {
+  const box = $("questions");
+  box.innerHTML = "";
+  for (let qi = 0; qi < 3; qi++) {
+    const card = document.createElement("div");
+    card.className = "q";
+    let stars = "";
+    for (let i = 0; i < 10; i++) stars += '<div class="star">' + starSvg() + "</div>";
+    card.innerHTML =
+      '<div class="q-title"><span class="q-num">' + (qi + 1) + '</span><span id="qt' + qi + '"></span></div>' +
+      '<div class="stars" id="stars' + qi + '">' + stars + "</div>" +
+      '<div class="score"><div class="val empty" id="val' + qi + '">– <small>/ 10</small></div><div class="hints" id="hint' + qi + '"></div></div>' +
+      '<div class="why" id="why' + qi + '"><label id="wl' + qi + '"></label><textarea id="wt' + qi + '" maxlength="600"></textarea></div>';
+    box.appendChild(card);
+    bindStars(qi);
+    $("wt" + qi).addEventListener("input", function (e) { state.whys[qi] = e.target.value; refresh(); });
+  }
+}
+
+function bindStars(qi) {
+  const el = $("stars" + qi);
+  let dragging = false;
+  function pick(e) {
+    const r = el.getBoundingClientRect();
+    let n = Math.ceil((e.clientX - r.left) / r.width * 10);
+    n = Math.max(1, Math.min(10, n));
+    if (n !== state.scores[qi]) setScore(qi, n);
+  }
+  el.addEventListener("pointerdown", function (e) { dragging = true; try { el.setPointerCapture(e.pointerId); } catch (x) {} pick(e); });
+  el.addEventListener("pointermove", function (e) { if (dragging) pick(e); });
+  el.addEventListener("pointerup", function () { dragging = false; });
+  el.addEventListener("pointercancel", function () { dragging = false; });
+}
+
+function setScore(qi, n) {
+  const prev = state.scores[qi];
+  state.scores[qi] = n;
+  const stars = $("stars" + qi).children;
+  for (let i = 0; i < 10; i++) {
+    const s = stars[i];
+    const wasOn = s.classList.contains("on");
+    if (i < n) {
+      s.style.transitionDelay = "";
+      s.firstChild.firstChild.style.transitionDelay = (Math.max(0, i - prev) * 45) + "ms";
+      s.classList.add("on");
+      if (!wasOn) {
+        s.classList.remove("pop");
+        void s.offsetWidth;
+        s.firstChild.firstChild.style.animationDelay = (Math.max(0, i - prev) * 45) + "ms";
+        s.classList.add("pop");
+      }
+    } else {
+      s.classList.remove("pop");
+      s.firstChild.firstChild.style.animationDelay = "";
+      s.firstChild.firstChild.style.transitionDelay = ((9 - i) * 12) + "ms";
+      s.classList.remove("on");
+    }
+  }
+  const v = $("val" + qi);
+  v.classList.remove("empty");
+  v.innerHTML = n + " <small>/ 10</small>";
+  $("why" + qi).classList.toggle("show", n < WHY_BELOW);
+  haptic("sel");
+  refresh();
+}
+
+function whyOk(qi) { return state.scores[qi] >= WHY_BELOW || state.whys[qi].trim().length >= 3; }
+
+function refresh() {
+  const t = T[lang];
+  const answered = state.scores.filter(function (s) { return s > 0; }).length;
+  $("progress").style.width = (answered / 3 * 100) + "%";
+  const missingWhy = [0, 1, 2].some(function (i) { return state.scores[i] > 0 && !whyOk(i); });
+  $("bar-info").textContent = (answered === 3 && missingWhy) ? t.needWhy : t.answered.replace("{n}", answered);
+  $("btn-submit").textContent = state.busy ? t.sending : t.submit;
+  $("btn-submit").disabled = state.busy || answered < 3 || missingWhy;
+}
+
+function applyLang() {
+  const t = T[lang];
+  document.documentElement.lang = lang;
+  document.querySelectorAll("#lang button").forEach(function (b) { b.classList.toggle("on", b.dataset.l === lang); });
+  document.querySelectorAll("[data-t]").forEach(function (el) { el.textContent = t[el.dataset.t]; });
+  $("hello").textContent = t.hello.replace("{name}", state.name);
+  $("intro").textContent = t.intro.replace("{car}", state.car);
+  for (let qi = 0; qi < 3; qi++) {
+    if (!$("qt" + qi)) continue;
+    $("qt" + qi).innerHTML = t.q[qi];
+    $("hint" + qi).innerHTML = t.hints[qi];
+    $("wl" + qi).textContent = t.whyLabel;
+    $("wt" + qi).placeholder = t.whyPh;
+  }
+  refresh();
+}
+
+function show(id) {
+  ["s-loading", "s-message", "s-thanks", "s-form"].forEach(function (x) { $(x).classList.toggle("hidden", x !== id); });
+  $("bar").classList.toggle("hidden", id !== "s-form");
+}
+
+function showMessage(titleKey, textKey, retry) {
+  const t = T[lang];
+  $("msg-title").textContent = t[titleKey];
+  $("msg-text").textContent = t[textKey];
+  const old = $("msg-retry");
+  if (old) old.remove();
+  if (retry) {
+    const b = document.createElement("button");
+    b.id = "msg-retry"; b.className = "btn"; b.style.maxWidth = "220px"; b.textContent = t.retry;
+    b.onclick = start;
+    $("s-message").appendChild(b);
+  }
+  show("s-message");
+  state.lastMsg = [titleKey, textKey, retry];
+}
+
+async function api(payload) {
+  const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+  return await res.json();
+}
+
+async function start() {
+  show("s-loading");
+  if (PREVIEW) { state.name = "Иван Иванов"; state.car = "BYD Chazor"; openForm(); return; }
+  if (!initData) { showMessage("errTitle", "errTg", false); return; }
+  if (!SID) { showMessage("errTitle", "errNotFound", false); return; }
+  try {
+    const r = await api({ action: "npsOpen", id: SID, initData: initData });
+    if (r && r.ok) {
+      state.name = r.name || ""; state.car = r.car || "";
+      if (r.done) { showMessage("doneTitle", "doneText", false); return; }
+      openForm();
+    } else {
+      showMessage("errTitle", "errNotFound", false);
+    }
+  } catch (e) {
+    showMessage("errTitle", "errNet", true);
+  }
+}
+
+function openForm() {
+  if (!state.ready) { buildQuestions(); state.ready = true; }
+  applyLang();
+  show("s-form");
+}
+
+async function submit() {
+  if (state.busy) return;
+  state.busy = true;
+  refresh();
+  const answers = [0, 1, 2].map(function (i) { return { score: state.scores[i], why: state.scores[i] < WHY_BELOW ? state.whys[i].trim() : "" }; });
+  try {
+    if (!PREVIEW) {
+      const r = await api({ action: "npsSubmit", id: SID, initData: initData, answers: answers });
+      if (!r || !r.ok) throw new Error("fail");
+    }
+    thanks();
+  } catch (e) {
+    state.busy = false;
+    refresh();
+    $("bar-info").textContent = T[lang].errNet;
+  }
+}
+
+function thanks() {
+  state.busy = false;
+  const burst = $("burst");
+  burst.innerHTML = "";
+  for (let i = 0; i < 5; i++) {
+    const d = document.createElement("div");
+    d.className = "star on pop";
+    d.innerHTML = starSvg();
+    d.firstChild.firstChild.style.animationDelay = (0.7 + i * 0.12) + "s";
+    burst.appendChild(d);
+  }
+  applyLang();
+  show("s-thanks");
+  haptic("ok");
+  if (tg && !PREVIEW) setTimeout(function () { try { tg.close(); } catch (e) {} }, 3500);
+}
+
+document.querySelectorAll("#lang button").forEach(function (b) {
+  b.addEventListener("click", function () {
+    lang = b.dataset.l;
+    applyLang();
+    if (!$("s-message").classList.contains("hidden") && state.lastMsg) showMessage(state.lastMsg[0], state.lastMsg[1], state.lastMsg[2]);
+  });
+});
+$("btn-submit").addEventListener("click", submit);
+$("btn-close").addEventListener("click", function () { if (tg) tg.close(); });
+
+applyLang();
+start();
+</script>
+</body>
+</html>
