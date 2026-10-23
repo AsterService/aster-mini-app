@@ -317,6 +317,8 @@ async function start() {
       openForm();
     } else {
       showMessage("errTitle", "errNotFound", false);
+      const code = r && r.error ? r.error + (r.why ? ": " + r.why : "") : "no response";
+      $("msg-text").textContent += " (" + code + ")";
     }
   } catch (e) {
     showMessage("errTitle", "errNet", true);
