@@ -318,6 +318,7 @@
         <option>Записан</option><option>Приехал</option><option>Не приехал</option><option>Перенесён</option>
       </select>
       <input type="date" id="fil-date" onchange="renderTable()" style="max-width:160px;font-size:13px">
+      <div id="reg-period" style="display:contents"></div>
       <button class="btn-secondary" id="btn-reset-filter" onclick="clearFilters()" style="font-size:12px;padding:6px 12px">Сбросить</button>
     </div>
 
@@ -386,6 +387,7 @@
     <div class="top-bar">
       <div><h1 style="font-size:20px;font-weight:700">Аналитика воронки</h1></div>
       <div class="top-bar-actions">
+        <div id="dash-period" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"></div>
         <button class="btn-secondary" id="btn-1c" onclick="document.getElementById('csv-input').click()">↑ Загрузить из 1С</button>
         <input type="file" id="csv-input" accept=".xlsx,.csv" style="display:none" onchange="handle1C(event)">
       </div>
@@ -647,6 +649,8 @@ function switchLang(lang) {
 
 function applyLang() {
   const L = LANGS[currentLang];
+  buildPeriod("reg", "renderTable", "visit");
+  buildPeriod("dash", "renderDashboard", "created");
   const s = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = val; };
   const p = (id, val) => { const e = document.getElementById(id); if(e) e.placeholder = val; };
 
@@ -1021,17 +1025,84 @@ function showAlert(msg, isError=false) {
   if (!isError) setTimeout(() => box.style.display = "none", 4000);
 }
 
+
+// ── ФИЛЬТР ПЕРИОДА (реестр и аналитика) ───────────────────
+const PERIOD_T = {
+  ru: { all: "Весь период", today: "Сегодня", yesterday: "Вчера", d7: "Последние 7 дней", d30: "Последние 30 дней", month: "Этот месяц", prev: "Прошлый месяц", custom: "Произвольный период", byVisit: "по дате визита", byCreated: "по дате записи", cap: "Период" },
+  uz: { all: "Butun davr", today: "Bugun", yesterday: "Kecha", d7: "Oxirgi 7 kun", d30: "Oxirgi 30 kun", month: "Shu oy", prev: "O'tgan oy", custom: "Ixtiyoriy davr", byVisit: "tashrif sanasi bo'yicha", byCreated: "yozilish sanasi bo'yicha", cap: "Davr" }
+};
+function ymd(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function buildPeriod(prefix, cb, defBy) {
+  const box = document.getElementById(prefix + "-period");
+  if (!box) return;
+  const T = PERIOD_T[currentLang] || PERIOD_T.ru;
+  const val = id => { const e = document.getElementById(prefix + "-" + id); return e ? e.value : ""; };
+  const prev = { preset: val("preset") || "all", from: val("from"), to: val("to"), by: val("by") || defBy };
+  const opt = (v, label, cur) => '<option value="' + v + '"' + (cur === v ? " selected" : "") + ">" + label + "</option>";
+  box.innerHTML =
+    '<select id="' + prefix + '-preset" onchange="onPeriodChange(\'' + prefix + "','" + cb + '\')" style="font-size:13px">' +
+      opt("all", T.all, prev.preset) + opt("today", T.today, prev.preset) + opt("yesterday", T.yesterday, prev.preset) +
+      opt("d7", T.d7, prev.preset) + opt("d30", T.d30, prev.preset) + opt("month", T.month, prev.preset) +
+      opt("prev", T.prev, prev.preset) + opt("custom", T.custom, prev.preset) +
+    "</select>" +
+    '<span id="' + prefix + '-custom" style="display:' + (prev.preset === "custom" ? "inline-flex" : "none") + ';gap:4px;align-items:center">' +
+      '<input type="date" id="' + prefix + '-from" value="' + prev.from + '" onchange="' + cb + '()" style="font-size:13px"> — ' +
+      '<input type="date" id="' + prefix + '-to" value="' + prev.to + '" onchange="' + cb + '()" style="font-size:13px">' +
+    "</span>" +
+    '<select id="' + prefix + '-by" onchange="' + cb + '()" style="font-size:13px">' +
+      opt("visit", T.byVisit, prev.by) + opt("created", T.byCreated, prev.by) +
+    "</select>";
+}
+function onPeriodChange(prefix, cb) {
+  const preset = document.getElementById(prefix + "-preset").value;
+  document.getElementById(prefix + "-custom").style.display = preset === "custom" ? "inline-flex" : "none";
+  window[cb]();
+}
+function periodRange(prefix) {
+  const pe = document.getElementById(prefix + "-preset");
+  const by = (document.getElementById(prefix + "-by") || {}).value || "visit";
+  if (!pe) return { from: "", to: "", by };
+  const now = new Date();
+  const preset = pe.value;
+  let from = "", to = "";
+  if (preset === "today") { from = to = ymd(now); }
+  else if (preset === "yesterday") { const d = new Date(now); d.setDate(d.getDate() - 1); from = to = ymd(d); }
+  else if (preset === "d7") { const d = new Date(now); d.setDate(d.getDate() - 6); from = ymd(d); to = ymd(now); }
+  else if (preset === "d30") { const d = new Date(now); d.setDate(d.getDate() - 29); from = ymd(d); to = ymd(now); }
+  else if (preset === "month") { from = ymd(new Date(now.getFullYear(), now.getMonth(), 1)); to = ymd(new Date(now.getFullYear(), now.getMonth() + 1, 0)); }
+  else if (preset === "prev") { from = ymd(new Date(now.getFullYear(), now.getMonth() - 1, 1)); to = ymd(new Date(now.getFullYear(), now.getMonth(), 0)); }
+  else if (preset === "custom") { from = document.getElementById(prefix + "-from").value; to = document.getElementById(prefix + "-to").value; }
+  return { from, to, by };
+}
+function inPeriod(r, p) {
+  if (!p.from && !p.to) return true;
+  const d = String(p.by === "created" ? (r.createdAt || "") : (r.visitDate || "")).slice(0, 10);
+  if (!d) return false;
+  if (p.from && d < p.from) return false;
+  if (p.to && d > p.to) return false;
+  return true;
+}
+function resetPeriod(prefix) {
+  const pe = document.getElementById(prefix + "-preset");
+  if (!pe) return;
+  pe.value = "all";
+  ["from", "to"].forEach(k => { const e = document.getElementById(prefix + "-" + k); if (e) e.value = ""; });
+  const c = document.getElementById(prefix + "-custom"); if (c) c.style.display = "none";
+}
+
 // ── TABLE ─────────────────────────────────────────────────
 function getFiltered() {
   const op = document.getElementById("fil-operator").value;
   const st = document.getElementById("fil-station").value;
   const ss = document.getElementById("fil-status").value;
   const dt = document.getElementById("fil-date").value;
+  const regPeriod = periodRange("reg");
   return records.filter(r => {
     if (op && r.operator !== op) return false;
     if (st && r.station !== st) return false;
     if (ss && r.status !== ss) return false;
     if (dt && r.visitDate !== dt) return false;
+    if (!inPeriod(r, regPeriod)) return false;
     return true;
   });
 }
@@ -1074,6 +1145,7 @@ function renderTable() {
 
 function clearFilters() {
   ["fil-operator","fil-station","fil-status","fil-date"].forEach(id => document.getElementById(id).value = "");
+  resetPeriod("reg");
   renderTable();
 }
 
@@ -1435,8 +1507,9 @@ function handle1C(e) {
           const car = String(row[4] || "").trim();
           const clientName = col0;
 
+          const docStatus = col2.includes("/") ? col2.split("/").pop().trim() : "";
           if (visitDate && (phone || vin || doc)) {
-            visits.push({ phone, visitDate, vin, doc, amount: "", items: "", clientName, car });
+            visits.push({ phone, visitDate, vin, doc, docStatus, amount: "", items: "", clientName, car });
           }
 
         } else {
@@ -1469,7 +1542,7 @@ function handle1C(e) {
 
     const res = await api({ action: "matchVisits", visits });
     if (res) {
-      showAlert(`✓ Обработано ${visits.length} записей из 1С, сопоставлено ${res.matched}`);
+      showAlert(`✓ Из 1С обработано ${visits.length} строк (данные по ${res.reportMaxDate || "?"}). Приехал: ${res.matched}, Не приехал: ${res.notArrived || 0}, новых ЗН в истории: ${res.histAdded || 0}`);
       loadRecords();
     }
   };
@@ -1770,11 +1843,12 @@ function switchTab(t) {
 
 // ── DASHBOARD ─────────────────────────────────────────────
 function renderDashboard() {
-  const total = records.length;
-  const arrived = records.filter(r => r.status==="Приехал").length;
-  const notArrived = records.filter(r => r.status==="Не приехал").length;
-  const scheduled = records.filter(r => r.status==="Записан").length;
-  const postponed = records.filter(r => r.status==="Перенесён").length;
+  const recs = records.filter(r => inPeriod(r, periodRange("dash")));
+  const total = recs.length;
+  const arrived = recs.filter(r => r.status==="Приехал").length;
+  const notArrived = recs.filter(r => r.status==="Не приехал").length;
+  const scheduled = recs.filter(r => r.status==="Записан").length;
+  const postponed = recs.filter(r => r.status==="Перенесён").length;
   const conv = total > 0 ? Math.round(arrived/total*100) : 0;
 
   document.getElementById("kpi-grid").innerHTML = [
@@ -1798,7 +1872,7 @@ function renderDashboard() {
   }).join("");
 
   document.getElementById("op-table-body").innerHTML = OPERATORS.map(op => {
-    const ops = records.filter(r => r.operator===op);
+    const ops = recs.filter(r => r.operator===op);
     if (!ops.length) return "";
     const arr = ops.filter(r => r.status==="Приехал").length;
     const c = Math.round(arr/ops.length*100);
@@ -1806,7 +1880,7 @@ function renderDashboard() {
   }).join("");
 
   document.getElementById("station-grid").innerHTML = STATIONS.map(st => {
-    const sts = records.filter(r => r.station===st);
+    const sts = recs.filter(r => r.station===st);
     if (!sts.length) return "";
     const arr = sts.filter(r => r.status==="Приехал").length;
     const c = Math.round(arr/sts.length*100);
