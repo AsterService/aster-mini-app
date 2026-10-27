@@ -204,6 +204,7 @@
       <button class="tab-btn active" onclick="switchTab('registry')" id="tab-registry">Реестр</button>
       <button class="tab-btn" onclick="switchTab('schedule')" id="tab-schedule">График загрузки</button>
       <button class="tab-btn" onclick="switchTab('dashboard')" id="tab-dashboard">Аналитика</button>
+      <button class="tab-btn" onclick="switchTab('nps')" id="tab-nps">NPS</button>
     </div>
   </div>
 </div>
@@ -406,8 +407,15 @@
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════ NPS ══ -->
+  <div id="page-nps" style="display:none">
+    <div class="top-bar"><div><h1 style="font-size:20px;font-weight:700">NPS: опрос покупателей</h1></div></div>
+    <div id="nps-root"></div>
+  </div>
+
 </div>
 
+<script src="nps-dashboard.js"></script>
 <!-- BOOKING MODAL -->
 <div class="modal-overlay" id="booking-modal" style="display:none" onclick="closeModal(event)">
   <div class="modal">
@@ -1832,12 +1840,15 @@ async function bookFromModal() {
 }
 
 // ── TAB SWITCH ────────────────────────────────────────────
+let npsView = null;
 function switchTab(t) {
-  ["registry","schedule","dashboard"].forEach(id => {
+  ["registry","schedule","dashboard","nps"].forEach(id => {
     document.getElementById("page-" + id).style.display = t===id ? "" : "none";
     document.getElementById("tab-" + id).classList.toggle("active", t===id);
   });
   if (t==="dashboard") renderDashboard();
+  if (!npsView && window.NpsDash) npsView = NpsDash.mount(document.getElementById("nps-root"), { scriptUrl: () => scriptUrl });
+  if (npsView) { if (t==="nps") npsView.show(); else npsView.hide(); }
   if (t==="schedule") renderSchedule();
 }
 
