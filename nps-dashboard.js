@@ -4,6 +4,7 @@
 (function () {
   var KEY_STORE = "servisset_nps_key";
   var REFRESH_MS = 5 * 60 * 1000;
+  var LOCATIONS = ["Рохат", "Ахмад Дониш", "Самарканд", "Бухара", "Наманган", "Карши", "Навои"];
   var GOOD = "#059669", MID = "#D97706", BAD = "#DC2626";
 
   var CSS = [
@@ -106,7 +107,7 @@
       var st = document.createElement("style"); st.id = "nps-css"; st.textContent = CSS; document.head.appendChild(st);
     }
     root.classList.add("nps");
-    var S = { rows: null, err: "", loading: false, updated: "", f: { loc: "", brand: "", period: "all", tests: null, low: false }, more: 30, timer: null };
+    var S = { rows: null, err: "", loading: false, updated: "", f: { loc: "", brand: "", period: "all", low: false }, more: 30, timer: null };
 
     function key() { return lsGet(KEY_STORE); }
 
@@ -123,7 +124,6 @@
           S.rows = parse(d);
           var d0 = new Date();
           S.updated = ("0" + d0.getHours()).slice(-2) + ":" + ("0" + d0.getMinutes()).slice(-2);
-          if (S.f.tests === null) S.f.tests = !S.rows.some(function (r) { return !r.test; });
         })
         .catch(function (e) { S.err = e.message || String(e); })
         .then(function () { S.loading = false; draw(); });
@@ -136,7 +136,7 @@
         from = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
       }
       return S.rows.filter(function (r) {
-        if (r.test && !f.tests) return false;
+        if (r.test) return false;
         if (f.loc && r.loc !== f.loc) return false;
         if (f.brand && r.brand.toLowerCase() !== f.brand.toLowerCase()) return false;
         if (from && String(r.sentAt).slice(0, 10) < from) return false;
@@ -147,18 +147,17 @@
     function opt(v, cur, label) { return '<option value="' + esc(v) + '"' + (v === cur ? " selected" : "") + ">" + esc(label == null ? v : label) + "</option>"; }
 
     function controls() {
-      var base = S.rows.filter(function (r) { return S.f.tests || !r.test; });
-      var locs = [], brands = [];
+      var base = S.rows.filter(function (r) { return !r.test; });
+      var locs = LOCATIONS.slice(), brands = [];
       base.forEach(function (r) {
         if (locs.indexOf(r.loc) < 0) locs.push(r.loc);
         if (!brands.some(function (b) { return b.toLowerCase() === r.brand.toLowerCase(); })) brands.push(r.brand);
       });
-      locs.sort(); brands.sort();
+      brands.sort();
       return '<div class="nps-bar">' +
         '<select data-f="loc">' + opt("", S.f.loc, "Все локации") + locs.map(function (l) { return opt(l, S.f.loc); }).join("") + "</select>" +
         '<select data-f="brand">' + opt("", S.f.brand, "Все бренды") + brands.map(function (b) { return opt(b, S.f.brand); }).join("") + "</select>" +
         '<select data-f="period">' + opt("all", S.f.period, "За всё время") + opt("7", S.f.period, "7 дней") + opt("30", S.f.period, "30 дней") + opt("90", S.f.period, "90 дней") + "</select>" +
-        '<label><input type="checkbox" data-f="tests"' + (S.f.tests ? " checked" : "") + "> Тестовые</label>" +
         '<span class="sp"></span>' +
         '<span class="nps-upd">' + (S.loading ? "Обновляется…" : "Обновлено " + esc(S.updated)) + "</span>" +
         '<button class="nps-btn" data-act="refresh">Обновить</button>' +
@@ -266,7 +265,7 @@
       var f = e.target.getAttribute && e.target.getAttribute("data-f");
       if (!f) return;
       S.f[f] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
-      if (f === "loc" || f === "brand" || f === "period" || f === "tests") S.more = 30;
+      if (f === "loc" || f === "brand" || f === "period") S.more = 30;
       draw();
     });
     root.addEventListener("click", function (e) {
