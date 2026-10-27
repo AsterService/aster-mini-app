@@ -252,7 +252,7 @@
         return;
       }
       var html = "";
-      if (S.err) html += '<div class="nps-err">' + esc(S.err) + ' <button class="nps-btn" data-act="refresh" style="margin-left:8px">Повторить</button></div>';
+      if (S.err) html += '<div class="nps-err">' + esc(S.err) + ' <button class="nps-btn" data-act="refresh" style="margin-left:8px">Повторить</button><button class="nps-btn" data-act="logout" style="margin-left:6px">Ввести другой ключ</button></div>';
       if (S.rows) {
         var rows = filtered(), st = stat(rows);
         html += controls() + kpis(rows, st) + '<div class="nps-two">' + funnel(rows) + breakdown(rows) + "</div>" + comments(rows);
