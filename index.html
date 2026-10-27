@@ -875,9 +875,11 @@ function showQrConfirm(qrData) {
 function requestTgPhone() {
   // Запрашиваем номер через Telegram WebApp
   if (tg && tg.requestContact) {
-    tg.requestContact(function(result) {
-      if (result && result.contact && result.contact.phone_number) {
-        let phone = result.contact.phone_number.replace(/\D/g, "");
+    // Колбэк Telegram: (sent: boolean, event); сам номер лежит в event.responseUnsafe.contact
+    tg.requestContact(function(sent, ev) {
+      const contact = ev && ev.responseUnsafe && ev.responseUnsafe.contact;
+      if (sent && contact && contact.phone_number) {
+        let phone = String(contact.phone_number).replace(/\D/g, "");
         if (phone.startsWith("998")) phone = phone.slice(3);
         phone = phone.slice(-9);
         // Форматируем
@@ -896,6 +898,9 @@ function requestTgPhone() {
           btn.style.color = "#065F46";
           btn.innerHTML = "✅ Номер получен: " + formatted;
         }
+      } else if (sent) {
+        // Telegram принял номер, но не отдал его приложению — вводим вручную
+        showToast("Введите номер вручную");
       }
     });
   } else {
