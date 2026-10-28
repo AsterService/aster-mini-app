@@ -1119,7 +1119,7 @@ function renderTable() {
       <td class="ellipsis" style="white-space:nowrap">${(r.visitDate||"").slice(0,10)}</td>
       <td style="white-space:nowrap">${r.visitTime||""}</td>
       <td class="ellipsis" title="${r.master||""}">${r.master||""}</td>
-      <td class="ellipsis" title="${r.service||""}">${r.service||""}</td>
+      <td class="ellipsis" title="${r.service||""}">${r.concierge==="Да"?"🚚 ":""}${r.service||""}${recTotalSpan(r)}</td>
       <td>
         <div class="status-cell">
           <select class="status-select" onchange="changeStatus(${r.id}, this.value)">
@@ -1703,6 +1703,21 @@ function renderSchedule() {
   wrap.appendChild(table);
 }
 
+// Запись из Mini App: сумма услуг и консьерж-сервис
+function recMoney(n) { return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+function recEsc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function recTotalSpan(r) {
+  return Number(r.total) > 0 ? ' <span class="muted">≈' + recMoney(r.total) + '</span>' : "";
+}
+function recExtraInfo(rec) {
+  let h = "";
+  if (Number(rec.total) > 0) h += "<div><span>Ориентировочно:</span> <b>≈ " + recMoney(rec.total) + " сум</b></div>";
+  if (rec.concierge === "Да") {
+    h += "<div><span>🚚 Консьерж:</span> <b>" + recEsc(rec.pickupAddress) + (rec.pickupTime ? ", забор в " + recEsc(rec.pickupTime) : "") + "</b></div>";
+  }
+  return h;
+}
+
 function showBookedInfo(rec) {
   document.getElementById("modal-title").textContent = "Информация о записи";
   document.getElementById("modal-sub").textContent = (rec.station || "") + " • " + (rec.master || "");
@@ -1713,7 +1728,7 @@ function showBookedInfo(rec) {
     "<div><span>Клиент:</span> <b>" + (rec.clientName || "") + "</b></div>" +
     "<div><span>Телефон:</span> <b>" + (rec.phone || "") + "</b></div>" +
     "<div><span>Авто:</span> <b>" + (rec.car || "") + "</b></div>" +
-    "<div><span>Причина:</span> <b>" + (rec.service || "") + "</b></div>" +
+    "<div><span>Причина:</span> <b>" + (rec.service || "") + "</b></div>" + recExtraInfo(rec) +
     "<div><span>Статус:</span> <b>" + (rec.status || "") + "</b></div>";
   // Скрываем поля ввода, показываем только инфо
   document.getElementById("modal-client").closest(".form-field").style.display = "none";

@@ -134,6 +134,35 @@
   .empty-state { text-align: center; padding: 40px 20px; color: #9CA3AF; font-size: 14px; }
   .lang-btn-mini.active { background: #3B82F6 !important; color: #fff !important; }
   .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+
+  /* ПОДБОР ТО, КОНСЬЕРЖ, ИТОГ */
+  .to-hint { font-size: 12px; color: #6B7280; background: #F8FAFC; border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; }
+  .to-card { background: #F0F9FF; border: 1px solid #BAE6FD; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; }
+  .to-reason { font-size: 11px; color: #0369A1; font-weight: 600; margin-bottom: 4px; }
+  .to-name { font-size: 15px; font-weight: 700; color: #0F172A; }
+  .to-price { font-size: 16px; font-weight: 700; color: #1D4ED8; margin: 4px 0 8px; }
+  .to-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #374151; margin-bottom: 8px; }
+  .to-card details { font-size: 12px; color: #374151; margin-bottom: 10px; }
+  .to-card summary { cursor: pointer; color: #0369A1; font-weight: 600; }
+  .to-card .to-list { margin-top: 6px; line-height: 1.6; }
+  .to-card .to-list-title { font-weight: 700; margin-top: 6px; }
+  .to-card .to-row { display: flex; justify-content: space-between; gap: 8px; }
+  .to-card select { margin-top: 4px; }
+  .cons-row { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 14px; }
+  .cons-row input { width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; }
+  .cons-sub { display: block; font-size: 12px; color: #6B7280; margin-top: 2px; line-height: 1.4; }
+  .sum-box { background: #fff; border: 1.5px solid #E5E7EB; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; font-size: 13px; }
+  .sum-row { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; }
+  .sum-total { border-top: 1px solid #E5E7EB; margin-top: 6px; padding-top: 8px; font-weight: 700; font-size: 15px; }
+  .sum-note { font-size: 11px; color: #9CA3AF; margin-top: 6px; }
+  .free { color: #10B981; font-weight: 600; }
+
+  /* ЯРЛЫК НА РАБОЧИЙ СТОЛ */
+  .a2hs { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid #BAE6FD; border-radius: 14px; padding: 12px 12px 12px 14px; margin-bottom: 16px; position: relative; }
+  .a2hs-text { flex: 1; font-size: 13px; color: #111827; display: flex; flex-direction: column; gap: 2px; }
+  .a2hs-text span { font-size: 11px; color: #6B7280; }
+  .a2hs .btn-sm { margin-bottom: 0; }
+  .a2hs-close { background: none; border: none; color: #9CA3AF; font-size: 20px; line-height: 1; cursor: pointer; padding: 0 4px; }
 </style>
 </head>
 <body>
@@ -172,6 +201,11 @@
         <div class="appt-info" id="appt-info">—</div>
       </div>
     </div>
+    <div id="a2hs-card" class="a2hs" style="display:none">
+      <div class="a2hs-text"><b id="a2hs-title">Добавьте на рабочий стол</b><span id="a2hs-sub">Открывайте Aster Service в одно касание</span></div>
+      <button class="btn btn-accent btn-sm" id="a2hs-btn" onclick="addToHome()">Добавить</button>
+      <button class="a2hs-close" onclick="dismissA2hs()" aria-label="×">×</button>
+    </div>
     <div class="section-title">Быстрые действия</div>
     <div class="quick-grid">
       <div class="quick-btn" onclick="goTo('schedule')"><div class="icon">📅</div><div class="label" id="quick-book">Записаться на сервис</div></div>
@@ -196,11 +230,11 @@
   <div class="card"><div class="card-body">
     <div class="form-field">
       <label class="form-label" id="s-car-label">Автомобиль</label>
-      <select class="form-input" id="s-car"></select>
+      <select class="form-input" id="s-car" onchange="onSchedCarChange()"></select>
     </div>
     <div class="form-field">
       <label class="form-label" id="s-branch-label">Филиал</label>
-      <select class="form-input" id="s-branch">
+      <select class="form-input" id="s-branch" onchange="loadSlots()">
         <option value="">Выберите филиал</option>
         <option>Рохат</option><option>Ахмад Дониш</option><option>Самарканд</option>
         <option>Бухара</option><option>Наманган</option><option>Карши</option><option>Навои</option>
@@ -214,6 +248,40 @@
       <label class="form-label" id="s-time-label">Время</label>
       <select class="form-input" id="s-time"><option value="">Выберите время</option></select>
     </div>
+    <div id="to-block" style="display:none">
+      <div class="divider"></div>
+      <div class="section-title" id="to-title">Подбор ТО</div>
+      <div style="display:flex;gap:10px">
+        <div class="form-field" style="flex:1">
+          <label class="form-label" id="s-mileage-label">Пробег, км</label>
+          <input type="text" inputmode="numeric" class="form-input" id="s-mileage" placeholder="45000" oninput="onToInput()">
+        </div>
+        <div class="form-field" style="flex:1">
+          <label class="form-label" id="s-year-label">Год выпуска</label>
+          <input type="text" inputmode="numeric" maxlength="4" class="form-input" id="s-year" placeholder="2022" oninput="onToInput()">
+        </div>
+      </div>
+      <div id="to-result"></div>
+    </div>
+    <div id="to-nodata" class="to-hint" style="display:none"></div>
+    <div id="cons-block" style="display:none">
+      <div class="divider"></div>
+      <label class="cons-row">
+        <input type="checkbox" id="s-cons" onchange="onConsToggle()">
+        <span><b id="cons-title">🚚 Консьерж-сервис</b><span class="cons-sub" id="cons-sub"></span></span>
+      </label>
+      <div id="cons-fields" style="display:none;margin-top:12px">
+        <div class="form-field">
+          <label class="form-label" id="s-addr-label">Адрес забора автомобиля</label>
+          <input type="text" class="form-input" id="s-addr" maxlength="300" oninput="updateSummary()">
+        </div>
+        <div class="form-field">
+          <label class="form-label" id="s-ptime-label">Время забора</label>
+          <input type="time" class="form-input" id="s-ptime">
+        </div>
+      </div>
+    </div>
+    <div id="s-summary" class="sum-box" style="display:none"></div>
     <div class="form-field">
       <label class="form-label" id="s-reason-label">Причина обращения</label>
       <input type="text" class="form-input" id="s-reason" 
@@ -531,6 +599,21 @@ const I18N = {
     selectBranch: "Выберите филиал", selectTime: "Выберите время",
     fillAll: "Заполните все поля",
     firstChooseBrand: "Сначала выберите марку", firstChooseModel: "Сначала выберите модель",
+    toTitle: "Подбор ТО", mileageLabel: "Пробег, км", yearLabel: "Год выпуска",
+    toHint: "Укажите пробег и год выпуска — подберём ТО по регламенту и посчитаем стоимость",
+    toRecKm: "Рекомендуем по пробегу", toRecAge: "Рекомендуем по сроку эксплуатации",
+    toInclude: "Добавить в запись", toDetails: "Что входит", toWorks: "Работы", toParts: "Запчасти и материалы",
+    toChange: "Выбрать другое ТО", toNoData: "Стоимость обслуживания для вашей модели уточнит менеджер — опишите задачу в поле ниже.",
+    consTitle: "🚚 Консьерж-сервис",
+    consFree: "Заберём автомобиль и вернём после обслуживания — бесплатно для вашего заказа",
+    consPaid: (p, thr, left) => "Заберём и вернём автомобиль — " + p + " сум. Бесплатно при заказе от " + thr + " сум" + (left ? " (осталось " + left + " сум)" : ""),
+    addrLabel: "Адрес забора автомобиля", addrPH: "Город, улица, дом, ориентир", ptimeLabel: "Время забора",
+    sumTo: "Услуги", sumCons: "Консьерж-сервис", sumFree: "бесплатно", sumTotal: "Итого",
+    sumNote: "Сумма ориентировочная, итог фиксируется в заказ-наряде.",
+    slotPickDate: "Сначала выберите филиал и дату", slotLoading: "Загрузка...", slotNone: "Нет свободного времени — выберите другую дату",
+    slotBusy: "Это время только что заняли. Выберите другое", needAddr: "Укажите адрес забора автомобиля",
+    bookErr: "Не удалось оформить запись. Попробуйте ещё раз",
+    a2hsTitle: "Добавьте на рабочий стол", a2hsSub: "Открывайте Aster Service в одно касание", a2hsBtn: "Добавить",
   },
   uz: {
     home: "Asosiy", schedule: "Yozuv", history: "Tarix",
@@ -579,6 +662,21 @@ const I18N = {
     selectBranch: "Filialni tanlang", selectTime: "Vaqtni tanlang",
     fillAll: "Barcha maydonlarni to'ldiring",
     firstChooseBrand: "Avval markani tanlang", firstChooseModel: "Avval modelni tanlang",
+    toTitle: "TXK tanlash", mileageLabel: "Yurgan masofa, km", yearLabel: "Ishlab chiqarilgan yil",
+    toHint: "Yurgan masofa va ishlab chiqarilgan yilni kiriting — reglament bo'yicha TXK tanlab, narxini hisoblaymiz",
+    toRecKm: "Yurgan masofa bo'yicha tavsiya", toRecAge: "Foydalanish muddati bo'yicha tavsiya",
+    toInclude: "Yozuvga qo'shish", toDetails: "Tarkibi", toWorks: "Ishlar", toParts: "Ehtiyot qismlar va materiallar",
+    toChange: "Boshqa TXK tanlash", toNoData: "Modelingiz uchun xizmat narxini menejer aniqlaydi — vazifani quyidagi maydonda yozing.",
+    consTitle: "🚚 Konsyerj-servis",
+    consFree: "Avtomobilni olib ketamiz va xizmatdan keyin qaytaramiz — buyurtmangiz uchun bepul",
+    consPaid: (p, thr, left) => "Avtomobilni olib ketamiz va qaytaramiz — " + p + " so'm. " + thr + " so'mdan yuqori buyurtmada bepul" + (left ? " (yana " + left + " so'm qoldi)" : ""),
+    addrLabel: "Avtomobilni olib ketish manzili", addrPH: "Shahar, ko'cha, uy, mo'ljal", ptimeLabel: "Olib ketish vaqti",
+    sumTo: "Xizmatlar", sumCons: "Konsyerj-servis", sumFree: "bepul", sumTotal: "Jami",
+    sumNote: "Summa taxminiy, yakuniy narx buyurtma-naryadda belgilanadi.",
+    slotPickDate: "Avval filial va sanani tanlang", slotLoading: "Yuklanmoqda...", slotNone: "Bo'sh vaqt yo'q — boshqa sanani tanlang",
+    slotBusy: "Bu vaqt hozirgina band qilindi. Boshqasini tanlang", needAddr: "Avtomobilni olib ketish manzilini kiriting",
+    bookErr: "Yozuvni rasmiylashtirib bo'lmadi. Qayta urinib ko'ring",
+    a2hsTitle: "Ish stoliga qo'shing", a2hsSub: "Aster Service ni bir bosishda oching", a2hsBtn: "Qo'shish",
   }
 };
 
@@ -626,6 +724,18 @@ function applyLang() {
   safeText("s-reason-label", t("schedReason"));
   safeAttr("s-reason", "placeholder", t("schedReasonPH"));
   safeText("s-submit-btn", t("schedBtn"));
+  safeText("to-title", t("toTitle"));
+  safeText("s-mileage-label", t("mileageLabel"));
+  safeText("s-year-label", t("yearLabel"));
+  safeText("cons-title", t("consTitle"));
+  safeText("s-addr-label", t("addrLabel"));
+  safeAttr("s-addr", "placeholder", t("addrPH"));
+  safeText("s-ptime-label", t("ptimeLabel"));
+  safeText("a2hs-title", t("a2hsTitle"));
+  safeText("a2hs-sub", t("a2hsSub"));
+  safeText("a2hs-btn", t("a2hsBtn"));
+  if (catalog) renderSchedExtras();
+  if (document.getElementById("page-schedule").classList.contains("active")) loadSlots();
 
   // История
   safeText("hist-page-title", t("histTitle"));
@@ -744,9 +854,8 @@ window.onload = () => {
   // Минимальная дата — сегодня (не вчера и не раньше)
   const today = new Date();
   document.getElementById("s-date").min = today.toISOString().split("T")[0];
-  document.getElementById("s-date").addEventListener("change", function() {
-    filterTimeSlots(this.value);
-  });
+  document.getElementById("s-date").addEventListener("change", loadSlots);
+  try { localStorage.setItem("aster_visits", String((parseInt(localStorage.getItem("aster_visits")) || 0) + 1)); } catch (e) {}
 
   const qrData = decodeStartParam();
   if (qrData && qrData.vin) {
@@ -963,6 +1072,7 @@ function showHome() {
   renderCarSelector();
   updateScheduleCarSelect();
   updateHistoryCarFilter();
+  initHomeScreen();
 }
 
 function renderCarSelector() {
@@ -1016,7 +1126,8 @@ function goTo(page) {
         document.getElementById("s-time").value = "";
       }
     }
-    filterTimeSlots(dateEl ? dateEl.value : "");
+    loadSlots();
+    loadCatalog();
   }
   // При переходе на главную — убираем загрузку если профиль есть
   if (page === "home" && profile) {
@@ -1111,30 +1222,48 @@ async function submitSchedule() {
   todayCheck.setHours(0,0,0,0);
   const selectedDate = new Date(date);
   if (selectedDate < todayCheck) { showToast("Выберите актуальную дату"); return; }
+  const tot = calcTotals();
+  const addr = document.getElementById("s-addr").value.trim();
+  if (tot.consOn && addr.length < 5) { showToast(t("needAddr")); return; }
   // Защита от двойного нажатия
   const schedBtn = document.getElementById("s-submit-btn");
   if (schedBtn && schedBtn.disabled) return;
   if (schedBtn) { schedBtn.disabled = true; schedBtn.textContent = "..."; }
+  const km = tot.svc ? (document.getElementById("s-mileage").value.replace(/\D/g, "")) : "";
+  const yr = tot.svc ? document.getElementById("s-year").value.trim() : "";
   const record = {
     operator: "Бот", station: branch,
     clientName: profile.name, phone: profile.phone,
     car: car.brand + " " + car.model, vin: car.vin,
     visitDate: date, visitTime: time,
     service: reason || "Не указана", status: "Записан",
-    note: "VIN: " + car.vin + " | Запись через Telegram бот",
+    note: "VIN: " + car.vin + (km ? " | Пробег: " + km + " км" : "") + (yr ? " | Год: " + yr : "") + " | Запись через Telegram бот",
     fromApp: true,
+    serviceIds: tot.svc ? [tot.svc.id] : [],
+    conciergeRequested: tot.consOn,
+    pickupAddress: tot.consOn ? addr : "",
+    pickupTime: tot.consOn ? document.getElementById("s-ptime").value : "",
+    mileage: km, year: yr,
   };
-  if (SCRIPT_URL) await apiCall({ action: "add", record });
+  let res = null;
+  if (SCRIPT_URL) res = await apiCall({ action: "add", record });
+  if (schedBtn) { schedBtn.disabled = false; schedBtn.textContent = t("schedBtn"); }
+  if (res && res.error === "slot_busy") { showToast(t("slotBusy")); document.getElementById("s-time").value = ""; loadSlots(); return; }
+  if (!res || res.error) { showToast(t("bookErr")); return; }
   const dateStr = new Date(date).toLocaleDateString("ru-RU", { day: "numeric", month: "long", weekday: "long" });
   document.getElementById("home-appt").style.display = "block";
   document.getElementById("appt-date").textContent = dateStr + " в " + time;
-  document.getElementById("appt-info").textContent = branch + (reason ? " • " + reason : ""); localStorage.setItem("aster_appt", JSON.stringify({ date, time, branch, reason }));
+  const apptSvc = tot.svc ? svcName(tot.svc) : reason;
+  document.getElementById("appt-info").textContent = branch + (apptSvc ? " • " + apptSvc : "") + (tot.consOn ? " • 🚚" : ""); localStorage.setItem("aster_appt", JSON.stringify({ date, time, branch, reason: apptSvc }));
+  try { localStorage.setItem("aster_booked", "1"); } catch (e) {}
   showToast(t("schedBooked"));
   document.getElementById("s-branch").value = "";
   document.getElementById("s-date").value = "";
   document.getElementById("s-time").value = "";
   document.getElementById("s-reason").value = "";
+  resetSchedExtras();
   goTo("home");
+  initHomeScreen();
 }
 
 // ── PROFILE VIEW ──────────────────────────────────────────
@@ -1358,31 +1487,215 @@ function onFregBrandChange() {
   if (brand && BRANDS_MODELS[brand]) BRANDS_MODELS[brand].forEach(m => sel.innerHTML += `<option>${m}</option>`);
 }
 
-function filterTimeSlots(selectedDate) {
+// ── СВОБОДНЫЕ СЛОТЫ ───────────────────────────────────────
+// Время берём с сервера (только слоты, где у филиала есть свободный мастер).
+// Если сервер не ответил за 15 сек — показываем все слоты, финальную проверку делает сервер.
+let slotsReq = 0;
+async function loadSlots() {
   const timeSel = document.getElementById("s-time");
-  const now = new Date();
-  const todayStr = now.toISOString().split("T")[0];
-  const currentHour = now.getHours();
-  const currentMin = now.getMinutes();
-
-  Array.from(timeSel.options).forEach(opt => {
-    if (!opt.value) return;
-    if (selectedDate === todayStr) {
-      const parts = opt.value.split(":");
-      const h = parseInt(parts[0]);
-      const m = parseInt(parts[1]);
-      // Скрываем прошедшее время + добавляем буфер 1 час
-      opt.disabled = (h * 60 + m) <= (currentHour * 60 + currentMin + 60);
-      opt.style.display = opt.disabled ? "none" : "";
-    } else {
-      opt.disabled = false;
-      opt.style.display = "";
-    }
-  });
-  // Сбрасываем выбранное время если оно стало недоступным
-  if (timeSel.options[timeSel.selectedIndex] && timeSel.options[timeSel.selectedIndex].disabled) {
-    timeSel.value = "";
+  const branch = document.getElementById("s-branch").value;
+  const date = document.getElementById("s-date").value;
+  const prev = timeSel.value;
+  if (!branch || !date) {
+    timeSel.innerHTML = '<option value="">' + t("slotPickDate") + '</option>';
+    return;
   }
+  const token = ++slotsReq;
+  timeSel.innerHTML = '<option value="">' + t("slotLoading") + '</option>';
+  const timeout = new Promise(resolve => setTimeout(() => resolve(null), 15000));
+  const res = await Promise.race([apiCall({ action: "getFreeSlots", station: branch, date }), timeout]);
+  if (token !== slotsReq) return;
+  let slots = (res && Array.isArray(res.slots)) ? res.slots : TIME_SLOTS.slice();
+  // Для сегодняшней даты скрываем прошедшее время + буфер 1 час
+  const now = new Date();
+  const todayStr = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
+  if (date === todayStr) {
+    const limit = now.getHours() * 60 + now.getMinutes() + 60;
+    slots = slots.filter(s => { const p = s.split(":"); return parseInt(p[0]) * 60 + parseInt(p[1]) > limit; });
+  }
+  if (!slots.length) {
+    timeSel.innerHTML = '<option value="">' + t("slotNone") + '</option>';
+    return;
+  }
+  timeSel.innerHTML = '<option value="">' + t("selectTime") + '</option>' + slots.map(s => `<option>${s}</option>`).join("");
+  if (prev && slots.indexOf(prev) !== -1) timeSel.value = prev;
+}
+
+function filterTimeSlots() { loadSlots(); }
+
+// ── КАТАЛОГ УСЛУГ, ПОДБОР ТО, КОНСЬЕРЖ ────────────────────
+const CATALOG_KEY = "aster_catalog_v1";
+let catalog = null;          // { services: [...], settings: {...} }
+let catalogTs = 0;
+let selectedServiceId = null;
+let toManual = false;        // клиент сам выбрал другое ТО
+let toInclude = true;        // добавлять ТО в запись
+let consTouched = false;     // клиент сам менял галочку консьержа
+
+function fmtMoney(n) { return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function svcName(s) { return currentLang === "uz" ? (s.nameUz || s.nameRu) : s.nameRu; }
+
+async function loadCatalog() {
+  if (!catalog) {
+    try {
+      const c = JSON.parse(localStorage.getItem(CATALOG_KEY) || "null");
+      if (c && c.data && Array.isArray(c.data.services)) { catalog = c.data; catalogTs = c.ts || 0; renderSchedExtras(); }
+    } catch (e) {}
+  }
+  if (catalog && Date.now() - catalogTs < 600000) { renderSchedExtras(); return; }
+  const res = await apiCall({ action: "getServices" });
+  if (res && Array.isArray(res.services)) {
+    catalog = res; catalogTs = Date.now();
+    try { localStorage.setItem(CATALOG_KEY, JSON.stringify({ ts: catalogTs, data: res })); } catch (e) {}
+    renderSchedExtras();
+  }
+}
+
+function currentSchedCar() {
+  if (!profile || !profile.cars.length) return null;
+  return profile.cars[parseInt(document.getElementById("s-car").value)] || null;
+}
+
+// Пакеты ТО выбранной модели по возрастанию пробега
+function modelToList(car) {
+  if (!catalog || !car) return [];
+  const b = String(car.brand).toLowerCase(), m = String(car.model).toLowerCase();
+  return catalog.services
+    .filter(s => s.category === "ТО" && s.brand.toLowerCase() === b && s.model.toLowerCase() === m)
+    .sort((a, c) => a.mileageKm - c.mileageKm);
+}
+
+// Какое ТО наступило раньше — по пробегу или по сроку. Берём старшее из достигнутых
+function recommendTo(list, km, year) {
+  const ageMonths = Math.max(0, new Date().getFullYear() - year) * 12;
+  let idxKm = 0, idxAge = 0;
+  list.forEach((s, i) => { if (km >= s.mileageKm) idxKm = i; if (ageMonths >= s.months) idxAge = i; });
+  return { idx: Math.max(idxKm, idxAge), byKm: idxKm >= idxAge };
+}
+
+function onSchedCarChange() { selectedServiceId = null; toManual = false; renderSchedExtras(); }
+function onToInput() { toManual = false; renderSchedExtras(); }
+function onToSelect() { selectedServiceId = document.getElementById("to-select").value; toManual = true; renderSchedExtras(); }
+function onToIncludeChange() { toInclude = document.getElementById("to-include").checked; updateSummary(); }
+function onConsToggle() { consTouched = true; updateSummary(); }
+
+function renderSchedExtras() {
+  const car = currentSchedCar();
+  const list = modelToList(car);
+  const hasCatalog = !!(catalog && catalog.services);
+  document.getElementById("to-block").style.display = list.length ? "block" : "none";
+  const nodata = document.getElementById("to-nodata");
+  nodata.style.display = (hasCatalog && car && !list.length) ? "block" : "none";
+  nodata.textContent = t("toNoData");
+  const cs = hasCatalog ? catalog.settings : null;
+  document.getElementById("cons-block").style.display = (cs && cs.conciergeEnabled) ? "block" : "none";
+  renderToResult(list);
+  updateSummary();
+}
+
+function renderToResult(list) {
+  const box = document.getElementById("to-result");
+  if (!list.length) { box.innerHTML = ""; selectedServiceId = null; return; }
+  const km = parseInt(document.getElementById("s-mileage").value.replace(/\D/g, ""));
+  const year = parseInt(document.getElementById("s-year").value);
+  const curYear = new Date().getFullYear();
+  if (!(km >= 0) || !(year >= 1990 && year <= curYear + 1)) {
+    selectedServiceId = null;
+    box.innerHTML = '<div class="to-hint">' + esc(t("toHint")) + '</div>';
+    return;
+  }
+  const rec = recommendTo(list, km, year);
+  if (!toManual || !list.some(s => s.id === selectedServiceId)) selectedServiceId = list[rec.idx].id;
+  const s = list.find(x => x.id === selectedServiceId);
+  const works = s.items.filter(i => i.t === "w"), parts = s.items.filter(i => i.t === "p");
+  const rows = arr => arr.map(i => '<div class="to-row"><span>' + esc(i.n) + '</span><span>' + (i.t === "p" ? fmtMoney(i.p) : "") + '</span></div>').join("");
+  const details = (works.length || parts.length)
+    ? '<details><summary>' + esc(t("toDetails")) + '</summary><div class="to-list">' +
+      (works.length ? '<div class="to-list-title">' + esc(t("toWorks")) + '</div>' + rows(works) : '') +
+      (parts.length ? '<div class="to-list-title">' + esc(t("toParts")) + '</div>' + rows(parts) : '') +
+      '</div></details>' : '';
+  const options = list.map(x => '<option value="' + esc(x.id) + '"' + (x.id === s.id ? ' selected' : '') + '>' + esc(svcName(x)) + ' — ' + fmtMoney(x.price) + '</option>').join("");
+  box.innerHTML =
+    '<div class="to-card">' +
+      '<div class="to-reason">' + esc(rec.byKm ? t("toRecKm") : t("toRecAge")) + '</div>' +
+      '<div class="to-name">' + esc(svcName(s)) + '</div>' +
+      '<div class="to-price">' + fmtMoney(s.price) + ' ' + (currentLang === "uz" ? "so'm" : "сум") + '</div>' +
+      '<label class="to-check"><input type="checkbox" id="to-include"' + (toInclude ? ' checked' : '') + ' onchange="onToIncludeChange()"> ' + esc(t("toInclude")) + '</label>' +
+      details +
+      '<label class="form-label">' + esc(t("toChange")) + '</label>' +
+      '<select class="form-input" id="to-select" onchange="onToSelect()">' + options + '</select>' +
+    '</div>';
+}
+
+function calcTotals() {
+  const svc = (toInclude && selectedServiceId && catalog) ? catalog.services.find(x => x.id === selectedServiceId) : null;
+  const sub = svc ? svc.price : 0;
+  const cs = catalog ? catalog.settings : null;
+  const consEl = document.getElementById("s-cons");
+  const consOn = !!(cs && cs.conciergeEnabled && consEl && consEl.checked);
+  const fee = consOn ? (sub >= cs.conciergeThreshold ? 0 : cs.conciergePrice) : 0;
+  return { svc, sub, consOn, fee, total: sub + fee };
+}
+
+function updateSummary() {
+  const cs = catalog ? catalog.settings : null;
+  const consEl = document.getElementById("s-cons");
+  if (cs && cs.conciergeEnabled) {
+    const sub0 = (toInclude && selectedServiceId) ? ((catalog.services.find(x => x.id === selectedServiceId) || {}).price || 0) : 0;
+    // Пока клиент сам не трогал галочку — включаем консьерж автоматически при сумме от порога
+    if (!consTouched) consEl.checked = sub0 >= cs.conciergeThreshold;
+    const left = sub0 > 0 && sub0 < cs.conciergeThreshold ? fmtMoney(cs.conciergeThreshold - sub0) : "";
+    document.getElementById("cons-sub").textContent = sub0 >= cs.conciergeThreshold
+      ? t("consFree")
+      : t("consPaid")(fmtMoney(cs.conciergePrice), fmtMoney(cs.conciergeThreshold), left);
+    document.getElementById("cons-fields").style.display = consEl.checked ? "block" : "none";
+  }
+  const tot = calcTotals();
+  const box = document.getElementById("s-summary");
+  if (!tot.svc && !tot.consOn) { box.style.display = "none"; return; }
+  const cur = currentLang === "uz" ? "so'm" : "сум";
+  let h = "";
+  if (tot.svc) h += '<div class="sum-row"><span>' + esc(svcName(tot.svc)) + '</span><span>' + fmtMoney(tot.sub) + ' ' + cur + '</span></div>';
+  if (tot.consOn) h += '<div class="sum-row"><span>' + esc(t("sumCons")) + '</span><span>' + (tot.fee ? fmtMoney(tot.fee) + ' ' + cur : '<span class="free">' + esc(t("sumFree")) + '</span>') + '</span></div>';
+  h += '<div class="sum-row sum-total"><span>' + esc(t("sumTotal")) + '</span><span>≈ ' + fmtMoney(tot.total) + ' ' + cur + '</span></div>';
+  h += '<div class="sum-note">' + esc(t("sumNote")) + '</div>';
+  box.innerHTML = h;
+  box.style.display = "block";
+}
+
+function resetSchedExtras() {
+  ["s-mileage", "s-year", "s-addr", "s-ptime"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+  selectedServiceId = null; toManual = false; toInclude = true; consTouched = false;
+  const c = document.getElementById("s-cons"); if (c) c.checked = false;
+  renderSchedExtras();
+}
+
+// ── ЯРЛЫК НА РАБОЧИЙ СТОЛ (Telegram Mini App API 8.0+) ────
+let a2hsInited = false;
+function initHomeScreen() {
+  const card = document.getElementById("a2hs-card");
+  if (!card || !tg || typeof tg.addToHomeScreen !== "function") return;
+  if (tg.isVersionAtLeast && !tg.isVersionAtLeast("8.0")) return;
+  try { if (localStorage.getItem("aster_a2hs_dismissed")) return; } catch (e) {}
+  // Предлагаем не с первого запуска, а после первой записи или со второго визита
+  let ready = false;
+  try { ready = !!localStorage.getItem("aster_booked") || (parseInt(localStorage.getItem("aster_visits")) || 0) >= 2; } catch (e) {}
+  if (!ready) return;
+  if (!a2hsInited) {
+    a2hsInited = true;
+    if (tg.onEvent) tg.onEvent("homeScreenAdded", () => { card.style.display = "none"; });
+  }
+  if (typeof tg.checkHomeScreenStatus === "function") {
+    tg.checkHomeScreenStatus(status => {
+      if (status === "missed" || status === "unknown") card.style.display = "flex";
+    });
+  }
+}
+function addToHome() { try { tg.addToHomeScreen(); } catch (e) {} }
+function dismissA2hs() {
+  document.getElementById("a2hs-card").style.display = "none";
+  try { localStorage.setItem("aster_a2hs_dismissed", "1"); } catch (e) {}
 }
 
 function phoneMask(input) {
