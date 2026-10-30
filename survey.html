@@ -175,7 +175,27 @@ const T = {
   }
 };
 
-const state = { name: "", car: "", scores: [0, 0, 0], whys: ["", "", ""], ready: false, busy: false };
+// Опрос по сервису: те же 3 вопроса-звезды, другие тексты (выбирается по kind из ответа сервера)
+const SVC = {
+  ru: {
+    intro: "Вы недавно обращались в сервисный центр Aster Service с автомобилем {car}. Нам очень важна обратная связь, чтобы становиться лучше. Ответьте, пожалуйста, на 3 вопроса — это займёт менее 1 минуты.",
+    q: [
+      "Оцените <b>качество выполненных работ</b>",
+      "Оцените <b>работу персонала</b> сервиса (приёмщик, мастера)",
+      "Насколько Вы готовы <b>рекомендовать</b> наш сервис друзьям, родственникам и знакомым?"
+    ]
+  },
+  uz: {
+    intro: "Siz yaqinda {car} avtomobilingiz bilan Aster Service servis markaziga murojaat qildingiz. Yaxshiroq bo'lishimiz uchun sizning fikringiz biz uchun juda muhim. Iltimos, 3 ta savolga javob bering — bu 1 daqiqadan kam vaqtingizni oladi.",
+    q: [
+      "Bajarilgan <b>ishlar sifatini</b> baholang",
+      "Servis <b>xodimlari ishini</b> baholang (qabul qiluvchi, ustalar)",
+      "Servisimizni do'stlaringiz, qarindoshlaringiz va tanishlaringizga qanchalik <b>tavsiya qilasiz</b>?"
+    ]
+  }
+};
+
+const state = { name: "", car: "", kind: "sales", scores: [0, 0, 0], whys: ["", "", ""], ready: false, busy: false };
 
 function $(id) { return document.getElementById(id); }
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -267,10 +287,11 @@ function applyLang() {
   document.querySelectorAll("#lang button").forEach(function (b) { b.classList.toggle("on", b.dataset.l === lang); });
   document.querySelectorAll("[data-t]").forEach(function (el) { el.textContent = t[el.dataset.t]; });
   $("hello").textContent = t.hello.replace("{name}", state.name);
-  $("intro").textContent = t.intro.replace("{car}", state.car);
+  const tx = state.kind === "service" ? SVC[lang] : t;
+  $("intro").textContent = tx.intro.replace("{car}", state.car);
   for (let qi = 0; qi < 3; qi++) {
     if (!$("qt" + qi)) continue;
-    $("qt" + qi).innerHTML = t.q[qi];
+    $("qt" + qi).innerHTML = tx.q[qi];
     $("hint" + qi).innerHTML = t.hints[qi];
     $("wl" + qi).textContent = t.whyLabel;
     $("wt" + qi).placeholder = t.whyPh;
@@ -306,13 +327,13 @@ async function api(payload) {
 
 async function start() {
   show("s-loading");
-  if (PREVIEW) { state.name = "Иван Иванов"; state.car = "BYD Chazor"; openForm(); return; }
+  if (PREVIEW) { state.name = "Иван Иванов"; state.car = "BYD Chazor"; state.kind = params.get("kind") === "service" ? "service" : "sales"; openForm(); return; }
   if (!initData) { showMessage("errTitle", "errTg", false); return; }
   if (!SID) { showMessage("errTitle", "errNotFound", false); return; }
   try {
     const r = await api({ action: "npsOpen", id: SID, initData: initData });
     if (r && r.ok) {
-      state.name = r.name || ""; state.car = r.car || "";
+      state.name = r.name || ""; state.car = r.car || ""; state.kind = r.kind === "service" ? "service" : "sales";
       if (r.done) { showMessage("doneTitle", "doneText", false); return; }
       openForm();
     } else {

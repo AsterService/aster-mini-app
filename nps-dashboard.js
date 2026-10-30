@@ -80,7 +80,8 @@
       Object.keys(idx).forEach(function (k) { o[k] = r[idx[k]]; });
       o.brand = brandOf(o.car);
       o.loc = String(o.branch || "").trim() || "Не указана";
-      o.test = String(o.campaign) === "ТЕСТ";
+      o.test = String(o.campaign).indexOf("ТЕСТ") === 0;
+      o.kind = /сервис/i.test(String(o.campaign)) ? "service" : "sales";
       o.done = String(o.status) === "Завершён";
       o.s1 = num(o.q1); o.s2 = num(o.q2); o.s3 = num(o.q3);
       return o;
@@ -107,7 +108,7 @@
       var st = document.createElement("style"); st.id = "nps-css"; st.textContent = CSS; document.head.appendChild(st);
     }
     root.classList.add("nps");
-    var S = { rows: null, err: "", loading: false, updated: "", f: { loc: "", brand: "", period: "all", low: false }, more: 30, timer: null };
+    var S = { rows: null, err: "", loading: false, updated: "", f: { kind: "sales", loc: "", brand: "", period: "all", low: false }, more: 30, timer: null };
 
     function key() { return lsGet(KEY_STORE); }
 
@@ -136,7 +137,7 @@
         from = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
       }
       return S.rows.filter(function (r) {
-        if (r.test) return false;
+        if (r.test || r.kind !== f.kind) return false;
         if (f.loc && r.loc !== f.loc) return false;
         if (f.brand && r.brand.toLowerCase() !== f.brand.toLowerCase()) return false;
         if (from && String(r.sentAt).slice(0, 10) < from) return false;
@@ -147,7 +148,7 @@
     function opt(v, cur, label) { return '<option value="' + esc(v) + '"' + (v === cur ? " selected" : "") + ">" + esc(label == null ? v : label) + "</option>"; }
 
     function controls() {
-      var base = S.rows.filter(function (r) { return !r.test; });
+      var base = S.rows.filter(function (r) { return !r.test && r.kind === S.f.kind; });
       var locs = LOCATIONS.slice(), brands = [];
       base.forEach(function (r) {
         if (locs.indexOf(r.loc) < 0) locs.push(r.loc);
@@ -155,6 +156,7 @@
       });
       brands.sort();
       return '<div class="nps-bar">' +
+        '<select data-f="kind">' + opt("sales", S.f.kind, "Продажи авто") + opt("service", S.f.kind, "Сервис") + "</select>" +
         '<select data-f="loc">' + opt("", S.f.loc, "Все локации") + locs.map(function (l) { return opt(l, S.f.loc); }).join("") + "</select>" +
         '<select data-f="brand">' + opt("", S.f.brand, "Все бренды") + brands.map(function (b) { return opt(b, S.f.brand); }).join("") + "</select>" +
         '<select data-f="period">' + opt("all", S.f.period, "За всё время") + opt("7", S.f.period, "7 дней") + opt("30", S.f.period, "30 дней") + opt("90", S.f.period, "90 дней") + "</select>" +
@@ -172,7 +174,7 @@
       return '<div class="nps-grid">' +
         '<div class="nps-card" style="grid-column:span 2"><div class="nps-kpi-l" style="margin:0 0 4px">NPS (рекомендация дилерского центра)</div><div class="nps-kpi-v" style="color:' + npsColor(st.nps) + '">' + fmtNps(st.nps) + "</div>" + split + "</div>" +
         '<div class="nps-card"><div class="nps-kpi-v">' + st.n + '</div><div class="nps-kpi-l">Ответили</div></div>' +
-        '<div class="nps-card"><div class="nps-kpi-v">' + (st.a1 == null ? "—" : st.a1) + '</div><div class="nps-kpi-l">Процесс покупки, из 10</div></div>' +
+        '<div class="nps-card"><div class="nps-kpi-v">' + (st.a1 == null ? "—" : st.a1) + '</div><div class="nps-kpi-l">' + (S.f.kind === "service" ? "Качество работ" : "Процесс покупки") + ', из 10</div></div>' +
         '<div class="nps-card"><div class="nps-kpi-v">' + (st.a2 == null ? "—" : st.a2) + '</div><div class="nps-kpi-l">Работа персонала, из 10</div></div></div>';
     }
 
@@ -210,7 +212,7 @@
         var brs = Object.keys(L.br).sort(function (a, b) { return stat(L.br[b].rows).n - stat(L.br[a].rows).n; });
         return tr("loc", n, stat(L.rows), L.rows.length) + brs.map(function (b) { return tr("br", L.br[b].name, stat(L.br[b].rows), L.br[b].rows.length); }).join("");
       }).join("");
-      return '<div class="nps-card"><h3>NPS по локациям и брендам</h3><div style="overflow-x:auto"><table class="nps-table"><thead><tr><th>Локация / бренд</th><th class="n">Отправлено</th><th class="n">Ответили</th><th class="n">NPS</th><th class="n">Покупка</th><th class="n">Персонал</th></tr></thead><tbody>' +
+      return '<div class="nps-card"><h3>NPS по локациям и брендам</h3><div style="overflow-x:auto"><table class="nps-table"><thead><tr><th>Локация / бренд</th><th class="n">Отправлено</th><th class="n">Ответили</th><th class="n">NPS</th><th class="n">' + (S.f.kind === "service" ? "Качество" : "Покупка") + '</th><th class="n">Персонал</th></tr></thead><tbody>' +
         (body || '<tr><td colspan="6" class="nps-empty">Нет данных</td></tr>') + "</tbody></table></div></div>";
     }
 
@@ -235,8 +237,8 @@
         var low = r.s1 < 9 || r.s2 < 9 || r.s3 < 9;
         function why(l, t) { return t ? '<div class="nps-why"><span>' + l + ":</span> " + esc(t) + "</div>" : ""; }
         return '<div class="nps-com' + (low ? " low" : "") + '"><div class="h"><b>' + esc(r.name || "Клиент") + "</b><span>" + esc(r.loc) + "</span><span>" + esc(r.car || "") + "</span><span>" + esc(String(r.completedAt || "").slice(0, 16)) + "</span></div>" +
-          '<div class="s">' + chip("Покупка", r.s1) + chip("Персонал", r.s2) + chip("Рекомендация", r.s3) + "</div>" +
-          why("Покупка", r.q1why) + why("Персонал", r.q2why) + why("Рекомендация", r.q3why) + "</div>";
+          '<div class="s">' + chip(S.f.kind === "service" ? "Качество" : "Покупка", r.s1) + chip("Персонал", r.s2) + chip("Рекомендация", r.s3) + "</div>" +
+          why(S.f.kind === "service" ? "Качество" : "Покупка", r.q1why) + why("Персонал", r.q2why) + why("Рекомендация", r.q3why) + "</div>";
       }).join("");
       return '<div class="nps-card"><h3>Комментарии клиентов (' + list.length + ')</h3>' +
         '<label style="display:flex;gap:6px;align-items:center;font-size:13px;margin-bottom:12px"><input type="checkbox" data-f="low"' + (S.f.low ? " checked" : "") + "> Только оценки ниже 9</label>" +
@@ -265,7 +267,8 @@
       var f = e.target.getAttribute && e.target.getAttribute("data-f");
       if (!f) return;
       S.f[f] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
-      if (f === "loc" || f === "brand" || f === "period") S.more = 30;
+      if (f === "loc" || f === "brand" || f === "period" || f === "kind") S.more = 30;
+      if (f === "kind") { S.f.loc = ""; S.f.brand = ""; }
       draw();
     });
     root.addEventListener("click", function (e) {
