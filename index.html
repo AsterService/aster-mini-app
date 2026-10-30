@@ -875,11 +875,18 @@ function showQrConfirm(qrData) {
     if (!profile.cars) profile.cars = [];
     const exists = profile.cars.find(function(c) { return c.vin === qrData.vin; });
     if (!exists && qrData.vin && qrData.brand && qrData.model) {
+      const prevCars = profile.cars.slice();
+      const prevIdx = profile.activeCarIndex;
       profile.cars.push({ brand: qrData.brand, model: qrData.model, vin: qrData.vin });
       profile.activeCarIndex = profile.cars.length - 1;
       saveProfileLocal();
       if (SCRIPT_URL && SCRIPT_URL !== "ВСТАВЬ_URL_СЮДА") {
-        apiCall({ action: "registerClient", client: profile });
+        apiCall({ action: "registerClient", client: profile }).then(function(res) {
+          if (isLinkError(res)) {
+            profile.cars = prevCars; profile.activeCarIndex = prevIdx; saveProfileLocal();
+            showHome(); showLinkError();
+          }
+        });
       }
     }
     showHome();
@@ -1036,10 +1043,17 @@ async function confirmQrReg(vin, name, brand, model, clientType, branch) {
     cars: [{ brand: brand, model: model, vin: vin }],
     activeCarIndex: 0
   };
-  saveProfileLocal();
   if (SCRIPT_URL && SCRIPT_URL !== "ВСТАВЬ_URL_СЮДА") {
-    await apiCall({ action: "registerClient", client: profile });
+    const regRes = await apiCall({ action: "registerClient", client: profile });
+    if (isLinkError(regRes)) {
+      window._qrRegBusy = false;
+      const rb = document.querySelector("#qr-reg-btn");
+      if (rb) { rb.disabled = false; rb.textContent = "✅ Подтвердить и зарегистрироваться"; rb.style.opacity = "1"; }
+      showLinkError();
+      return;
+    }
   }
+  saveProfileLocal();
   showToast("Регистрация завершена ✓");
   showHome();
 }
@@ -1166,7 +1180,7 @@ async function renderHistory() {
   let history = [];
 
   if (SCRIPT_URL && SCRIPT_URL !== "ВСТАВЬ_URL_СЮДА") {
-    const res = await apiCall({ action: "getHistory", phone: profile.phone, vin: car.vin });
+    const res = await apiCall({ action: "getHistory", phone: profile.phone, vin: car.vin, tgId: tgUser ? tgUser.id : "" });
     history = res?.history || [];
   }
 
@@ -1363,6 +1377,8 @@ function saveCar() {
   if (dupIdx !== -1) { showFieldError("err-vin", "Автомобиль с таким VIN уже добавлен"); return; }
 
   const car = { brand, model, vin };
+  const prevCars = JSON.parse(JSON.stringify(profile.cars));
+  const prevIdx = profile.activeCarIndex;
   if (editingCarIndex === -1) {
     profile.cars.push(car);
     profile.activeCarIndex = profile.cars.length - 1;
@@ -1370,7 +1386,13 @@ function saveCar() {
     profile.cars[editingCarIndex] = car;
   }
   saveProfileLocal();
-  if (SCRIPT_URL) apiCall({ action: "registerClient", client: profile });
+  if (SCRIPT_URL) apiCall({ action: "registerClient", client: profile }).then(function(res) {
+    if (isLinkError(res)) {
+      profile.cars = prevCars; profile.activeCarIndex = prevIdx; saveProfileLocal();
+      renderProfileView(); renderCarSelector(); updateScheduleCarSelect(); updateHistoryCarFilter();
+      showLinkError();
+    }
+  });
   showToast(editingCarIndex === -1 ? t("carAdded") : t("carEdited"));
   editingCarIndex = -1;
   renderProfileView();
@@ -1443,7 +1465,12 @@ function firstRegister() {
   window._fregBusy = true;
   profile = { name, phone, tgId: tgUser?.id, tgName: tgUser?.first_name, cars: [{ brand, model, vin }], activeCarIndex: 0 };
   saveProfileLocal();
-  if (SCRIPT_URL) apiCall({ action: "registerClient", client: profile });
+  if (SCRIPT_URL) apiCall({ action: "registerClient", client: profile }).then(function(res) {
+    if (isLinkError(res)) {
+      localStorage.removeItem("aster_profile_v2");
+      showLinkError(function() { location.reload(); });
+    }
+  });
   showHome();
   document.getElementById("home-register").style.display = "none";
   showToast(t("welcome") + ", " + name + "! ✓");
@@ -1743,6 +1770,17 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+const LINK_MSG = {
+  ru: "Этот автомобиль или номер телефона уже подключён к другому аккаунту Telegram. Обратитесь в Aster Service: +998 55 516 74 74",
+  uz: "Bu avtomobil yoki telefon raqami boshqa Telegram akkauntiga ulangan. Aster Service'ga murojaat qiling: +998 55 516 74 74"
+};
+function isLinkError(res) { return !!(res && res.error === "already_linked"); }
+function showLinkError(cb) {
+  const m = LINK_MSG[currentLang] || LINK_MSG.ru;
+  if (tg && tg.showAlert) tg.showAlert(m, cb);
+  else { alert(m); if (cb) cb(); }
 }
 
 async function apiCall(payload) {
