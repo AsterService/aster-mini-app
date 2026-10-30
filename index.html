@@ -1318,9 +1318,19 @@ function editCar(i) {
   editingCarIndex = i;
   const car = profile.cars[i];
   document.getElementById("car-form-title").textContent = "Редактировать автомобиль";
-  document.getElementById("car-brand").value = car.brand;
+  const brandSel = document.getElementById("car-brand");
+  if (car.brand && ![...brandSel.options].some(o => o.value === car.brand)) {
+    const bo = document.createElement("option"); bo.value = bo.textContent = car.brand; brandSel.appendChild(bo);
+  }
+  brandSel.value = car.brand;
   onCarBrandChange();
-  setTimeout(() => document.getElementById("car-model").value = car.model, 50);
+  setTimeout(() => {
+    const modelSel = document.getElementById("car-model");
+    if (car.model && ![...modelSel.options].some(o => o.value === car.model)) {
+      const mo = document.createElement("option"); mo.value = mo.textContent = car.model; modelSel.appendChild(mo);
+    }
+    modelSel.value = car.model;
+  }, 50);
   document.getElementById("car-vin").value = car.vin;
   onVinInput(document.getElementById("car-vin"));
   clearCarFormErrors();
