@@ -318,7 +318,6 @@
         <option value="">Все статусы</option>
         <option>Записан</option><option>Приехал</option><option>Не приехал</option><option>Перенесён</option>
       </select>
-      <input type="date" id="fil-date" onchange="renderTable()" style="max-width:160px;font-size:13px">
       <div id="reg-period" style="display:contents"></div>
       <button class="btn-secondary" id="btn-reset-filter" onclick="clearFilters()" style="font-size:12px;padding:6px 12px">Сбросить</button>
     </div>
@@ -1091,13 +1090,11 @@ function getFiltered() {
   const op = document.getElementById("fil-operator").value;
   const st = document.getElementById("fil-station").value;
   const ss = document.getElementById("fil-status").value;
-  const dt = document.getElementById("fil-date").value;
   const regPeriod = periodRange("reg");
   return records.filter(r => {
     if (op && r.operator !== op) return false;
     if (st && r.station !== st) return false;
     if (ss && r.status !== ss) return false;
-    if (dt && r.visitDate !== dt) return false;
     if (!inPeriod(r, regPeriod)) return false;
     return true;
   });
@@ -1140,7 +1137,7 @@ function renderTable() {
 }
 
 function clearFilters() {
-  ["fil-operator","fil-station","fil-status","fil-date"].forEach(id => document.getElementById(id).value = "");
+  ["fil-operator","fil-station","fil-status"].forEach(id => document.getElementById(id).value = "");
   resetPeriod("reg");
   renderTable();
 }
