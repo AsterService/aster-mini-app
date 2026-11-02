@@ -1036,8 +1036,8 @@ function showAlert(msg, isError=false) {
 
 // ── ФИЛЬТР ПЕРИОДА (реестр и аналитика) ───────────────────
 const PERIOD_T = {
-  ru: { all: "Весь период", today: "Сегодня", yesterday: "Вчера", d7: "Последние 7 дней", d30: "Последние 30 дней", month: "Этот месяц", prev: "Прошлый месяц", custom: "Произвольный период", byVisit: "по дате визита", byCreated: "по дате записи", cap: "Период" },
-  uz: { all: "Butun davr", today: "Bugun", yesterday: "Kecha", d7: "Oxirgi 7 kun", d30: "Oxirgi 30 kun", month: "Shu oy", prev: "O'tgan oy", custom: "Ixtiyoriy davr", byVisit: "tashrif sanasi bo'yicha", byCreated: "yozilish sanasi bo'yicha", cap: "Davr" }
+  ru: { all: "Весь период", today: "Сегодня", yesterday: "Вчера", d7: "Последние 7 дней", d30: "Последние 30 дней", month: "Этот месяц", prev: "Прошлый месяц", custom: "Произвольный период", byVisit: "по дате визита", byCreated: "по дате записи", byHint: "Сначала выберите период: сегодня, 7 дней, месяц или произвольный", cap: "Период" },
+  uz: { all: "Butun davr", today: "Bugun", yesterday: "Kecha", d7: "Oxirgi 7 kun", d30: "Oxirgi 30 kun", month: "Shu oy", prev: "O'tgan oy", custom: "Ixtiyoriy davr", byVisit: "tashrif sanasi bo'yicha", byCreated: "yozilish sanasi bo'yicha", byHint: "Avval davrni tanlang: bugun, 7 kun, oy yoki ixtiyoriy", cap: "Davr" }
 };
 function ymd(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
 function buildPeriod(prefix, cb, defBy) {
@@ -1057,13 +1057,15 @@ function buildPeriod(prefix, cb, defBy) {
       '<input type="date" id="' + prefix + '-from" value="' + prev.from + '" onchange="' + cb + '()" style="font-size:13px"> — ' +
       '<input type="date" id="' + prefix + '-to" value="' + prev.to + '" onchange="' + cb + '()" style="font-size:13px">' +
     "</span>" +
-    '<select id="' + prefix + '-by" onchange="' + cb + '()" style="font-size:13px">' +
+    '<select id="' + prefix + '-by" onchange="' + cb + '()" style="font-size:13px" title="' + T.byHint + '"' + (prev.preset === "all" ? " disabled" : "") + ">" +
       opt("visit", T.byVisit, prev.by) + opt("created", T.byCreated, prev.by) +
     "</select>";
 }
 function onPeriodChange(prefix, cb) {
   const preset = document.getElementById(prefix + "-preset").value;
   document.getElementById(prefix + "-custom").style.display = preset === "custom" ? "inline-flex" : "none";
+  const bySel = document.getElementById(prefix + "-by");
+  if (bySel) bySel.disabled = preset === "all";
   window[cb]();
 }
 function periodRange(prefix) {
@@ -1096,6 +1098,7 @@ function resetPeriod(prefix) {
   pe.value = "all";
   ["from", "to"].forEach(k => { const e = document.getElementById(prefix + "-" + k); if (e) e.value = ""; });
   const c = document.getElementById(prefix + "-custom"); if (c) c.style.display = "none";
+  const bs = document.getElementById(prefix + "-by"); if (bs) bs.disabled = true;
 }
 
 // ── TABLE ─────────────────────────────────────────────────
