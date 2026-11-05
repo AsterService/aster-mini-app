@@ -839,7 +839,7 @@ function decodeStartParam() {
     const decoded = decodeURIComponent(escape(atob(base64)));
     const parts = decoded.split("|");
     if (parts.length < 2) return null;
-    return { vin: parts[0]||"", name: parts[1]||"", brand: parts[2]||"", model: parts[3]||"", clientType: parts[4]||"existing", branch: normalizeBranch(parts[5]) };
+    return { vin: parts[0]||"", name: parts[1]||"", brand: parts[2]||"", model: parts[3]||"", clientType: parts[4]||"existing", branch: normalizeBranch(parts[5]), master: (parts[6]||"").trim(), zn: (parts[7]||"").trim() };
   } catch(e) {
     console.error("QR decode error:", e);
     return null;
@@ -889,6 +889,9 @@ function showQrConfirm(qrData) {
         });
       }
     }
+    if ((qrData.master || qrData.zn) && SCRIPT_URL && SCRIPT_URL !== "ВСТАВЬ_URL_СЮДА") {
+      apiCall({ action: "znScan", tgId: profile.tgId || (tgUser ? tgUser.id : ""), phone: profile.phone || "", vin: qrData.vin, zn: qrData.zn || "", master: qrData.master || "" });
+    }
     showHome();
     showToast("Данные из QR добавлены");
     return;
@@ -922,6 +925,7 @@ function showQrConfirm(qrData) {
     ["VIN", qrData.vin]
   ];
   if (qrData.branch) rows.push(["Филиал", qrData.branch]);
+  if (qrData.master) rows.push(["Мастер", qrData.master]);
   rows.forEach(function(r) {
     const row = document.createElement("div");
     row.style.cssText = "display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F3F4F6;font-size:13px";
@@ -981,7 +985,7 @@ function showQrConfirm(qrData) {
   const model = qrData.model;
   const clientType = qrData.clientType;
   btn.addEventListener("click", function() {
-    confirmQrReg(vin, name, brand, model, clientType, qrData.branch);
+    confirmQrReg(vin, name, brand, model, clientType, qrData.branch, qrData.master, qrData.zn);
   });
   wrap.appendChild(btn);
   el.appendChild(wrap);
@@ -1027,7 +1031,7 @@ function requestTgPhone() {
   }
 }
 
-async function confirmQrReg(vin, name, brand, model, clientType, branch) {
+async function confirmQrReg(vin, name, brand, model, clientType, branch, master, zn) {
   const phone = document.getElementById("qr-phone").value.trim();
   if (!isPhoneComplete(phone)) { showToast("Введите полный номер телефона"); return; }
   if (window._qrRegBusy) return;
@@ -1044,7 +1048,7 @@ async function confirmQrReg(vin, name, brand, model, clientType, branch) {
     activeCarIndex: 0
   };
   if (SCRIPT_URL && SCRIPT_URL !== "ВСТАВЬ_URL_СЮДА") {
-    const regRes = await apiCall({ action: "registerClient", client: profile });
+    const regRes = await apiCall({ action: "registerClient", client: Object.assign({}, profile, { master: master || "", zn: zn || "" }) });
     if (isLinkError(regRes)) {
       window._qrRegBusy = false;
       const rb = document.querySelector("#qr-reg-btn");

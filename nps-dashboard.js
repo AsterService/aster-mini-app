@@ -82,6 +82,7 @@
       o.loc = String(o.branch || "").trim() || "Не указана";
       o.test = String(o.campaign).indexOf("ТЕСТ") === 0;
       o.kind = /сервис/i.test(String(o.campaign)) ? "service" : "sales";
+      o.master = String(o.master || "").trim();
       o.done = String(o.status) === "Завершён";
       o.s1 = num(o.q1); o.s2 = num(o.q2); o.s3 = num(o.q3);
       return o;
@@ -216,6 +217,19 @@
         (body || '<tr><td colspan="6" class="nps-empty">Нет данных</td></tr>') + "</tbody></table></div></div>";
     }
 
+    function mastersCard(rows) {
+      var g = {};
+      rows.forEach(function (r) { if (r.master) (g[r.master] = g[r.master] || []).push(r); });
+      var names = Object.keys(g).sort(function (a, b) { return stat(g[b]).n - stat(g[a]).n; });
+      if (!names.length) return "";
+      var body = names.map(function (n) {
+        var st = stat(g[n]);
+        return "<tr><td>" + esc(n) + '</td><td class="n">' + g[n].length + '</td><td class="n">' + st.n + '</td><td class="n" style="color:' + npsColor(st.nps) + ';font-weight:700">' + fmtNps(st.nps) +
+          '</td><td class="n">' + (st.a1 == null ? "—" : st.a1) + '</td><td class="n">' + (st.a2 == null ? "—" : st.a2) + "</td></tr>";
+      }).join("");
+      return '<div class="nps-card" style="margin-bottom:18px"><h3>NPS по мастерам-консультантам</h3><div style="overflow-x:auto"><table class="nps-table"><thead><tr><th>Мастер</th><th class="n">Отправлено</th><th class="n">Ответили</th><th class="n">NPS</th><th class="n">Качество</th><th class="n">Персонал</th></tr></thead><tbody>' + body + "</tbody></table></div></div>";
+    }
+
     function chip(label, v) {
       if (v == null) return "";
       return '<span class="nps-chip ' + (v < 9 ? "low" : "hi") + '">' + label + " " + v + "</span>";
@@ -236,7 +250,7 @@
       var html = shown.map(function (r) {
         var low = r.s1 < 9 || r.s2 < 9 || r.s3 < 9;
         function why(l, t) { return t ? '<div class="nps-why"><span>' + l + ":</span> " + esc(t) + "</div>" : ""; }
-        return '<div class="nps-com' + (low ? " low" : "") + '"><div class="h"><b>' + esc(r.name || "Клиент") + "</b><span>" + esc(r.loc) + "</span><span>" + esc(r.car || "") + "</span><span>" + esc(String(r.completedAt || "").slice(0, 16)) + "</span></div>" +
+        return '<div class="nps-com' + (low ? " low" : "") + '"><div class="h"><b>' + esc(r.name || "Клиент") + "</b><span>" + esc(r.loc) + "</span><span>" + esc(r.car || "") + "</span>" + (r.master ? "<span>Мастер: " + esc(r.master) + "</span>" : "") + "<span>" + esc(String(r.completedAt || "").slice(0, 16)) + "</span></div>" +
           '<div class="s">' + chip(S.f.kind === "service" ? "Качество" : "Покупка", r.s1) + chip("Персонал", r.s2) + chip("Рекомендация", r.s3) + "</div>" +
           why(S.f.kind === "service" ? "Качество" : "Покупка", r.q1why) + why("Персонал", r.q2why) + why("Рекомендация", r.q3why) + "</div>";
       }).join("");
@@ -256,7 +270,7 @@
       if (S.err) html += '<div class="nps-err">' + esc(S.err) + ' <button class="nps-btn" data-act="refresh" style="margin-left:8px">Повторить</button><button class="nps-btn" data-act="logout" style="margin-left:6px">Ввести другой ключ</button></div>';
       if (S.rows) {
         var rows = filtered(), st = stat(rows);
-        html += controls() + kpis(rows, st) + '<div class="nps-two">' + funnel(rows) + breakdown(rows) + "</div>" + comments(rows);
+        html += controls() + kpis(rows, st) + '<div class="nps-two">' + funnel(rows) + breakdown(rows) + "</div>" + (S.f.kind === "service" ? mastersCard(rows) : "") + comments(rows);
       } else if (!S.err) {
         html += '<div class="nps-empty">Загрузка…</div>';
       }

@@ -150,6 +150,15 @@ input.vin { font-family: monospace; text-transform: uppercase; letter-spacing: 2
       </div>
     </div>
 
+    <div class="field">
+      <label class="label">Мастер-консультант (необязательно)</label>
+      <input type="text" id="inp-master" placeholder="Иванов А.">
+    </div>
+    <div class="field">
+      <label class="label">Номер ЗН (необязательно)</label>
+      <input type="text" id="inp-zn" placeholder="ЗН-000123">
+    </div>
+
     <button class="btn btn-primary" onclick="generate()">Сгенерировать QR-код</button>
   </div>
 
@@ -251,6 +260,8 @@ function resetAll() {
   document.getElementById("inp-brand").value = "";
   onBrand();
   document.getElementById("inp-vin").value = "";
+  document.getElementById("inp-master").value = "";
+  document.getElementById("inp-zn").value = "";
   document.getElementById("vin-cnt").textContent = "0 / 17";
   document.getElementById("vin-cnt").className = "vin-count";
   selectType("new");
@@ -272,7 +283,11 @@ function generate() {
   if (vin.length !== 17) { alert("VIN должен содержать ровно 17 символов"); return; }
 
   // Кодируем данные
-  var data = [vin, name, brand, model, clientType, branch].join("|");
+  var master = document.getElementById("inp-master").value.trim().replace(/\|/g, " ");
+  var zn = document.getElementById("inp-zn").value.trim().replace(/\|/g, " ");
+  var fields = [vin, name, brand, model, clientType, branch];
+  if (master || zn) fields.push(master, zn);
+  var data = fields.join("|");
   var encoded = btoa(unescape(encodeURIComponent(data)));
   var safe = encoded.replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,"");
   // Ссылка открывает Mini App через прямую ссылку с параметром
@@ -292,6 +307,8 @@ function generate() {
     '<div class="client-row"><span class="cl">Филиал</span><span class="cv name">' + branch + '</span></div>' +
     '<div class="client-row"><span class="cl">Автомобиль</span><span class="cv name">' + brand + ' ' + model + '</span></div>' +
     '<div class="client-row"><span class="cl">VIN</span><span class="cv">' + vin + '</span></div>' +
+    (master ? '<div class="client-row"><span class="cl">Мастер</span><span class="cv name">' + master + '</span></div>' : '') +
+    (zn ? '<div class="client-row"><span class="cl">Номер ЗН</span><span class="cv">' + zn + '</span></div>' : '') +
     '<div class="client-row"><span class="cl">Тип</span><span class="cv name">' + (clientType === "new" ? "Новый клиент" : "Существующий") + '</span></div>';
 
   // QR

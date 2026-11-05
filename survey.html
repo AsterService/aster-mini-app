@@ -183,7 +183,8 @@ const SVC = {
       "Оцените <b>качество выполненных работ</b>",
       "Оцените <b>работу персонала</b> сервиса (приёмщик, мастера)",
       "Насколько Вы готовы <b>рекомендовать</b> наш сервис друзьям, родственникам и знакомым?"
-    ]
+    ],
+    qm: "Оцените работу мастера-консультанта <b>{master}</b>"
   },
   uz: {
     intro: "Siz yaqinda {car} avtomobilingiz bilan Aster Service servis markaziga murojaat qildingiz. Yaxshiroq bo'lishimiz uchun sizning fikringiz biz uchun juda muhim. Iltimos, 3 ta savolga javob bering — bu 1 daqiqadan kam vaqtingizni oladi.",
@@ -191,11 +192,12 @@ const SVC = {
       "Bajarilgan <b>ishlar sifatini</b> baholang",
       "Servis <b>xodimlari ishini</b> baholang (qabul qiluvchi, ustalar)",
       "Servisimizni do'stlaringiz, qarindoshlaringiz va tanishlaringizga qanchalik <b>tavsiya qilasiz</b>?"
-    ]
+    ],
+    qm: "Usta-maslahatchi <b>{master}</b> ishini baholang"
   }
 };
 
-const state = { name: "", car: "", kind: "sales", scores: [0, 0, 0], whys: ["", "", ""], ready: false, busy: false };
+const state = { name: "", car: "", master: "", kind: "sales", scores: [0, 0, 0], whys: ["", "", ""], ready: false, busy: false };
 
 function $(id) { return document.getElementById(id); }
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -288,10 +290,11 @@ function applyLang() {
   document.querySelectorAll("[data-t]").forEach(function (el) { el.textContent = t[el.dataset.t]; });
   $("hello").textContent = t.hello.replace("{name}", state.name);
   const tx = state.kind === "service" ? SVC[lang] : t;
+  const q2 = (state.kind === "service" && state.master) ? SVC[lang].qm.replace("{master}", esc(state.master)) : null;
   $("intro").textContent = tx.intro.replace("{car}", state.car);
   for (let qi = 0; qi < 3; qi++) {
     if (!$("qt" + qi)) continue;
-    $("qt" + qi).innerHTML = tx.q[qi];
+    $("qt" + qi).innerHTML = (qi === 1 && q2) ? q2 : tx.q[qi];
     $("hint" + qi).innerHTML = t.hints[qi];
     $("wl" + qi).textContent = t.whyLabel;
     $("wt" + qi).placeholder = t.whyPh;
@@ -327,13 +330,13 @@ async function api(payload) {
 
 async function start() {
   show("s-loading");
-  if (PREVIEW) { state.name = "Иван Иванов"; state.car = "BYD Chazor"; state.kind = params.get("kind") === "service" ? "service" : "sales"; openForm(); return; }
+  if (PREVIEW) { state.name = "Иван Иванов"; state.car = "BYD Chazor"; state.kind = params.get("kind") === "service" ? "service" : "sales"; state.master = params.get("master") || ""; openForm(); return; }
   if (!initData) { showMessage("errTitle", "errTg", false); return; }
   if (!SID) { showMessage("errTitle", "errNotFound", false); return; }
   try {
     const r = await api({ action: "npsOpen", id: SID, initData: initData });
     if (r && r.ok) {
-      state.name = r.name || ""; state.car = r.car || ""; state.kind = r.kind === "service" ? "service" : "sales";
+      state.name = r.name || ""; state.car = r.car || ""; state.kind = r.kind === "service" ? "service" : "sales"; state.master = r.master || "";
       if (r.done) { showMessage("doneTitle", "doneText", false); return; }
       openForm();
     } else {
