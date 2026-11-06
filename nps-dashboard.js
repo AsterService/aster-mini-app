@@ -61,9 +61,10 @@
   function lsGet(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function num(v) { var n = Number(v); return v !== "" && v != null && isFinite(n) ? n : null; }
+  var BRANDS = { kia: "KIA", byd: "BYD", chery: "Chery", haval: "Haval", chevrolet: "Chevrolet", changan: "Changan", jetour: "Jetour", leapmotor: "Leapmotor", lixiang: "Lixiang", li: "Lixiang", deepal: "Deepal", dongfeng: "Dongfeng", lada: "LADA", hyundai: "Hyundai" };
   function brandOf(car) {
     var s = String(car || "").trim().split(/\s+/)[0] || "";
-    return s || "—";
+    return s ? (BRANDS[s.toLowerCase()] || s) : "—";
   }
   function npsColor(v) { return v == null ? "#9CA3AF" : v >= 50 ? GOOD : v >= 0 ? MID : BAD; }
   function fmtNps(v) { return v == null ? "—" : (v > 0 ? "+" : "") + v; }
