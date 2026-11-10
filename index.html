@@ -847,7 +847,7 @@ function decodeStartParam() {
 }
 
 // ── INIT ──────────────────────────────────────────────────
-window.onload = () => {
+function asterInit() {
   if (tgUser) document.getElementById("header-user").textContent = tgUser.first_name;
   const timeSel = document.getElementById("s-time");
   TIME_SLOTS.forEach(t => timeSel.innerHTML += `<option>${t}</option>`);
@@ -859,12 +859,15 @@ window.onload = () => {
 
   const qrData = decodeStartParam();
   if (qrData && qrData.vin) {
+    clientLog("qr_open", { vin6: String(qrData.vin).slice(-6), hasMaster: !!qrData.master, loadMs: (window.performance && performance.now) ? Math.round(performance.now()) : 0 });
     showQrConfirm(qrData);
   } else {
     loadProfile();
   }
   applyLang();
-};
+}
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", asterInit);
+else asterInit();
 
 function restoreAppt() { const saved = localStorage.getItem("aster_appt"); if (!saved) return; try { const appt = JSON.parse(saved); const todayCheck = new Date(); todayCheck.setHours(0,0,0,0); const visitDate = new Date(appt.date); if (visitDate < todayCheck) { localStorage.removeItem("aster_appt"); return; } const dateStr = visitDate.toLocaleDateString("ru-RU", { day: "numeric", month: "long", weekday: "long" }); document.getElementById("home-appt").style.display = "block"; document.getElementById("appt-date").textContent = dateStr + " в " + appt.time; document.getElementById("appt-info").textContent = appt.branch + (appt.reason ? " • " + appt.reason : ""); } catch (e) {} } const _origShowHome = showHome; showHome = function() { _origShowHome(); restoreAppt(); }; if (window.visualViewport) { window.visualViewport.addEventListener("resize", function() { if (document.activeElement && document.activeElement.id === "s-reason") { document.getElementById("s-reason").scrollIntoView({behavior:"smooth", block:"center"}); } }); }
 // ── QR CONFIRM ────────────────────────────────────────────
@@ -900,7 +903,11 @@ function showQrConfirm(qrData) {
   document.getElementById("home-loading").style.display = "none";
   document.getElementById("home-register").style.display = "none";
 
-  const el = document.getElementById("home-content");
+  // Экран подтверждения — в отдельном контейнере, блок главной (home-content) не трогаем,
+  // иначе после регистрации showHome() падает на пустых элементах и экран «зависает»
+  document.getElementById("home-content").style.display = "none";
+  let el = document.getElementById("qr-confirm");
+  if (!el) { el = document.createElement("div"); el.id = "qr-confirm"; document.getElementById("page-home").appendChild(el); }
   el.style.display = "block";
   el.innerHTML = "";
 
@@ -996,7 +1003,18 @@ function requestTgPhone() {
   // Запрашиваем номер через Telegram WebApp
   if (tg && tg.requestContact) {
     // Колбэк Telegram: (sent: boolean, event); сам номер лежит в event.responseUnsafe.contact
+    clientLog("phone_click");
+    let answered = false;
+    setTimeout(function() {
+      if (answered) return;
+      clientLog("phone_no_answer");
+      showToast("Введите номер вручную");
+      const pi = document.getElementById("qr-phone");
+      if (pi) pi.focus();
+    }, 12000);
     tg.requestContact(function(sent, ev) {
+      answered = true;
+      clientLog("phone_cb", { sent: !!sent });
       const contact = ev && ev.responseUnsafe && ev.responseUnsafe.contact;
       if (sent && contact && contact.phone_number) {
         let phone = String(contact.phone_number).replace(/\D/g, "");
@@ -1048,7 +1066,19 @@ async function confirmQrReg(vin, name, brand, model, clientType, branch, master,
     activeCarIndex: 0
   };
   if (SCRIPT_URL && SCRIPT_URL !== "ВСТАВЬ_URL_СЮДА") {
+    clientLog("reg_click", { vin6: String(vin).slice(-6) });
     const regRes = await apiCall({ action: "registerClient", client: Object.assign({}, profile, { master: master || "", zn: zn || "" }) });
+    if (regRes === null) {
+      window._qrRegBusy = false;
+      const rb0 = document.querySelector("#qr-reg-btn");
+      if (rb0) { rb0.disabled = false; rb0.textContent = "✅ Подтвердить и зарегистрироваться"; rb0.style.opacity = "1"; }
+      const offMsg = (currentLang === "uz")
+        ? "Server bilan aloqa yo'q. Internetni tekshirib, qayta urinib ko'ring."
+        : "Нет связи с сервером. Проверьте интернет и нажмите кнопку ещё раз.";
+      if (tg && tg.showAlert) tg.showAlert(offMsg); else alert(offMsg);
+      return;
+    }
+    clientLog("reg_ok", { err: regRes && regRes.error ? String(regRes.error).slice(0, 80) : "" });
     if (isLinkError(regRes)) {
       window._qrRegBusy = false;
       const rb = document.querySelector("#qr-reg-btn");
@@ -1083,6 +1113,8 @@ function saveProfileLocal() {
 
 // ── HOME ──────────────────────────────────────────────────
 function showHome() {
+  const qc = document.getElementById("qr-confirm");
+  if (qc) qc.style.display = "none";
   document.getElementById("home-loading").style.display = "none";
   document.getElementById("home-content").style.display = "block";
   document.getElementById("home-register").style.display = "none";
@@ -1787,13 +1819,62 @@ function showLinkError(cb) {
   else { alert(m); if (cb) cb(); }
 }
 
+// Таймаут запроса и одна повторная попытка (только для действий, которые безопасно повторять)
+const API_TIMEOUT_MS = 15000;
+const API_RETRY = { registerClient: 1, getHistory: 1, getFreeSlots: 1, getServices: 1, znScan: 1 };
 async function apiCall(payload) {
   if (!SCRIPT_URL || SCRIPT_URL === "ВСТАВЬ_URL_СЮДА") return null;
-  try {
-    const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-    return await res.json();
-  } catch(e) { console.error("API error:", e); return null; }
+  const act = payload && payload.action;
+  const attempts = API_RETRY[act] ? 2 : 1;
+  const t0 = Date.now();
+  let lastErr = "";
+  for (let i = 0; i < attempts; i++) {
+    const ctrl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(function() { ctrl.abort(); }, API_TIMEOUT_MS) : null;
+    try {
+      const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload), signal: ctrl ? ctrl.signal : undefined });
+      const data = await res.json();
+      if (timer) clearTimeout(timer);
+      const ms = Date.now() - t0;
+      if (ms > 6000 || i > 0) clientLog("api_slow", { action: act, ms: ms, tries: i + 1 });
+      return data;
+    } catch(e) {
+      if (timer) clearTimeout(timer);
+      lastErr = (e && (e.name || "") + ": " + (e.message || "")) || "error";
+      console.error("API error:", e);
+    }
+  }
+  clientLog("api_fail", { action: act, ms: Date.now() - t0, tries: attempts, err: lastErr });
+  return null;
 }
+
+// ── ДИАГНОСТИКА: короткие события в лист «Логи клиента» (без ФИО и телефона) ──
+const LOG_SID = Math.random().toString(36).slice(2, 10);
+const LOG_T0 = Date.now();
+function clientLog(stage, extra) {
+  try {
+    if (!SCRIPT_URL || SCRIPT_URL === "ВСТАВЬ_URL_СЮДА") return;
+    const nav = navigator || {};
+    const conn = nav.connection || {};
+    const body = {
+      action: "clientLog",
+      sid: LOG_SID, stage: stage, t: Date.now() - LOG_T0,
+      tgId: tgUser ? tgUser.id : "",
+      platform: tg ? tg.platform : "", tgVer: tg ? tg.version : "",
+      ua: String(nav.userAgent || "").slice(0, 160),
+      net: conn.effectiveType || "", lang: nav.language || "",
+      vw: window.innerWidth + "x" + window.innerHeight,
+      extra: extra || {}
+    };
+    fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(body), keepalive: true }).catch(function() {});
+  } catch(e) {}
+}
+window.addEventListener("error", function(ev) {
+  clientLog("js_error", { msg: String(ev.message || "").slice(0, 150), at: String(ev.filename || "").slice(-30) + ":" + ev.lineno });
+});
+window.addEventListener("unhandledrejection", function(ev) {
+  clientLog("js_reject", { msg: String(ev.reason && (ev.reason.message || ev.reason) || "").slice(0, 150) });
+});
 </script>
 </body>
 </html>
