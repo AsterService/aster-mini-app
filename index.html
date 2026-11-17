@@ -146,8 +146,10 @@
   .to-card summary { cursor: pointer; color: #0369A1; font-weight: 600; }
   .to-card .to-list { margin-top: 6px; line-height: 1.6; }
   .to-card .to-list-title { font-weight: 700; margin-top: 6px; }
-  .to-card .to-row { display: flex; justify-content: space-between; gap: 8px; }
-  .to-card select { margin-top: 4px; }
+  .to-card .to-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .to-card .to-row span:first-child { flex: 1; min-width: 0; }
+  .to-card .to-row span:last-child { flex: 0 0 auto; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+  .to-card select { margin-top: 4px; font-size: 12.5px; padding: 11px 30px 11px 10px; text-overflow: ellipsis; }
   .cons-row { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 14px; }
   .cons-row input { width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; }
   .cons-sub { display: block; font-size: 12px; color: #6B7280; margin-top: 2px; line-height: 1.4; }
@@ -1631,17 +1633,26 @@ function currentSchedCar() {
 }
 
 // Пакеты ТО выбранной модели по возрастанию пробега
+// Название модели без суффиксов комплектации/поколения: «Tiggo 7 Pro», «Tiggo 7 PRO New» → «tiggo 7»
+const MODEL_SUFFIXES = ["pro", "new", "max", "luxury", "lux", "premium", "comfort", "elite", "style", "limited"];
+function normModel(m) {
+  const w = String(m || "").toLowerCase().replace(/[^a-z0-9а-яё\s]/gi, " ").split(/\s+/).filter(Boolean);
+  while (w.length > 1 && MODEL_SUFFIXES.indexOf(w[w.length - 1]) !== -1) w.pop();
+  return w.join(" ");
+}
 function modelToList(car) {
   if (!catalog || !car) return [];
-  const b = String(car.brand).toLowerCase(), m = String(car.model).toLowerCase();
+  const b = String(car.brand).toLowerCase(), m = normModel(car.model);
   return catalog.services
-    .filter(s => s.category === "ТО" && s.brand.toLowerCase() === b && s.model.toLowerCase() === m)
+    .filter(s => s.category === "ТО" && s.brand.toLowerCase() === b && normModel(s.model) === m)
     .sort((a, c) => a.mileageKm - c.mileageKm);
 }
 
 // Какое ТО наступило раньше — по пробегу или по сроку. Берём старшее из достигнутых
 function recommendTo(list, km, year) {
-  const ageMonths = Math.max(0, new Date().getFullYear() - year) * 12;
+  // Месяц выпуска неизвестен: считаем от 1 января года выпуска, чтобы ТО по сроку наступало не позже, а не раньше фактического
+  const now = new Date();
+  const ageMonths = Math.max(0, (now.getFullYear() - year) * 12 + now.getMonth());
   let idxKm = 0, idxAge = 0;
   list.forEach((s, i) => { if (km >= s.mileageKm) idxKm = i; if (ageMonths >= s.months) idxAge = i; });
   return { idx: Math.max(idxKm, idxAge), byKm: idxKm >= idxAge };
