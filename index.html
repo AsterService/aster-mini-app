@@ -311,43 +311,43 @@
   <div class="branch-card">
     <div class="branch-name">Рохат (Ташкент)</div>
     <div class="branch-addr">Бектемирский район, мх. Нурафшон</div>
-    <a href="tel:+998555167474" class="branch-phone">📞 +998 55 516 74 74</a>
+    <a href="tel:+998555167474" class="branch-phone" onclick="return onPhoneTap(event)">📞 +998 55 516 74 74</a>
     <a href="https://yandex.ru/navi/org/adm_aster/215116590272?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
   </div>
   <div class="branch-card">
     <div class="branch-name">Ахмад Дониш (Ташкент)</div>
     <div class="branch-addr">ул. Байроктол, 36Б</div>
-    <a href="tel:+998555167474" class="branch-phone">📞 +998 55 516 74 74</a>
+    <a href="tel:+998555167474" class="branch-phone" onclick="return onPhoneTap(event)">📞 +998 55 516 74 74</a>
     <a href="https://yandex.ru/navi/org/aster_auto_city/210418048375?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
   </div>
   <div class="branch-card">
     <div class="branch-name">Самарканд</div>
     <div class="branch-addr">Самаркандская кольцевая дорога, 50A</div>
-    <a href="tel:+998555167474" class="branch-phone">📞 +998 55 516 74 74</a>
+    <a href="tel:+998555167474" class="branch-phone" onclick="return onPhoneTap(event)">📞 +998 55 516 74 74</a>
     <a href="https://yandex.ru/navi/org/aster_auto_city/190021696533?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
   </div>
   <div class="branch-card">
     <div class="branch-name">Бухара</div>
     <div class="branch-addr">ул. Мустакиллик, 55/1А</div>
-    <a href="tel:+998555167474" class="branch-phone">📞 +998 55 516 74 74</a>
+    <a href="tel:+998555167474" class="branch-phone" onclick="return onPhoneTap(event)">📞 +998 55 516 74 74</a>
     <a href="https://yandex.ru/navi/org/aster_auto_city/133684389451?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
   </div>
   <div class="branch-card">
     <div class="branch-name">Наманган</div>
     <div class="branch-addr">мх. Мингчинор, ул. Косонсой</div>
-    <a href="tel:+998555167474" class="branch-phone">📞 +998 55 516 74 74</a>
+    <a href="tel:+998555167474" class="branch-phone" onclick="return onPhoneTap(event)">📞 +998 55 516 74 74</a>
     <a href="https://yandex.ru/navi/org/aster_auto_city/130905742415?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
   </div>
   <div class="branch-card">
     <div class="branch-name">Навои</div>
     <div class="branch-addr">Кармана, мх. Талкок, ул. Янги Хаёт, 111</div>
-    <a href="tel:+998555167474" class="branch-phone">📞 +998 55 516 74 74</a>
+    <a href="tel:+998555167474" class="branch-phone" onclick="return onPhoneTap(event)">📞 +998 55 516 74 74</a>
     <a href="https://yandex.ru/navi/org/aster_auto_city/97988622505?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
   </div>
   <div class="branch-card">
     <div class="branch-name">Карши</div>
     <div class="branch-addr">нп. Тукмангит, ул. Тукмангит, 142</div>
-    <a href="tel:+998555167474" class="branch-phone">📞 +998 55 516 74 74</a>
+    <a href="tel:+998555167474" class="branch-phone" onclick="return onPhoneTap(event)">📞 +998 55 516 74 74</a>
     <a href="https://yandex.ru/navi/org/adm_aster_changan/224804077608?si=xchhwhruwkrgubdhjfypfup1pg" target="_blank" class="branch-nav">🗺️ <span data-i="route">Построить маршрут</span></a>
   </div>
 </div>
@@ -1529,6 +1529,51 @@ function onVinInput(input, counterId) {
   counter.textContent = len + " / 17";
   counter.className = "vin-counter" + (len === 17 ? " full" : "");
 }
+
+// ── ТЕЛЕФОН: в Telegram Mini App ссылка tel: открывается не везде, поэтому даём меню с запасными вариантами ──
+const CALL_TEL = "+998555167474", CALL_FMT = "+998 55 516 74 74";
+const CALL_TX = {
+  ru: { title: "Позвонить в Aster Service", call: "📞 Позвонить", copy: "📋 Скопировать номер", cb: "↩️ Заказать обратный звонок", copied: "Номер скопирован" },
+  uz: { title: "Aster Service'ga qo'ng'iroq", call: "📞 Qo'ng'iroq qilish", copy: "📋 Raqamni nusxalash", cb: "↩️ Qayta qo'ng'iroq buyurtma qilish", copied: "Raqam nusxalandi" }
+};
+function dialPhone() { try { window.location.href = "tel:" + CALL_TEL; } catch (e) { showToast(CALL_FMT); } }
+function fallbackCopy(txt) {
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = txt; ta.style.cssText = "position:fixed;opacity:0;top:0;left:0";
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  } catch (e) { return false; }
+}
+function copyPhone() {
+  const x = CALL_TX[currentLang] || CALL_TX.ru;
+  const done = function(ok) { showToast(ok ? x.copied : CALL_FMT); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(CALL_FMT).then(function() { done(true); }, function() { done(fallbackCopy(CALL_FMT)); });
+  } else done(fallbackCopy(CALL_FMT));
+}
+function showCallMenu() {
+  const x = CALL_TX[currentLang] || CALL_TX.ru;
+  if (tg && typeof tg.showPopup === "function") {
+    try {
+      tg.showPopup({ title: x.title, message: CALL_FMT, buttons: [
+        { id: "call", type: "default", text: x.call },
+        { id: "copy", type: "default", text: x.copy },
+        { id: "cb", type: "default", text: x.cb }
+      ] }, function(id) {
+        if (id === "call") dialPhone();
+        else if (id === "copy") copyPhone();
+        else if (id === "cb") requestCallback();
+      });
+      return;
+    } catch (e) { /* окно уже открыто или не поддерживается */ }
+  }
+  // Без showPopup (старый Telegram, обычный браузер): пробуем звонилку и показываем номер
+  copyPhone(); dialPhone();
+}
+function onPhoneTap(ev) { if (ev && ev.preventDefault) ev.preventDefault(); showCallMenu(); return false; }
 
 // ── CALLBACK ──────────────────────────────────────────────
 function requestCallback() {
