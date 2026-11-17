@@ -1549,7 +1549,14 @@ const CALL_TX = {
   ru: { title: "Позвонить в Aster Service", call: "📞 Позвонить", copy: "📋 Скопировать номер", cb: "↩️ Заказать обратный звонок", copied: "Номер скопирован" },
   uz: { title: "Aster Service'ga qo'ng'iroq", call: "📞 Qo'ng'iroq qilish", copy: "📋 Raqamni nusxalash", cb: "↩️ Qayta qo'ng'iroq buyurtma qilish", copied: "Raqam nusxalandi" }
 };
-function dialPhone() { try { window.location.href = "tel:" + CALL_TEL; } catch (e) { showToast(CALL_FMT); } }
+// В Mini App схема tel: не открывается, поэтому звонок идёт через https-страницу, которая запускает набор в обычном браузере
+const CALL_PAGE = "https://asterservice.github.io/aster-mini-app/call.html";
+function dialPhone() {
+  if (tg && typeof tg.openLink === "function") {
+    try { tg.openLink(CALL_PAGE + "?lang=" + (currentLang === "uz" ? "uz" : "ru")); return; } catch (e) {}
+  }
+  try { window.location.href = "tel:" + CALL_TEL; } catch (e) { showToast(CALL_FMT); }
+}
 function fallbackCopy(txt) {
   try {
     const ta = document.createElement("textarea");

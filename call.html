@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Позвонить в Aster Service</title>
+<link rel="icon" href="favicon.ico">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background: #F8FAFC; color: #111827; min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: #0F172A; color: #fff; padding: 18px 20px; font-weight: 700; font-size: 18px; letter-spacing: .3px; }
+  header span { color: #4A9FBF; }
+  main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px 20px 40px; text-align: center; }
+  .ico { font-size: 54px; margin-bottom: 10px; }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  p { margin: 0 0 22px; color: #6B7280; font-size: 14px; line-height: 1.5; max-width: 320px; }
+  .btn { display: block; width: 100%; max-width: 320px; padding: 16px; border-radius: 14px; border: 0; font-size: 18px; font-weight: 700; font-family: inherit; text-decoration: none; cursor: pointer; margin-bottom: 12px; }
+  .call { background: #0F172A; color: #fff; }
+  .copy { background: #fff; color: #1B3A5C; border: 1.5px solid #E5E7EB; font-size: 15px; font-weight: 600; }
+  .note { font-size: 12.5px; color: #9CA3AF; margin-top: 8px; }
+</style>
+</head>
+<body>
+<header>ASTER <span>Service</span></header>
+<main>
+  <div class="ico">📞</div>
+  <h1 id="t-title">Звоним в Aster Service</h1>
+  <p id="t-sub">Если телефон не начал набор сам, нажмите на номер ниже.</p>
+  <a class="btn call" id="call" href="tel:+998555167474">+998 55 516 74 74</a>
+  <button class="btn copy" id="copy" type="button">Скопировать номер</button>
+  <div class="note" id="note"></div>
+</main>
+<script>
+const TEL = "+998555167474", FMT = "+998 55 516 74 74";
+const TX = {
+  ru: { title: "Звоним в Aster Service", sub: "Если телефон не начал набор сам, нажмите на номер ниже.", copy: "Скопировать номер", copied: "Номер скопирован" },
+  uz: { title: "Aster Service'ga qo'ng'iroq", sub: "Agar telefon o'zi terishni boshlamasa, quyidagi raqamni bosing.", copy: "Raqamni nusxalash", copied: "Raqam nusxalandi" }
+};
+const lang = new URLSearchParams(location.search).get("lang") === "uz" ? "uz" : "ru";
+const t = TX[lang];
+document.documentElement.lang = lang;
+document.getElementById("t-title").textContent = t.title;
+document.getElementById("t-sub").textContent = t.sub;
+document.getElementById("copy").textContent = t.copy;
+document.getElementById("copy").addEventListener("click", function () {
+  const done = function (ok) { document.getElementById("note").textContent = ok ? t.copied : FMT; };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(FMT).then(function () { done(true); }, function () { done(false); });
+  else done(false);
+});
+// Пробуем начать звонок сразу; если браузер требует касания, остаётся большая кнопка с номером
+setTimeout(function () { try { location.href = "tel:" + TEL; } catch (e) {} }, 400);
+</script>
+</body>
+</html>
