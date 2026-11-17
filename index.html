@@ -568,6 +568,8 @@ const I18N = {
     schedBtn: "Записаться", schedNoCars: "Нет автомобилей — добавьте в профиле",
     histTitle: "История ремонта", histEmpty: "История пуста",
     histNoCar: "Добавьте автомобиль в профиле",
+    histMaintTitle: "Раздел обновляется",
+    histMaintText: "Мы дорабатываем историю обслуживания, скоро она снова появится здесь. Спасибо, что Вы с нами!",
     contactsTitle: "Наши филиалы", route: "Построить маршрут",
     profileTitle: "Личные данные", profileCars: "Мои автомобили",
     profileEdit: "✏️ Редактировать данные", profileAddCar: "+ Добавить авто",
@@ -631,6 +633,8 @@ const I18N = {
     schedBtn: "Yozilish", schedNoCars: "Avtomobil yo'q — profilga qo'shing",
     histTitle: "Ta'mirlash tarixi", histEmpty: "Tarix bo'sh",
     histNoCar: "Profilga avtomobil qo'shing",
+    histMaintTitle: "Bo'lim yangilanmoqda",
+    histMaintText: "Xizmat tarixini takomillashtiryapmiz, tez orada u yana shu yerda paydo bo'ladi. Biz bilan bo'lganingiz uchun rahmat!",
     contactsTitle: "Bizning filiallar", route: "Yo'nalish qurish",
     profileTitle: "Shaxsiy ma'lumotlar", profileCars: "Mening avtomobillarim",
     profileEdit: "✏️ Ma'lumotlarni tahrirlash", profileAddCar: "+ Avtomobil qo'shish",
@@ -1200,12 +1204,21 @@ function updateHistoryCarFilter() {
   sel.value = profile.activeCarIndex || 0;
 }
 
+// Временно: раздел «История» на доработке. Чтобы вернуть историю, поставьте false
+const HISTORY_MAINTENANCE = true;
+
 async function renderHistory() {
   if (!profile) return;
   const sel = document.getElementById("history-car-filter");
+  const list = document.getElementById("history-list");
+  if (HISTORY_MAINTENANCE) {
+    sel.style.display = "none";
+    list.innerHTML = '<div class="empty-state"><div class="icon">🛠</div><b>' + esc(t("histMaintTitle")) + '</b><div style="margin-top:6px">' + esc(t("histMaintText")) + '</div></div>';
+    return;
+  }
+  sel.style.display = "";
   const carIdx = parseInt(sel.value) || 0;
   const car = profile.cars[carIdx];
-  const list = document.getElementById("history-list");
 
   if (!car) {
     list.innerHTML = '<div class="empty-state"><div class="icon">🚗</div>' + t("histNoCar") + '</div>';
