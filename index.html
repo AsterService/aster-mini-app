@@ -63,6 +63,10 @@
   .welcome-hi { font-size: 13px; color: #94A3B8; margin-bottom: 4px; }
   .welcome-name { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
 
+  .hero-car-wrap { position: relative; height: 128px; margin: 0 0 8px; display: flex; align-items: center; justify-content: center; }
+  .hero-car-wrap::before { content: ""; position: absolute; left: 50%; top: 52%; width: 78%; height: 70%; transform: translate(-50%, -50%); background: radial-gradient(closest-side, rgba(74,159,191,.38), transparent); pointer-events: none; }
+  .hero-car { position: relative; max-width: 100%; max-height: 118px; width: auto; height: auto; object-fit: contain; filter: drop-shadow(0 8px 12px rgba(0,0,0,.4)); }
+
   /* CAR SELECTOR */
   .car-selector { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; scrollbar-width: none; }
   .car-selector::-webkit-scrollbar { display: none; }
@@ -194,6 +198,7 @@
       <div class="welcome-hi" id="home-hi">Добро пожаловать 👋</div>
       <div class="welcome-name" id="home-name">—</div>
       <div class="car-selector" id="home-car-selector"></div>
+      <div class="hero-car-wrap" id="home-car-wrap" style="display:none"><img id="home-car-img" class="hero-car" alt="" onerror="this.parentNode.style.display='none'"></div>
       <div style="font-size:13px;color:#94A3B8">VIN: <span id="home-vin" style="font-family:monospace;color:#fff">—</span></div>
     </div>
     <div id="home-appt" style="display:none">
@@ -1151,8 +1156,38 @@ function setActiveCar(i) {
   updateHistoryCarFilter();
 }
 
+// Фото авто на главной: файлы лежат в папке cars/. Правила идут от частного к общему; сверка по нормализованной строке (только a-z0-9)
+const CAR_IMG_RULES = {
+  chery:   [["tiggo7life","chery_tiggo7life"],["tiggo7","chery_tiggo7pro"],["tiggo8hybrid","chery_tiggo8hybrid"],["tiggo8","chery_tiggo8promax"],
+            ["tiggo9hybrid","chery_tiggo9hybrid"],["tiggo9","chery_tiggo9pro"],["tiggo4","chery_tiggo4pro"],["arrizo6","chery_arrizo6pro"],["arrizo8","chery_arrizo8hybrid"]],
+  haval:   [["h6","haval_h6"],["h7","haval_h7"],["h9","haval_h9"],["jolion","haval_jolion"],["m6","haval_m6"]],
+  kia:     [["sonetprime","kia_sonetprime"],["sonet","kia_sonet"],["seltos","kia_seltos"],["k3","kia_k3"],["cerato","kia_k3"],["k5","kia_k5"],["k8","kia_k8"],["k9","kia_k9"],
+            ["sportage","kia_sportage"],["sorento","kia_sorento"],["carens","kia_carens"],["carnival","kia_carnival"],["bongo","kia_bongo"]],
+  changan: [["univ","changan_univ"],["unit","changan_unit"],["unik","changan_unik"],["cs55","changan_cs55plus"]],
+  byd:     [["atto8","byd_atto8"],["yuanupdmi","byd_yuanupdmi"],["yuanup","byd_yuanup"],["songplus","byd_songplus"],["seal6","byd_seal6"],["sealion7","byd_sealion7"],["e2","byd_e2"],["chazor","byd_chazor"]]
+};
+function carImageFor(car) {
+  if (!car) return null;
+  const norm = s => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const rules = CAR_IMG_RULES[norm(car.brand)];
+  const m = norm(car.model);
+  if (!rules || !m) return null;
+  for (let i = 0; i < rules.length; i++) if (m.indexOf(rules[i][0]) === 0) return "cars/" + rules[i][1] + ".webp";
+  return null;
+}
+function updateHomeCarImage(car) {
+  const wrap = document.getElementById("home-car-wrap"), img = document.getElementById("home-car-img");
+  if (!wrap || !img) return;
+  const src = carImageFor(car);
+  if (!src) { wrap.style.display = "none"; return; }
+  wrap.style.display = "flex";
+  img.alt = car.brand + " " + car.model;
+  if (img.getAttribute("src") !== src) img.src = src;
+}
+
 function updateHomeCarInfo() {
   const car = profile.cars[profile.activeCarIndex];
+  updateHomeCarImage(car);
   if (car) {
     document.getElementById("home-vin").textContent = car.vin;
   } else {
